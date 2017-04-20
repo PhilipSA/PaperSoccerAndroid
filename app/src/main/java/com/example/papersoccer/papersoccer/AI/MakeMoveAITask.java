@@ -24,7 +24,7 @@ public class MakeMoveAITask extends AsyncTask<Object, Void, Node>
     }
 
     protected void onPostExecute(Node result) {
-        gameHandler.ProgressGame(new Move(gameHandler.ballNode, result, gameHandler.players.get(1)));
+        gameHandler.ProgressGame(new Move(gameHandler.ballNode, result, gameHandler.player2));
     }
 
 }

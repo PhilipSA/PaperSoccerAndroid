@@ -1,38 +1,42 @@
 package com.example.papersoccer.papersoccer.GameObjects;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.UUID;
 
 import com.example.papersoccer.papersoccer.AI.GameAIHandler;
 import com.example.papersoccer.papersoccer.Activites.GameActivity;
 import com.example.papersoccer.papersoccer.Enums.DifficultyEnum;
 import com.example.papersoccer.papersoccer.Enums.NodeTypeEnum;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 
 public class GameHandler implements Cloneable {
 
 	public HashMap<UUID, Node> nodeHashMap = new HashMap<>();
-	public List<Player> players = new ArrayList<Player>();
+	private Multimap<UUID, UUID> connectedNodes = HashMultimap.create();
+
+	public Player player1;
+	public Player player2;
 	
 	private boolean isMyTurn = true;
-	public Player playerTurn;
+	public Player currentPlayersTurn;
 	public int myPlayerNumber = 0;
 
 	public int numberOfTurns = 0;
 
 	public Node ballNode;
-	
+
 	private GameActivity gameActivity;
 	
 	private GameAIHandler gameAIHandler;
 	
 	public GameHandler(final GameActivity gameActivity, int gridX, int gridY, DifficultyEnum difficulty, Player player1, Player player2)
 	{
-		players.add(player1);
-		players.add(player2);
+		this.player1 = player1;
+		this.player2 = player2;
 
-		playerTurn = players.get(0);
+		currentPlayersTurn = player1;
 
 		myPlayerNumber = 1;
 		
@@ -52,18 +56,12 @@ public class GameHandler implements Cloneable {
 		{
 			addNodeToNodeMap(new Node(node));
 		}
-		for (final Node node : original.nodeHashMap.values())
-		{
-			Node updateNode = findNodeById(node.id);
-			for (Node neighbor : node.neighbors)
-			{
-				updateNode.neighbors.add(findNodeById(neighbor.id));
-			}
-		}
 
+		connectedNodes = original.connectedNodes;
 		ballNode = findNodeById(original.ballNode.id);
-		this.players = original.players;
-		this.playerTurn = original.playerTurn;
+		this.player1 = original.player1;
+		this.player2 = original.player2;
+		this.currentPlayersTurn = original.currentPlayersTurn;
 		numberOfTurns = original.numberOfTurns;
 	}
 	
@@ -74,6 +72,12 @@ public class GameHandler implements Cloneable {
 		{
 			for (int x = 0; x <= gridSizeX; ++x)
 			{
+				//No node in the 4 cornes
+				if (x == 0 && y == 1) continue;
+				if (x == 0 && y == gridSizeY - 1) continue;
+				if (x == gridSizeX && y == 1) continue;
+				if (x == gridSizeX && y == gridSizeY - 1) continue;
+
 				//Check if wall
 				if (x == 0 || x == gridSizeX )
 					addNodeToNodeMap(new Node(x,y, NodeTypeEnum.Wall));
@@ -100,58 +104,47 @@ public class GameHandler implements Cloneable {
 		//Make the 2 goal nodes
 		Node player1Goalnode = new Node(gridSizeX / 2, gridSizeY, NodeTypeEnum.Goal);
 		addNodeToNodeMap(player1Goalnode);
-		players.get(0).goalNode = player1Goalnode;
 		
 		Node player2Goalnode = new Node(gridSizeX / 2, 0, NodeTypeEnum.Goal);
 		addNodeToNodeMap(player2Goalnode);
-		players.get(1).goalNode = player2Goalnode;
-		
-		setNodeNeighbors();
+
+		player1.goalNode = player1Goalnode;
+		player2.goalNode = player2Goalnode;
 	}
-	
-	//Sets the neighbors for all nodes
-	private void setNodeNeighbors()
+
+	public HashSet<Node> allAvailibleMoves()
 	{
-		//Set neighbours
+		HashSet<Node> moves = new HashSet<>();
+
 		for (Node n1 : nodeHashMap.values())
 		{
-			for (Node n2 : nodeHashMap.values())
+			if (existsNodeConnection(ballNode, n1)) continue;
+
+			if(ballNode.nodeType == NodeTypeEnum.Wall && n1.nodeType == NodeTypeEnum.Wall)
 			{
-				//Vertical and horizontal neighbors
-				if (n1.xCord - 1 == n2.xCord && n1.yCord == n2.yCord)
-					n1.neighbors.add(n2);
-				if (n1.xCord + 1 == n2.xCord && n1.yCord == n2.yCord)
-					n1.neighbors.add(n2);
-				if (n1.xCord == n2.xCord && n1.yCord + 1 == n2.yCord)
-					n1.neighbors.add(n2);
-				if (n1.xCord == n2.xCord && n1.yCord - 1 == n2.yCord)
-					n1.neighbors.add(n2);
-				
-				//Diagonal neighbors
-				if (n1.xCord - 1 == n2.xCord && n1.yCord - 1 == n2.yCord)
-					n1.neighbors.add(n2);
-				if (n1.xCord + 1 == n2.xCord && n1.yCord + 1 == n2.yCord)
-					n1.neighbors.add(n2);
-				if (n1.xCord - 1 == n2.xCord && n1.yCord + 1 == n2.yCord)
-					n1.neighbors.add(n2);
-				if (n1.xCord + 1 == n2.xCord && n1.yCord - 1 == n2.yCord)
-					n1.neighbors.add(n2);
+				if ((ballNode.yCord != n1.yCord && n1.xCord == ballNode.xCord) ||
+						n1.yCord == ballNode.yCord && n1.xCord != ballNode.xCord)
+				{
+					continue;
+				}
+				else
+				{
+					moves.add(n1);
+				}
 			}
+
+			int euclideanDistance = (int)Math.sqrt(Math.pow((ballNode.xCord - n1.xCord), 2) +
+					Math.pow((ballNode.yCord - n1.yCord), 2));
+			if (euclideanDistance < 2) moves.add(n1);
 		}
-		
-		//Walls should not have other walls as neighbors
-		//Crap what about diagonals? Ugly temp solution
-		for (Node n1 : nodeHashMap.values())
-		{
-			for (Node n2 : nodeHashMap.values())
-			{
-				if (n1.neighbors.contains(n2))
-					if(n1.nodeType == NodeTypeEnum.Wall && n2.nodeType == NodeTypeEnum.Wall)
-						if ((n1.yCord != n2.yCord && n1.xCord == n2.xCord) ||
-							n1.yCord == n2.yCord && n1.xCord != n2.xCord)							
-								n1.neighbors.remove(n2);
-			}
-		}
+		return moves;
+	}
+
+	private boolean existsNodeConnection(Node node1, Node node2)
+	{
+		if (connectedNodes.get(node1.id).contains(node2.id)) return true;
+		if (connectedNodes.get(node2.id).contains(node1.id)) return true;
+		return false;
 	}
 
 	public void ProgressGame(Move move)
@@ -169,7 +162,7 @@ public class GameHandler implements Cloneable {
 
 			gameActivity.UpdateBallPosition();
 			gameActivity.gameView.invalidate();
-			if (playerTurn.playerNumber != myPlayerNumber) gameAIHandler.MakeAIMove();
+			//if (currentPlayersTurn.playerNumber != myPlayerNumber) gameAIHandler.MakeAIMove();
 		}
 		else
 		{
@@ -179,8 +172,7 @@ public class GameHandler implements Cloneable {
 
 	public void MakeMove(Move move)
 	{
-		ballNode.neighbors.remove(move.newNode);
-		move.newNode.neighbors.remove(move.oldNode);
+		connectedNodes.put(move.newNode.id, move.oldNode.id);
 
 		move.oldNode.nodeType = NodeTypeEnum.BounceAble;
 		ballNode = move.newNode;
@@ -194,7 +186,7 @@ public class GameHandler implements Cloneable {
 
 	public boolean checkStateForWinner(Node n)
 	{
-		Player winner = victoryCheck(n);
+		Player winner = getWinner(n);
 		if (winner != null)
 		{
 			winner(winner);
@@ -203,19 +195,19 @@ public class GameHandler implements Cloneable {
 		return false;
 	}
 
-	public Player victoryCheck(Node n)
+	public Player getWinner(Node n)
 	{
 		if(n.nodeType == NodeTypeEnum.Goal)
 		{
-			if (n.id == playerTurn.goalNode.id)
+			if (n.id == currentPlayersTurn.goalNode.id)
 			{
-				return getOpponent(playerTurn);
+				return getOpponent(currentPlayersTurn);
 			}
-			return playerTurn;
+			return currentPlayersTurn;
 		}	
-		else if (n.neighbors.size() == 0)
+		else if (allAvailibleMoves().size() == 0)
 		{
-			return getOpponent(playerTurn);
+			return getOpponent(currentPlayersTurn);
 		}
 		return null;
 	}
@@ -270,19 +262,20 @@ public class GameHandler implements Cloneable {
 
 	public Player getOpponent(Player myPlayer)
 	{
-		return players.get((players.indexOf(myPlayer) + 1) % 2);
+		if (myPlayer == player1) return player2;
+		return player1;
 	}
 	
 	//Gives the turn to the other player
 	public Player changeTurn()
 	{
-		playerTurn = players.get((players.indexOf(playerTurn) + 1) % 2);
-		return playerTurn;
+		currentPlayersTurn = getOpponent(currentPlayersTurn);
+		return currentPlayersTurn;
 	}
 	
 	//Checks if a move is legal in the current gamestate
 	public boolean isLegalMove(Move move)
 	{
-		return move.oldNode.neighbors.contains(move.newNode) && move.madeTheMove == playerTurn;
+		return !existsNodeConnection(move.oldNode, move.newNode) && move.madeTheMove == currentPlayersTurn && allAvailibleMoves().contains(move.newNode);
 	}
 }

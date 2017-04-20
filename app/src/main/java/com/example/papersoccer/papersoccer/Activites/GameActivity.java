@@ -87,7 +87,7 @@ public class GameActivity extends Activity {
 		    		Node n = gameHandler.coordsToNode(Math.round(motionEvent.getX()), Math.round(motionEvent.getY()));
 		    		if (n != null)
 		    		{
-			    		if (isMultiplayer) gameHandler.ProgressGame(new Move(gameHandler.ballNode, n, gameHandler.playerTurn));
+			    		if (isMultiplayer) gameHandler.ProgressGame(new Move(gameHandler.ballNode, n, gameHandler.currentPlayersTurn));
 						else {
 							gameHandler.ProgressGame(new Move(gameHandler.ballNode, n, p1));
 						}
@@ -103,7 +103,7 @@ public class GameActivity extends Activity {
 
 	public void UpdateBallPosition()
 	{
-		gameView.UpdateBallPosition(gameHandler.nodeToCoords(gameHandler.ballNode), gameHandler.playerTurn);
+		gameView.UpdateBallPosition(gameHandler.nodeToCoords(gameHandler.ballNode), gameHandler.currentPlayersTurn);
 	}
 	
 	public void AddNewLineToDraw (float oldNodeCoords, float oldNodeCoords2, float newLineCoords, float newLineCoords2, int color)

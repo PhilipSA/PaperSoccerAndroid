@@ -13,7 +13,6 @@ public class Node
 	public int xCord;
 	public int yCord;
 	public NodeTypeEnum nodeType;
-	public HashSet<Node> neighbors = new HashSet<>();
 	
 	Node(int x, int y, NodeTypeEnum nodeType)
 	{

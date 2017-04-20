@@ -12,7 +12,7 @@ public class ManhattanAI implements IGameAI {
         int manhattanDistance = Integer.MAX_VALUE;
         int tempManhattan = 0;
 
-        for (Node n : gameHandler.ballNode.neighbors)
+        for (Node n : gameHandler.allAvailibleMoves())
         {
             tempManhattan = Math.abs(n.xCord - 5) + Math.abs(n.yCord - 12);
             if (tempManhattan < manhattanDistance)

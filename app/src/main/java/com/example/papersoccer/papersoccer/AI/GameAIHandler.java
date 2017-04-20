@@ -3,9 +3,6 @@ package com.example.papersoccer.papersoccer.AI;
 import com.example.papersoccer.papersoccer.AI.Abstraction.IGameAI;
 import com.example.papersoccer.papersoccer.Enums.DifficultyEnum;
 import com.example.papersoccer.papersoccer.GameObjects.GameHandler;
-import com.example.papersoccer.papersoccer.GameObjects.Node;
-
-import java.util.concurrent.ExecutionException;
 
 public class GameAIHandler
 {
@@ -28,7 +25,7 @@ public class GameAIHandler
 		}
 		else if (difficulty == DifficultyEnum.Hard)
 		{
-			gameAI = new MinMaxAI();
+			gameAI = new MinimaxAI();
 		}
 	}
 

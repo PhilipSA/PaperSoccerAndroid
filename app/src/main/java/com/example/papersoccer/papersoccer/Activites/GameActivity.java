@@ -87,9 +87,9 @@ public class GameActivity extends Activity {
 		    		Node n = gameHandler.coordsToNode(Math.round(motionEvent.getX()), Math.round(motionEvent.getY()));
 		    		if (n != null)
 		    		{
-			    		if (isMultiplayer) gameHandler.MakeMove(new Move(gameHandler.ballNode, n, gameHandler.playerTurn));
+			    		if (isMultiplayer) gameHandler.ProgressGame(new Move(gameHandler.ballNode, n, gameHandler.playerTurn));
 						else {
-							gameHandler.MakeMove(new Move(gameHandler.ballNode, n, p1));
+							gameHandler.ProgressGame(new Move(gameHandler.ballNode, n, p1));
 						}
 						UpdateBallPosition();
 			    		gameView.invalidate();
@@ -101,7 +101,7 @@ public class GameActivity extends Activity {
 
 	} //OnCreate
 
-	private void UpdateBallPosition()
+	public void UpdateBallPosition()
 	{
 		gameView.UpdateBallPosition(gameHandler.nodeToCoords(gameHandler.ballNode), gameHandler.playerTurn);
 	}

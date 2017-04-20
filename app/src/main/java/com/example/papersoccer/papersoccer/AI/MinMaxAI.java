@@ -16,7 +16,7 @@ public class MinMaxAI implements IGameAI {
         for (Node node : gameHandler.ballNode.neighbors)
         {
             GameHandler clone = new GameHandler(gameHandler);
-            minmaxFakeMove(new Move(clone.ballNode, clone.findNodeById(node.id), clone.playerTurn), clone);
+            clone.MakeMove(new Move(clone.ballNode, clone.findNodeById(node.id), clone.playerTurn));
             int score = bestScoreForMaximizingPlayer(4, clone, gameHandler.playerTurn);
             if (score > bestScore)
             {
@@ -41,7 +41,7 @@ public class MinMaxAI implements IGameAI {
 
     private int min(int currentDepth, GameHandler state, Player maximizingPlayer)
     {
-        if (currentDepth == 0) return minmaxEvaluation(state);
+        if (currentDepth == 0 || state.victoryCheck(state.ballNode) != null) return minmaxEvaluation(state);
         --currentDepth;
 
         int worstScore = Integer.MAX_VALUE;
@@ -49,7 +49,7 @@ public class MinMaxAI implements IGameAI {
         for (Node evaluateNode : state.ballNode.neighbors)
         {
             GameHandler clone = new GameHandler(state);
-            minmaxFakeMove(new Move(clone.ballNode, clone.findNodeById(evaluateNode.id), clone.playerTurn), clone);
+            clone.MakeMove(new Move(clone.ballNode, clone.findNodeById(evaluateNode.id), clone.playerTurn));
             score = bestScoreForMaximizingPlayer(currentDepth, clone, maximizingPlayer);
             if (score < worstScore)
             {
@@ -61,7 +61,7 @@ public class MinMaxAI implements IGameAI {
 
     private int max(int currentDepth, GameHandler state, Player maximizingPlayer)
     {
-        if (currentDepth == 0) return minmaxEvaluation(state);
+        if (currentDepth == 0 || state.victoryCheck(state.ballNode) != null) return minmaxEvaluation(state);
         --currentDepth;
 
         int bestScore = Integer.MIN_VALUE;
@@ -69,7 +69,7 @@ public class MinMaxAI implements IGameAI {
         for (Node evaluateNode : state.ballNode.neighbors)
         {
             GameHandler clone = new GameHandler(state);
-            minmaxFakeMove(new Move(clone.ballNode, clone.findNodeById(evaluateNode.id), clone.playerTurn), clone);
+            clone.MakeMove(new Move(clone.ballNode, clone.findNodeById(evaluateNode.id), clone.playerTurn));
             score = bestScoreForMaximizingPlayer(currentDepth, clone, maximizingPlayer);
             if (score > bestScore)
             {
@@ -79,54 +79,41 @@ public class MinMaxAI implements IGameAI {
         return bestScore;
     }
 
-    private void minmaxFakeMove(Move move, GameHandler clone)
-    {
-        if (clone.isLegalMove(move))
-        {
-            move.oldNode.neighbors.remove(move.newNode);
-            move.oldNode.nodeType = NodeTypeEnum.BounceAble;
-
-            move.newNode.neighbors.remove(move.oldNode);
-            clone.ballNode = move.newNode;
-
-            if(clone.victoryCheck(move.newNode) != null)
-                return;
-
-            if (!(clone.ballNode.nodeType == NodeTypeEnum.BounceAble) && !(clone.ballNode.nodeType == NodeTypeEnum.Wall))
-            {
-                move.newNode.nodeType = NodeTypeEnum.BounceAble;
-                clone.changeTurn();
-            }
-        }
-
-    }
-
     private int minmaxEvaluation(GameHandler clone)
     {
         int evalScore = 0;
 
         if (clone.victoryCheck(clone.ballNode) == clone.playerTurn)
         {
-            return Integer.MAX_VALUE;
+            return 1000;
         }
-        else if (clone.victoryCheck(clone.ballNode) != null)
+        else if (clone.victoryCheck(clone.ballNode) != clone.getOpponent(clone.playerTurn))
         {
-            return Integer.MIN_VALUE;
+            return -1000;
         }
 
+        evalScore -= clone.numberOfTurns;
+
         //If bounceable
-        if (clone.ballNode.nodeType == NodeTypeEnum.BounceAble)
-            evalScore += 1;
+        if (clone.ballNode.nodeType == NodeTypeEnum.BounceAble || clone.ballNode.nodeType == NodeTypeEnum.Wall)
+            evalScore += 5;
 
         //If close to goal
         for (Node node : clone.ballNode.neighbors)
         {
-            if (node.nodeType == NodeTypeEnum.Goal && node.id == clone.getOpponent(clone.playerTurn).goalNode.id) evalScore += 10;
+            if (node.nodeType == NodeTypeEnum.Goal && node.id == clone.getOpponent(clone.playerTurn).goalNode.id) evalScore += 20;
+            if (node.nodeType == NodeTypeEnum.Goal && node.id == clone.playerTurn.goalNode.id) evalScore -= 20;
         }
 
-        //Distance to goal
-        int manhattanDistance = Math.abs(clone.ballNode.xCord - clone.getOpponent(clone.playerTurn).goalNode.xCord) + Math.abs(clone.ballNode.yCord - clone.getOpponent(clone.playerTurn).goalNode.yCord);
-        evalScore += manhattanDistance;
+        //Distance to opponents goal
+        int euclideanDistance = (int)Math.sqrt(Math.pow((clone.ballNode.xCord - clone.getOpponent(clone.playerTurn).goalNode.xCord), 2) +
+                Math.pow((clone.ballNode.yCord - clone.getOpponent(clone.playerTurn).goalNode.yCord), 2));
+        evalScore -= euclideanDistance*2;
+
+        //Distance to own goal
+        euclideanDistance = (int)Math.sqrt(Math.pow((clone.ballNode.xCord - clone.playerTurn.goalNode.xCord), 2) +
+                Math.pow((clone.ballNode.yCord - clone.playerTurn.goalNode.yCord), 2));
+        evalScore += euclideanDistance*2;
 
         return evalScore;
     }

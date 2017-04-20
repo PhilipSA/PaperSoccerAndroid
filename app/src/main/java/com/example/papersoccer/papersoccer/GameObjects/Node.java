@@ -3,6 +3,7 @@ package com.example.papersoccer.papersoccer.GameObjects;
 import com.example.papersoccer.papersoccer.Enums.NodeTypeEnum;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 
@@ -12,7 +13,7 @@ public class Node
 	public int xCord;
 	public int yCord;
 	public NodeTypeEnum nodeType;
-	public List<Node> neighbors = new ArrayList<Node>();
+	public HashSet<Node> neighbors = new HashSet<>();
 	
 	Node(int x, int y, NodeTypeEnum nodeType)
 	{

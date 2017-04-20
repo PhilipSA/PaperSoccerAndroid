@@ -10,7 +10,7 @@ public class RandomAI implements IGameAI {
     public Node MakeMove(GameHandler gameHandler)
     {
         Random random = new Random();
-        Node randomNode = gameHandler.ballNode.neighbors.get(random.nextInt(gameHandler.ballNode.neighbors.size()));
+        Node randomNode = (Node)gameHandler.ballNode.neighbors.toArray()[random.nextInt(gameHandler.ballNode.neighbors.size())];
         return randomNode;
     }
 }

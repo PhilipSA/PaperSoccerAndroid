@@ -10,7 +10,7 @@ import com.example.papersoccer.papersoccer.Helpers.MathHelper;
 public class MinimaxAI implements IGameAI
 {
     private int callCount;
-    private int searchDepth = 6;
+    private int searchDepth = 5;
 
     private class MoveValue {
         public double returnValue;
@@ -35,11 +35,15 @@ public class MinimaxAI implements IGameAI
     public Move MakeMove(GameHandler gameHandler)
     {
         callCount = 0;
-        return alphaBetaPruning(searchDepth, gameHandler, true, Double.MIN_VALUE, Double.MAX_VALUE).returnMove;
+        Move bestMove = alphaBetaPruning(searchDepth, gameHandler, true, Double.MIN_VALUE, Double.MAX_VALUE).returnMove;
+        System.out.println(callCount);
+        return bestMove;
     }
 
     private MoveValue alphaBetaPruning(int currentDepth, GameHandler state, boolean maximizingPlayer, double alpha, double beta)
     {
+        ++callCount;
+
         if (currentDepth == 0 || state.getWinner(state.ballNode) != null)
         {
             return new MoveValue(minmaxEvaluation(state));

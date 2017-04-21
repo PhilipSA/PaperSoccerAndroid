@@ -21,7 +21,7 @@ public class GameAIHandler
 		}
 		else if (difficulty == DifficultyEnum.Medium)
 		{
-			gameAI = new ManhattanAI();
+			gameAI = new EuclideanAI();
 		}
 		else if (difficulty == DifficultyEnum.Hard)
 		{

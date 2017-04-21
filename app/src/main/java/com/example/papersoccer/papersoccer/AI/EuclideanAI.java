@@ -6,7 +6,7 @@ import com.example.papersoccer.papersoccer.GameObjects.Move;
 import com.example.papersoccer.papersoccer.GameObjects.Node;
 import com.example.papersoccer.papersoccer.Helpers.MathHelper;
 
-public class ManhattanAI implements IGameAI {
+public class EuclideanAI implements IGameAI {
 
     @Override
     public Move MakeMove(GameHandler gameHandler) {
@@ -20,6 +20,7 @@ public class ManhattanAI implements IGameAI {
             if (tempManhattan < manhattanDistance)
             {
                 manhattanDistance = tempManhattan;
+                move.madeTheMove = gameHandler.currentPlayersTurn;
                 manhattanMove = move;
             }
         }

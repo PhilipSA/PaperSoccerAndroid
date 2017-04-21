@@ -160,8 +160,6 @@ public class GameView extends View {
 		image = new ScaleDrawable(image, 0, ballSize, ballSize).getDrawable();
 		image.setBounds((int)ballX-ballSize/2, (int)ballY-ballSize/2, (int)ballX+ballSize/2, (int)ballY+ballSize/2);
 		image.draw(canvas);
-
-		System.out.println("painted map");
 	}
 
 	private void DrawCurrentPlayersTurnText(int color, String text, Paint paint)

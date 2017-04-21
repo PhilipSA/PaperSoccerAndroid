@@ -8,6 +8,7 @@ import com.example.papersoccer.papersoccer.AI.GameAIHandler;
 import com.example.papersoccer.papersoccer.Activites.GameActivity;
 import com.example.papersoccer.papersoccer.Enums.DifficultyEnum;
 import com.example.papersoccer.papersoccer.Enums.NodeTypeEnum;
+import com.example.papersoccer.papersoccer.Helpers.MathHelper;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
@@ -19,7 +20,7 @@ public class GameHandler implements Cloneable {
 	public Player player1;
 	public Player player2;
 	
-	private boolean isMyTurn = true;
+	public boolean extraTurn = false;
 	public Player currentPlayersTurn;
 	public int myPlayerNumber = 0;
 
@@ -57,7 +58,8 @@ public class GameHandler implements Cloneable {
 			addNodeToNodeMap(new Node(node));
 		}
 
-		connectedNodes = original.connectedNodes;
+		extraTurn = original.extraTurn;
+		connectedNodes = HashMultimap.create(original.connectedNodes);
 		ballNode = findNodeById(original.ballNode.id);
 		this.player1 = original.player1;
 		this.player2 = original.player2;
@@ -112,30 +114,29 @@ public class GameHandler implements Cloneable {
 		player2.goalNode = player2Goalnode;
 	}
 
-	public HashSet<Node> allAvailibleMoves()
+	public HashSet<Move> allAvailibleMoves()
 	{
-		HashSet<Node> moves = new HashSet<>();
+		HashSet<Move> moves = new HashSet<>();
 
 		for (Node n1 : nodeHashMap.values())
 		{
 			if (existsNodeConnection(ballNode, n1)) continue;
+			if (n1.id == ballNode.id) continue;
+
+			double euclideanDistance = MathHelper.euclideanDistance(ballNode.xCord, n1.xCord, ballNode.yCord, n1.yCord);
 
 			if(ballNode.nodeType == NodeTypeEnum.Wall && n1.nodeType == NodeTypeEnum.Wall)
 			{
-				if ((ballNode.yCord != n1.yCord && n1.xCord == ballNode.xCord) ||
-						n1.yCord == ballNode.yCord && n1.xCord != ballNode.xCord)
+				if (ballNode.yCord != n1.yCord && n1.xCord != ballNode.xCord && euclideanDistance < 2)
 				{
-					continue;
+					moves.add(new Move(ballNode, n1));
 				}
 				else
 				{
-					moves.add(n1);
+					continue;
 				}
 			}
-
-			int euclideanDistance = (int)Math.sqrt(Math.pow((ballNode.xCord - n1.xCord), 2) +
-					Math.pow((ballNode.yCord - n1.yCord), 2));
-			if (euclideanDistance < 2) moves.add(n1);
+			if (euclideanDistance < 2) moves.add(new Move(ballNode, n1));
 		}
 		return moves;
 	}
@@ -155,14 +156,17 @@ public class GameHandler implements Cloneable {
 			float[] oldNodeCoords = nodeToCoords(move.oldNode);
 			gameActivity.AddNewLineToDraw(oldNodeCoords[0], oldNodeCoords[1], newLineCoords[0], newLineCoords[1], move.madeTheMove.playerColor);
 
-			if(checkStateForWinner(move.newNode))
-				return;
-
 			MakeMove(move);
+
+			if(isGameOver())
+			{
+				winner(getWinner(ballNode));
+				return;
+			}
 
 			gameActivity.UpdateBallPosition();
 			gameActivity.gameView.invalidate();
-			//if (currentPlayersTurn.playerNumber != myPlayerNumber) gameAIHandler.MakeAIMove();
+			if (currentPlayersTurn.playerNumber != myPlayerNumber) gameAIHandler.MakeAIMove();
 		}
 		else
 		{
@@ -174,22 +178,30 @@ public class GameHandler implements Cloneable {
 	{
 		connectedNodes.put(move.newNode.id, move.oldNode.id);
 
-		move.oldNode.nodeType = NodeTypeEnum.BounceAble;
+		//Make sure the nodes is not from a clone
+		move.newNode = findNodeById(move.newNode.id);
+		move.oldNode = findNodeById(move.oldNode.id);
+
+		if (move.oldNode.nodeType == NodeTypeEnum.Empty) move.oldNode.nodeType = NodeTypeEnum.BounceAble;
 		ballNode = move.newNode;
 
-		if (!(move.newNode.nodeType == NodeTypeEnum.BounceAble) && !(move.newNode.nodeType == NodeTypeEnum.Wall))
+		if (move.newNode.nodeType == NodeTypeEnum.BounceAble || move.newNode.nodeType == NodeTypeEnum.Wall)
 		{
+			extraTurn = true;
+		}
+		else
+		{
+			extraTurn = false;
 			changeTurn();
 		}
 		++numberOfTurns;
 	}
 
-	public boolean checkStateForWinner(Node n)
+	public boolean isGameOver()
 	{
-		Player winner = getWinner(n);
+		Player winner = getWinner(ballNode);
 		if (winner != null)
 		{
-			winner(winner);
 			return true;
 		};
 		return false;
@@ -276,6 +288,7 @@ public class GameHandler implements Cloneable {
 	//Checks if a move is legal in the current gamestate
 	public boolean isLegalMove(Move move)
 	{
-		return !existsNodeConnection(move.oldNode, move.newNode) && move.madeTheMove == currentPlayersTurn && allAvailibleMoves().contains(move.newNode);
+		HashSet<Move> test = allAvailibleMoves();
+		return move.madeTheMove == currentPlayersTurn && test.contains(move);
 	}
 }

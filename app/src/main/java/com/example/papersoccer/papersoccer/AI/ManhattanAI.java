@@ -2,25 +2,27 @@ package com.example.papersoccer.papersoccer.AI;
 
 import com.example.papersoccer.papersoccer.AI.Abstraction.IGameAI;
 import com.example.papersoccer.papersoccer.GameObjects.GameHandler;
+import com.example.papersoccer.papersoccer.GameObjects.Move;
 import com.example.papersoccer.papersoccer.GameObjects.Node;
+import com.example.papersoccer.papersoccer.Helpers.MathHelper;
 
 public class ManhattanAI implements IGameAI {
 
     @Override
-    public Node MakeMove(GameHandler gameHandler) {
-        Node manhattanNode = null;
-        int manhattanDistance = Integer.MAX_VALUE;
-        int tempManhattan = 0;
+    public Move MakeMove(GameHandler gameHandler) {
+        Move manhattanMove = null;
+        double manhattanDistance = Integer.MAX_VALUE;
+        double tempManhattan = 0;
 
-        for (Node n : gameHandler.allAvailibleMoves())
+        for (Move move : gameHandler.allAvailibleMoves())
         {
-            tempManhattan = Math.abs(n.xCord - 5) + Math.abs(n.yCord - 12);
+            tempManhattan = MathHelper.euclideanDistance(move.newNode.xCord, 5, move.newNode.yCord, 10);
             if (tempManhattan < manhattanDistance)
             {
                 manhattanDistance = tempManhattan;
-                manhattanNode = n;
+                manhattanMove = move;
             }
         }
-        return manhattanNode;
+        return manhattanMove;
     }
 }

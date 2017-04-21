@@ -7,7 +7,7 @@ import com.example.papersoccer.papersoccer.GameObjects.GameHandler;
 import com.example.papersoccer.papersoccer.GameObjects.Move;
 import com.example.papersoccer.papersoccer.GameObjects.Node;
 
-public class MakeMoveAITask extends AsyncTask<Object, Void, Node>
+public class MakeMoveAITask extends AsyncTask<Object, Void, Move>
 {
     private IGameAI iGameAI;
     private GameHandler gameHandler;
@@ -19,12 +19,12 @@ public class MakeMoveAITask extends AsyncTask<Object, Void, Node>
     }
 
     @Override
-    protected Node doInBackground(Object... params) {
+    protected Move doInBackground(Object... params) {
         return iGameAI.MakeMove(gameHandler);
     }
 
-    protected void onPostExecute(Node result) {
-        gameHandler.ProgressGame(new Move(gameHandler.ballNode, result, gameHandler.player2));
+    protected void onPostExecute(Move result) {
+        gameHandler.ProgressGame(result);
     }
 
 }

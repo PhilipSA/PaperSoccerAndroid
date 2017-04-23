@@ -2,26 +2,26 @@ package com.example.papersoccer.papersoccer.AI;
 
 import com.example.papersoccer.papersoccer.AI.Abstraction.IGameAI;
 import com.example.papersoccer.papersoccer.GameObjects.GameHandler;
-import com.example.papersoccer.papersoccer.GameObjects.Move;
-import com.example.papersoccer.papersoccer.GameObjects.Node;
+import com.example.papersoccer.papersoccer.GameObjects.Move.Move;
+import com.example.papersoccer.papersoccer.GameObjects.Move.PartialMove;
 import com.example.papersoccer.papersoccer.Helpers.MathHelper;
 
 public class EuclideanAI implements IGameAI {
 
     @Override
-    public Move MakeMove(GameHandler gameHandler) {
-        Move manhattanMove = null;
+    public PartialMove MakeMove(GameHandler gameHandler) {
+        PartialMove manhattanMove = null;
         double manhattanDistance = Integer.MAX_VALUE;
         double tempManhattan = 0;
 
-        for (Move move : gameHandler.allAvailibleMoves())
+        for (PartialMove partialMove : gameHandler.allAvailiblePartialMovesFromNode(gameHandler.ballNode))
         {
-            tempManhattan = MathHelper.euclideanDistance(move.newNode.xCord, 5, move.newNode.yCord, 10);
+            tempManhattan = MathHelper.euclideanDistance(partialMove.newNode.xCord, 5, partialMove.newNode.yCord, 10);
             if (tempManhattan < manhattanDistance)
             {
                 manhattanDistance = tempManhattan;
-                move.madeTheMove = gameHandler.currentPlayersTurn;
-                manhattanMove = move;
+                partialMove.madeTheMove = gameHandler.currentPlayersTurn;
+                manhattanMove = partialMove;
             }
         }
         return manhattanMove;

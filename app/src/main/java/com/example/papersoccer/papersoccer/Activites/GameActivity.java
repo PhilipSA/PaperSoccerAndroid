@@ -20,7 +20,6 @@ import android.widget.TextView;
 
 import com.example.papersoccer.papersoccer.Enums.DifficultyEnum;
 import com.example.papersoccer.papersoccer.GameObjects.GameHandler;
-import com.example.papersoccer.papersoccer.GameObjects.Move;
 import com.example.papersoccer.papersoccer.GameObjects.Node;
 import com.example.papersoccer.papersoccer.GameObjects.Player;
 import com.example.papersoccer.papersoccer.R;
@@ -39,7 +38,6 @@ public class GameActivity extends Activity {
 	protected GameHandler gameHandler;
 	
 	public String myName;
-	public boolean isMultiplayer;
 	
 	private Button playAgain;
 	
@@ -53,7 +51,7 @@ public class GameActivity extends Activity {
 		String difficulty = sharedPreferences.getString("pref_difficultyLevel", "Medium");
 		String playerName = sharedPreferences.getString("pref_playerName", "Player");
 
-		isMultiplayer = getIntent().getBooleanExtra("MULTIPLAYER_MODE", false);
+		boolean isMultiplayer = getIntent().getBooleanExtra("MULTIPLAYER_MODE", false);
 
 		myName = playerName;
 		
@@ -69,7 +67,7 @@ public class GameActivity extends Activity {
         final Player p1 = new Player(playerName, 1, Color.BLUE);
         final Player p2 = new Player("Player 2", 2, Color.RED);
 		
-        gameHandler = new GameHandler(this, gameView.gridSizeX, gameView.gridSizeY, DifficultyEnum.valueOf(difficulty), p1, p2);
+        gameHandler = new GameHandler(this, gameView.gridSizeX, gameView.gridSizeY, DifficultyEnum.valueOf(difficulty), p1, p2, isMultiplayer);
         UpdateBallPosition();
 		
 		playAgain = (Button)findViewById(R.id.playagainButton);
@@ -77,20 +75,17 @@ public class GameActivity extends Activity {
 		gameView.setMyPlayer(p1);
 		if (!isMultiplayer) player2Name.setText("Ai"+difficulty);
 		player1Name.setText(playerName);
-		
+
 		gameView.setOnTouchListener(new View.OnTouchListener()
         {
 			@Override
 			public boolean onTouch(View view, MotionEvent motionEvent) {
 				if(motionEvent.getAction() == MotionEvent.ACTION_DOWN)
 		    	{
-		    		Node n = gameHandler.coordsToNode(Math.round(motionEvent.getX()), Math.round(motionEvent.getY()));
-		    		if (n != null)
+		    		Node touchedNode = gameHandler.coordsToNode(Math.round(motionEvent.getX()), Math.round(motionEvent.getY()));
+		    		if (touchedNode != null)
 		    		{
-			    		if (isMultiplayer) gameHandler.ProgressGame(new Move(gameHandler.ballNode, n, gameHandler.currentPlayersTurn));
-						else {
-							gameHandler.ProgressGame(new Move(gameHandler.ballNode, n, p1));
-						}
+						gameHandler.PlayerMakeMove(touchedNode, gameHandler.currentPlayersTurn);
 						UpdateBallPosition();
 			    		gameView.invalidate();
 		    		}

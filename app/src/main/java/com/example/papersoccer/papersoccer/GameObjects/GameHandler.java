@@ -8,6 +8,8 @@ import com.example.papersoccer.papersoccer.AI.GameAIHandler;
 import com.example.papersoccer.papersoccer.Activites.GameActivity;
 import com.example.papersoccer.papersoccer.Enums.DifficultyEnum;
 import com.example.papersoccer.papersoccer.Enums.NodeTypeEnum;
+import com.example.papersoccer.papersoccer.GameObjects.Move.Move;
+import com.example.papersoccer.papersoccer.GameObjects.Move.PartialMove;
 import com.example.papersoccer.papersoccer.Helpers.MathHelper;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
@@ -19,8 +21,7 @@ public class GameHandler implements Cloneable {
 
 	public Player player1;
 	public Player player2;
-	
-	public boolean extraTurn = false;
+
 	public Player currentPlayersTurn;
 	public int myPlayerNumber = 0;
 
@@ -28,16 +29,22 @@ public class GameHandler implements Cloneable {
 
 	public Node ballNode;
 
+	private Move onGoingMove;
+
 	private GameActivity gameActivity;
 	
 	private GameAIHandler gameAIHandler;
+
+	private boolean isMultiplayer;
 	
-	public GameHandler(final GameActivity gameActivity, int gridX, int gridY, DifficultyEnum difficulty, Player player1, Player player2)
+	public GameHandler(final GameActivity gameActivity, int gridX, int gridY, DifficultyEnum difficulty, Player player1, Player player2, boolean isMultiplayer)
 	{
 		this.player1 = player1;
 		this.player2 = player2;
 
 		currentPlayersTurn = player1;
+
+		this.isMultiplayer = isMultiplayer;
 
 		myPlayerNumber = 1;
 		
@@ -58,7 +65,6 @@ public class GameHandler implements Cloneable {
 			addNodeToNodeMap(new Node(node));
 		}
 
-		extraTurn = original.extraTurn;
 		connectedNodes = HashMultimap.create(original.connectedNodes);
 		ballNode = findNodeById(original.ballNode.id);
 		this.player1 = original.player1;
@@ -114,31 +120,31 @@ public class GameHandler implements Cloneable {
 		player2.goalNode = player2Goalnode;
 	}
 
-	public HashSet<Move> allAvailibleMoves()
+	public HashSet<PartialMove> allAvailiblePartialMovesFromNode(Node currentBallNode)
 	{
-		HashSet<Move> moves = new HashSet<>();
+		HashSet<PartialMove> partialMoves = new HashSet<>();
 
 		for (Node n1 : nodeHashMap.values())
 		{
-			if (existsNodeConnection(ballNode, n1)) continue;
-			if (n1.id == ballNode.id) continue;
+			if (existsNodeConnection(currentBallNode, n1)) continue;
+			if (n1.id == currentBallNode.id) continue;
 
-			double euclideanDistance = MathHelper.euclideanDistance(ballNode.xCord, n1.xCord, ballNode.yCord, n1.yCord);
+			double euclideanDistance = MathHelper.euclideanDistance(currentBallNode.xCord, n1.xCord, currentBallNode.yCord, n1.yCord);
 
-			if(ballNode.nodeType == NodeTypeEnum.Wall && n1.nodeType == NodeTypeEnum.Wall)
+			if(currentBallNode.nodeType == NodeTypeEnum.Wall && n1.nodeType == NodeTypeEnum.Wall)
 			{
-				if (ballNode.yCord != n1.yCord && n1.xCord != ballNode.xCord && euclideanDistance < 2)
+				if (currentBallNode.yCord != n1.yCord && n1.xCord != currentBallNode.xCord && euclideanDistance < 2)
 				{
-					moves.add(new Move(ballNode, n1));
+					partialMoves.add(new PartialMove(currentBallNode, n1));
 				}
 				else
 				{
 					continue;
 				}
 			}
-			if (euclideanDistance < 2) moves.add(new Move(ballNode, n1));
+			if (euclideanDistance < 2) partialMoves.add(new PartialMove(currentBallNode, n1));
 		}
-		return moves;
+		return partialMoves;
 	}
 
 	private boolean existsNodeConnection(Node node1, Node node2)
@@ -148,53 +154,77 @@ public class GameHandler implements Cloneable {
 		return false;
 	}
 
-	public void ProgressGame(Move move)
+	public void UpdateGameState()
 	{
-		if (isLegalMove(move))
+		if(isGameOver())
 		{
+			winner(getWinner(ballNode));
+			return;
+		}
+		if (myPlayerNumber != currentPlayersTurn.playerNumber && !isMultiplayer) gameAIHandler.MakeAIMove();
+	}
+
+	public void DrawPartialMove(PartialMove move, int playerColor)
+	{
+		try {
 			float[] newLineCoords = nodeToCoords(move.newNode);
 			float[] oldNodeCoords = nodeToCoords(move.oldNode);
-			gameActivity.AddNewLineToDraw(oldNodeCoords[0], oldNodeCoords[1], newLineCoords[0], newLineCoords[1], move.madeTheMove.playerColor);
-
-			MakeMove(move);
-
-			if(isGameOver())
-			{
-				winner(getWinner(ballNode));
-				return;
-			}
+			gameActivity.AddNewLineToDraw(oldNodeCoords[0], oldNodeCoords[1], newLineCoords[0], newLineCoords[1], playerColor);
 
 			gameActivity.UpdateBallPosition();
 			gameActivity.gameView.invalidate();
-			if (currentPlayersTurn.playerNumber != myPlayerNumber) gameAIHandler.MakeAIMove();
 		}
-		else
+		catch(Exception e)
 		{
-			System.out.println(String.format("%s Tried to make an illegal move", move.madeTheMove.playerName));
+			return;
 		}
+	}
+
+	public void PlayerMakeMove(Node node, Player player)
+	{
+		PartialMove partialMove = new PartialMove(ballNode, node);
+		if (isPartialMoveLegal(partialMove, player))
+		{
+			MakePartialMove(partialMove);
+			UpdateGameState();
+		}
+	}
+
+	public void AIMakeMove(PartialMove move)
+	{
+		MakePartialMove(move);
+		UpdateGameState();
 	}
 
 	public void MakeMove(Move move)
 	{
-		connectedNodes.put(move.newNode.id, move.oldNode.id);
+		onGoingMove = null;
+		changeTurn();
+
+		++numberOfTurns;
+	}
+
+	public void MakePartialMove(PartialMove partialMove)
+	{
+		if (onGoingMove == null) onGoingMove = new Move(partialMove.madeTheMove);
+		onGoingMove.addPartialMove(partialMove);
+
+		connectedNodes.put(partialMove.newNode.id, partialMove.oldNode.id);
 
 		//Make sure the nodes is not from a clone
-		move.newNode = findNodeById(move.newNode.id);
-		move.oldNode = findNodeById(move.oldNode.id);
+		partialMove.newNode = findNodeById(partialMove.newNode.id);
+		partialMove.oldNode = findNodeById(partialMove.oldNode.id);
 
-		if (move.oldNode.nodeType == NodeTypeEnum.Empty) move.oldNode.nodeType = NodeTypeEnum.BounceAble;
-		ballNode = move.newNode;
+		if (partialMove.oldNode.nodeType == NodeTypeEnum.Empty)
+			partialMove.oldNode.nodeType = NodeTypeEnum.BounceAble;
+		ballNode = partialMove.newNode;
 
-		if (move.newNode.nodeType == NodeTypeEnum.BounceAble || move.newNode.nodeType == NodeTypeEnum.Wall)
+		DrawPartialMove(partialMove, currentPlayersTurn.playerColor);
+
+		if (onGoingMove.completedMove)
 		{
-			extraTurn = true;
+			MakeMove(onGoingMove);
 		}
-		else
-		{
-			extraTurn = false;
-			changeTurn();
-		}
-		++numberOfTurns;
 	}
 
 	public boolean isGameOver()
@@ -217,7 +247,7 @@ public class GameHandler implements Cloneable {
 			}
 			return currentPlayersTurn;
 		}	
-		else if (allAvailibleMoves().size() == 0)
+		else if (allAvailiblePartialMovesFromNode(n).size() == 0)
 		{
 			return getOpponent(currentPlayersTurn);
 		}
@@ -277,18 +307,16 @@ public class GameHandler implements Cloneable {
 		if (myPlayer == player1) return player2;
 		return player1;
 	}
-	
-	//Gives the turn to the other player
+
 	public Player changeTurn()
 	{
 		currentPlayersTurn = getOpponent(currentPlayersTurn);
 		return currentPlayersTurn;
 	}
-	
-	//Checks if a move is legal in the current gamestate
-	public boolean isLegalMove(Move move)
+
+	public boolean isPartialMoveLegal(PartialMove partialMove, Player player)
 	{
-		HashSet<Move> test = allAvailibleMoves();
-		return move.madeTheMove == currentPlayersTurn && test.contains(move);
+		HashSet<PartialMove> test = allAvailiblePartialMovesFromNode(ballNode);
+		return test.contains(partialMove) && player == currentPlayersTurn;
 	}
 }

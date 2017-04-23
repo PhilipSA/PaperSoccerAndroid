@@ -2,16 +2,16 @@ package com.example.papersoccer.papersoccer.AI;
 
 import com.example.papersoccer.papersoccer.AI.Abstraction.IGameAI;
 import com.example.papersoccer.papersoccer.GameObjects.GameHandler;
-import com.example.papersoccer.papersoccer.GameObjects.Move;
-import com.example.papersoccer.papersoccer.GameObjects.Node;
+import com.example.papersoccer.papersoccer.GameObjects.Move.Move;
+import com.example.papersoccer.papersoccer.GameObjects.Move.PartialMove;
 
 import java.util.Random;
 
 public class RandomAI implements IGameAI {
-    public Move MakeMove(GameHandler gameHandler)
+    public PartialMove MakeMove(GameHandler gameHandler)
     {
         Random random = new Random();
-        Move randomMove = (Move)gameHandler.allAvailibleMoves().toArray()[random.nextInt(gameHandler.allAvailibleMoves().size())];
+        PartialMove randomMove = (PartialMove)gameHandler.allAvailiblePartialMovesFromNode(gameHandler.ballNode).toArray()[random.nextInt(gameHandler.allAvailiblePartialMovesFromNode(gameHandler.ballNode).size())];
         return randomMove;
     }
 }

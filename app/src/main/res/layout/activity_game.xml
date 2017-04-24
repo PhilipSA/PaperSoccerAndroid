@@ -33,21 +33,73 @@
         android:visibility="invisible" />
 
     <TextView
-        android:id="@+id/player2Textview"
+        android:id="@+id/player2TextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/player1Textview"
+        android:layout_alignLeft="@+id/player1TextView"
         android:layout_alignParentTop="true"
         android:text="Player2"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        style="@style/PlayerNameOverlayText"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:background="@drawable/drawable_back"/>
 
     <TextView
-        android:id="@+id/player1Textview"
+        android:id="@+id/player2ScoreTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Player2: 0"
+        android:textColor="#FFFFFF"
+        android:textSize="20dp"
+        android:layout_alignBaseline="@+id/player2TextView"
+        android:layout_alignBottom="@+id/player2TextView"
+        android:layout_alignLeft="@+id/playagainButton"
+        android:layout_alignStart="@+id/playagainButton" />
+
+    <TextView
+        android:id="@+id/player1ScoreTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Player1: 0"
+        android:textColor="#FFFFFF"
+        android:textSize="20dp"
+        android:layout_below="@+id/player2TextView"
+        android:layout_alignLeft="@+id/player2ScoreTextView"
+        android:layout_alignStart="@+id/player2ScoreTextView" />
+
+    <TextView
+        android:id="@+id/playerWinnerTextview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Winner!"
+        android:visibility="invisible"
+        android:textColor="#FFFFFF"
+        android:textSize="50dp"
+        android:layout_marginTop="115dp"
+        android:layout_below="@+id/player1ScoreTextView"
+        android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:id="@+id/player1TextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:text="Player1"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        style="@style/PlayerNameOverlayText"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:background="@drawable/drawable_back"/>
+
+    <TextView
+        android:id="@+id/playerTurnTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Player1"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:background="@drawable/drawable_tooltip_back"
+        android:layout_above="@+id/quitButton"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_toStartOf="@+id/player1TextView"
+        android:layout_toLeftOf="@+id/player1TextView" />
 
 </RelativeLayout>

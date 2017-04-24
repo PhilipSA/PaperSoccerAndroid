@@ -29,13 +29,22 @@ public class GameActivity extends Activity {
 
 	public GameView gameView;
 
-	protected TextView player1Name;
-	protected TextView player2Name;
-	
-	protected int screenHeight;
-	protected int screenWidth;
-	
-	protected GameHandler gameHandler;
+	private TextView player1NameTextView;
+	private TextView player2NameTextView;
+	private TextView playerTurnTextView;
+
+	private TextView player1ScoreTextView;
+	private TextView player2ScoreTextView;
+
+	private TextView playerWinnerTextView;
+
+	private int player1Color = Color.BLUE;
+	private int player2Color = Color.RED;
+
+	private int screenHeight;
+	private int screenWidth;
+
+	private GameHandler gameHandler;
 	
 	public String myName;
 	
@@ -58,23 +67,27 @@ public class GameActivity extends Activity {
 		gameView = (GameView)findViewById(R.id.gameview);
 		gameView.SetValues(GameActivity.getWidth(this), GameActivity.getHeight(this), gameView.gridSizeX, gameView.gridSizeY);
 		
-		player1Name = (TextView)findViewById(R.id.player1Textview);
-		player2Name = (TextView)findViewById(R.id.player2Textview);
+		player1NameTextView = (TextView)findViewById(R.id.player1TextView);
+		player2NameTextView = (TextView)findViewById(R.id.player2TextView);
+		playerTurnTextView = (TextView)findViewById(R.id.playerTurnTextView);
+		playerWinnerTextView = (TextView)findViewById(R.id.playerWinnerTextview);
+
+		player1ScoreTextView = (TextView)findViewById(R.id.player1ScoreTextView);
+		player2ScoreTextView = (TextView)findViewById(R.id.player2ScoreTextView);
+
+		player1NameTextView.setTextColor(player1Color);
+		player2NameTextView.setTextColor(player2Color);
+
+		if (!isMultiplayer) player2NameTextView.setText("Ai"+difficulty);
+		player1NameTextView.setText(playerName);
 		
-		player1Name.setTextColor(Color.BLUE);
-		player2Name.setTextColor(Color.RED);
+        final Player player1 = new Player(playerName, 1, player1Color);
+        final Player player2 = new Player(player2NameTextView.getText().toString(), 2, player2Color);
 		
-        final Player p1 = new Player(playerName, 1, Color.BLUE);
-        final Player p2 = new Player("Player 2", 2, Color.RED);
-		
-        gameHandler = new GameHandler(this, gameView.gridSizeX, gameView.gridSizeY, DifficultyEnum.valueOf(difficulty), p1, p2, isMultiplayer);
-        UpdateBallPosition();
+        gameHandler = new GameHandler(this, gameView.gridSizeX, gameView.gridSizeY, DifficultyEnum.valueOf(difficulty), player1, player2, isMultiplayer);
+        UpdateDrawData();
 		
 		playAgain = (Button)findViewById(R.id.playagainButton);
-
-		gameView.setMyPlayer(p1);
-		if (!isMultiplayer) player2Name.setText("Ai"+difficulty);
-		player1Name.setText(playerName);
 
 		gameView.setOnTouchListener(new View.OnTouchListener()
         {
@@ -86,8 +99,6 @@ public class GameActivity extends Activity {
 		    		if (touchedNode != null)
 		    		{
 						gameHandler.PlayerMakeMove(touchedNode, gameHandler.currentPlayersTurn);
-						UpdateBallPosition();
-			    		gameView.invalidate();
 		    		}
 		    	}
 				return false;
@@ -96,15 +107,17 @@ public class GameActivity extends Activity {
 
 	} //OnCreate
 
-	public void UpdateBallPosition()
+	public void UpdateDrawData()
 	{
+		playerTurnTextView.setText(String.format("It's %s turn", gameHandler.currentPlayersTurn.playerName));
+		playerTurnTextView.setTextColor(gameHandler.currentPlayersTurn.playerColor);
 		gameView.UpdateBallPosition(gameHandler.nodeToCoords(gameHandler.ballNode), gameHandler.currentPlayersTurn);
 	}
 	
 	public void AddNewLineToDraw (float oldNodeCoords, float oldNodeCoords2, float newLineCoords, float newLineCoords2, int color)
 	{
 		gameView.drawLines.add(new LinesToDraw(oldNodeCoords, oldNodeCoords2, newLineCoords, newLineCoords2, color));
-		UpdateBallPosition();
+		UpdateDrawData();
 		gameView.invalidate();
 	}
 	
@@ -146,6 +159,8 @@ public class GameActivity extends Activity {
 	
 	public void Winner(Player player)
 	{
+		playerWinnerTextView.setText(String.format("%s scored a goal!", player.playerName));
+		playerWinnerTextView.setVisibility(View.VISIBLE);
 		playAgain.setVisibility(View.VISIBLE);
 		gameView.setEnabled(false);
 	}

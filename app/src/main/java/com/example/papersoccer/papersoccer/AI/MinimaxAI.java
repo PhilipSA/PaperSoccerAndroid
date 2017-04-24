@@ -11,7 +11,7 @@ import com.example.papersoccer.papersoccer.Helpers.Tree;
 
 public class MinimaxAI implements IGameAI
 {
-    private int searchDepth = 6;
+    private int searchDepth = 7;
     private Tree<MoveData> MoveDataTree;
 
     private class MoveData
@@ -118,7 +118,7 @@ public class MinimaxAI implements IGameAI
 
         if (clone.getWinner(clone.ballNode) == maximizingPlayer) moveData.insertValueContext(1000, "GOAL!!");
 
-        moveData.insertValueContext(clone.numberOfTurns, "Number of turns");
+        moveData.insertValueContext(-clone.numberOfTurns, "Number of turns");
 
         //if (clone.ballNode.nodeType == NodeTypeEnum.BounceAble) moveData.insertValueContext(5, "Bounceable");
 

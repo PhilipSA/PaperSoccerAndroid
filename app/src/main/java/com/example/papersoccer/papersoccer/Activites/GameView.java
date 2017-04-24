@@ -37,6 +37,9 @@ public class GameView extends View {
 	public int gridSizeX = 8;
 	public int gridSizeY = 10;
 
+	private int gridStrokeWidth = 3;
+	private int gridColor = Color.rgb(242, 244, 247);
+
 	public float leftEdgeMargin = 30;
 	public float rightEdgeMargin = 1.027f;
 
@@ -50,7 +53,6 @@ public class GameView extends View {
 	protected float middlePointY;
 	
 	private Player playerTurn;
-	private Player myPlayer;
 
 	private float ballX;
 	private float ballY;
@@ -64,11 +66,6 @@ public class GameView extends View {
 	{
         super(context, attrs);
     }
-    
-	public void setMyPlayer(Player myPlayer)
-	{
-		this.myPlayer = myPlayer;
-	}
     
     public void UpdateBallPosition(float[] ballCoords, Player playerTurn)
     {
@@ -108,7 +105,7 @@ public class GameView extends View {
     {
         paint = new Paint();
         paint.setTextSize(40);
-		paint.setStrokeWidth(2);
+		paint.setStrokeWidth(gridStrokeWidth);
     	paintComponent(canvas, paint);
     }
     
@@ -119,7 +116,7 @@ public class GameView extends View {
 		this.middlePointX = (rightEdge+leftEdge)/2;
 		this.middlePointY = (bottomEdge+topEdge)/2;
 
-		paint.setColor(Color.BLACK);
+		paint.setColor(gridColor);
 		for(float outerLoop = 0; outerLoop <= gridSizeX; ++outerLoop)
 		{
 			for (float innerLoop = 1; innerLoop < gridSizeY; ++innerLoop)
@@ -142,8 +139,8 @@ public class GameView extends View {
 		DrawSideline(leftEdge, paint);
 		DrawSideline(rightEdge, paint);
 
-		DrawGoalLines(topEdge, paint, topEdge+gridYdraw, 0, Color.RED);
-		DrawGoalLines(bottomEdge, paint, bottomEdge-gridYdraw, 180, Color.BLUE);
+		DrawGoalLines(topEdge, paint, topEdge+gridYdraw, Color.RED);
+		DrawGoalLines(bottomEdge, paint, bottomEdge-gridYdraw, Color.BLUE);
 		
 		paint.setStyle(Paint.Style.FILL);
 		
@@ -153,8 +150,6 @@ public class GameView extends View {
 			canvas.drawLine(drawLines.get(i).fromX,drawLines.get(i).fromY, drawLines.get(i).toX,drawLines.get(i).toY, paint);
 		}
 
-		DrawCurrentPlayersTurnText(playerTurn.playerColor, String.format("It's %s turn", playerTurn.playerName), paint);
-
 		//Draw ball
 		Drawable image = getResources().getDrawable(R.drawable.football);
 		image = new ScaleDrawable(image, 0, ballSize, ballSize).getDrawable();
@@ -162,13 +157,7 @@ public class GameView extends View {
 		image.draw(canvas);
 	}
 
-	private void DrawCurrentPlayersTurnText(int color, String text, Paint paint)
-	{
-		paint.setColor(color);
-		canvas.drawText(text, leftEdge+200, bottomEdge+100, paint);
-	}
-
-	private void DrawGoalLines(float edge, Paint paint, float edgeMargin, float arcAngle, int color)
+	private void DrawGoalLines(float edge, Paint paint, float edgeMargin, int color)
 	{
 		canvas.drawLine(leftEdge, edgeMargin, middlePointX-gridXdraw, edgeMargin, paint);
 		canvas.drawLine(rightEdge, edgeMargin, middlePointX+gridXdraw, edgeMargin, paint);
@@ -179,7 +168,6 @@ public class GameView extends View {
 
 		paint.setColor(color);
 		paint.setStyle(Paint.Style.STROKE);
-		canvas.drawArc(new RectF(middlePointX-50, edge-50, middlePointX+50, edge+50), arcAngle, 180, false, paint);
 		paint.setColor(Color.BLACK);
 	}
 

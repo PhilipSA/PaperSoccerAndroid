@@ -34,10 +34,10 @@ public class GameHandler implements Cloneable {
 	private ArrayList<PartialMove> allPartialMoves = new ArrayList<>();
 
 	private GameActivity gameActivity;
-	
 	private GameAIHandler gameAIHandler;
 
 	private boolean isMultiplayer;
+	private boolean aiTurn = false;
 	
 	public GameHandler(final GameActivity gameActivity, int gridX, int gridY, DifficultyEnum difficulty, Player player1, Player player2, boolean isMultiplayer)
 	{
@@ -142,12 +142,18 @@ public class GameHandler implements Cloneable {
 
 	public void UpdateGameState()
 	{
+		gameActivity.UpdateDrawData();
+
 		if(isGameOver())
 		{
 			winner(getWinner(ballNode));
 			return;
 		}
-		if (myPlayerNumber != currentPlayersTurn.playerNumber && !isMultiplayer) gameAIHandler.MakeAIMove();
+		if (myPlayerNumber != currentPlayersTurn.playerNumber && !isMultiplayer)
+		{
+			aiTurn = true;
+			gameAIHandler.MakeAIMove();
+		};
 	}
 
 	public void DrawPartialMove(PartialMove move, int playerColor)
@@ -157,7 +163,7 @@ public class GameHandler implements Cloneable {
 			float[] oldNodeCoords = nodeToCoords(move.oldNode);
 			gameActivity.AddNewLineToDraw(oldNodeCoords[0], oldNodeCoords[1], newLineCoords[0], newLineCoords[1], playerColor);
 
-			gameActivity.UpdateBallPosition();
+			gameActivity.UpdateDrawData();
 			gameActivity.gameView.invalidate();
 		}
 		catch(Exception e)
@@ -169,7 +175,7 @@ public class GameHandler implements Cloneable {
 	public void PlayerMakeMove(Node node, Player player)
 	{
 		PartialMove partialMove = new PartialMove(ballNode, node, player);
-		if (isPartialMoveLegal(partialMove, player))
+		if (isPartialMoveLegal(partialMove, player) && !aiTurn)
 		{
 			MakeMove(partialMove);
 			UpdateGameState();
@@ -179,6 +185,7 @@ public class GameHandler implements Cloneable {
 	public void AIMakeMove(PartialMove move)
 	{
 		MakeMove(move);
+		aiTurn = false;
 		UpdateGameState();
 	}
 
@@ -250,6 +257,7 @@ public class GameHandler implements Cloneable {
 	//Let the activity know we have a winner
 	public void winner(Player winningPlayer)
 	{
+		winningPlayer.score += 1;
 		gameActivity.Winner(winningPlayer);
 	}
 		

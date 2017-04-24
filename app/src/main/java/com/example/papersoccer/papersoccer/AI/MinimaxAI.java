@@ -1,27 +1,28 @@
 package com.example.papersoccer.papersoccer.AI;
 
 import com.example.papersoccer.papersoccer.AI.Abstraction.IGameAI;
+import com.example.papersoccer.papersoccer.Enums.NodeTypeEnum;
 import com.example.papersoccer.papersoccer.GameObjects.GameHandler;
 import com.example.papersoccer.papersoccer.GameObjects.Move.PartialMove;
 import com.example.papersoccer.papersoccer.GameObjects.Node;
 import com.example.papersoccer.papersoccer.GameObjects.Player;
 import com.example.papersoccer.papersoccer.Helpers.MathHelper;
-
-import java.util.HashSet;
+import com.example.papersoccer.papersoccer.Helpers.Tree;
 
 public class MinimaxAI implements IGameAI
 {
-    private int callCount;
-    private int searchDepth = 1;
-    private HashSet<MoveData> MoveDataTree;
+    private int searchDepth = 2;
+    private Tree<MoveData> MoveDataTree;
 
-    private class MoveData {
+    private class MoveData
+    {
         public double returnValue;
         public PartialMove returnMove;
         public String information;
 
-
-        public MoveData() {
+        public MoveData(String playerName)
+        {
+            information = playerName;
             returnValue = 0;
         }
 
@@ -31,26 +32,29 @@ public class MinimaxAI implements IGameAI
             information += String.format("| %f = %s |", value, context);
         }
 
+        @Override
+        public String toString() {
+            return information;
+        }
     }
 
     @Override
     public PartialMove MakeMove(GameHandler gameHandler)
     {
-        MoveDataTree = new HashSet<>();
-        callCount = 0;
-        MoveData bestMove = alphaBetaPruning(searchDepth, gameHandler, gameHandler.currentPlayersTurn, Double.MIN_VALUE, Double.MAX_VALUE);
-        System.out.println(callCount);
+        MoveDataTree = new Tree<>(null);
+        MoveData bestMove = alphaBetaPruning(searchDepth, gameHandler, gameHandler.currentPlayersTurn, Double.MIN_VALUE, Double.MAX_VALUE, MoveDataTree);
+        System.out.printf(MoveDataTree.toString());
         return bestMove.returnMove;
     }
 
-    private MoveData alphaBetaPruning(int currentDepth, GameHandler state, Player maximizingPlayer, double alpha, double beta)
+    private MoveData alphaBetaPruning(int currentDepth, GameHandler state, Player maximizingPlayer, double alpha, double beta, Tree<MoveData> tree)
     {
-        ++callCount;
-
         if (currentDepth == 0 || state.getWinner(state.ballNode) != null)
         {
-            return minmaxEvaluation(state);
+            return minmaxEvaluation(state, maximizingPlayer, tree);
         }
+
+        tree = tree.addLeaf(new MoveData(state.currentPlayersTurn.playerName));
 
         MoveData returnMove;
         MoveData bestMove = null;
@@ -63,16 +67,20 @@ public class MinimaxAI implements IGameAI
                 GameHandler clone = new GameHandler(state);
                 partialMove.madeTheMove = clone.currentPlayersTurn;
                 clone.MakePartialMove(partialMove);
-                returnMove = alphaBetaPruning(currentDepth - 1, clone, maximizingPlayer, bestScore, beta);
-                if ((bestMove == null) || (bestMove.returnValue < returnMove.returnValue)) {
+                returnMove = alphaBetaPruning(currentDepth - 1, clone, maximizingPlayer, bestScore, beta, tree);
+
+                if ((bestMove == null) || (bestMove.returnValue < returnMove.returnValue))
+                {
                     bestMove = returnMove;
                     bestMove.returnMove = partialMove;
                 }
-                if (returnMove.returnValue > alpha) {
+                if (returnMove.returnValue > alpha)
+                {
                     alpha = returnMove.returnValue;
                     bestMove = returnMove;
                 }
-                if (beta <= alpha) {
+                if (beta <= alpha)
+                {
                     bestMove.returnValue = beta;
                     bestMove.returnMove = null;
                     return bestMove; // pruning
@@ -86,10 +94,12 @@ public class MinimaxAI implements IGameAI
 
             for (PartialMove partialMove : state.allAvailiblePartialMovesFromNode(state.ballNode))
             {
+                tree = tree.addLeaf(new MoveData(state.currentPlayersTurn.playerName));
+
                 GameHandler clone = new GameHandler(state);
                 partialMove.madeTheMove = clone.currentPlayersTurn;
                 clone.MakePartialMove(partialMove);
-                returnMove = alphaBetaPruning(currentDepth - 1, clone, maximizingPlayer, alpha, worstScore);
+                returnMove = alphaBetaPruning(currentDepth - 1, clone, maximizingPlayer, alpha, worstScore, tree);
 
                 if ((bestMove == null) || (bestMove.returnValue > returnMove.returnValue)) {
                     bestMove = returnMove;
@@ -109,19 +119,23 @@ public class MinimaxAI implements IGameAI
         }
     }
 
-    private MoveData minmaxEvaluation(GameHandler clone)
+    private MoveData minmaxEvaluation(GameHandler clone, Player maximizingPlayer, Tree<MoveData> tree)
     {
-        MoveData moveData = new MoveData();
+        MoveData moveData = new MoveData(clone.currentPlayersTurn.playerName);
 
-        if (clone.getWinner(clone.ballNode) == clone.player2) moveData.insertValueContext(1000, "GOAL!!");
+        if (clone.getWinner(clone.ballNode) == maximizingPlayer) moveData.insertValueContext(1000, "GOAL!!");
 
-        Node opponentsGoal = clone.getOpponent(clone.player2).goalNode;
+        moveData.insertValueContext(-clone.numberOfTurns, "Number of turns");
+
+        if (clone.ballNode.nodeType == NodeTypeEnum.BounceAble) moveData.insertValueContext(5, "Bounceable");
+
+        Node opponentsGoal = clone.getOpponent(maximizingPlayer).goalNode;
         double distanceToOpponentsGoal = -MathHelper.distance(opponentsGoal.xCord, clone.ballNode.xCord, opponentsGoal.yCord, clone.ballNode.yCord);
 
         //Distance to opponents goal
         moveData.insertValueContext(distanceToOpponentsGoal, "Distance to opponents goal");
 
-        MoveDataTree.add(moveData);
+        tree.addLeaf(moveData);
         return moveData;
     }
 }

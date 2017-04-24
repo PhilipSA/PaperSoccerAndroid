@@ -29,7 +29,7 @@ public class GameHandler implements Cloneable {
 
 	public Node ballNode;
 
-	private Move onGoingMove;
+	public Move onGoingMove;
 
 	private GameActivity gameActivity;
 	

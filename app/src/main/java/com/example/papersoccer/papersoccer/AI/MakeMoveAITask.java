@@ -4,7 +4,6 @@ import android.os.AsyncTask;
 
 import com.example.papersoccer.papersoccer.AI.Abstraction.IGameAI;
 import com.example.papersoccer.papersoccer.GameObjects.GameHandler;
-import com.example.papersoccer.papersoccer.GameObjects.Move.Move;
 import com.example.papersoccer.papersoccer.GameObjects.Move.PartialMove;
 
 public class MakeMoveAITask extends AsyncTask<Object, Void, PartialMove>

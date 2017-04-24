@@ -1,9 +1,9 @@
 package com.example.papersoccer.papersoccer.AI;
 
 import com.example.papersoccer.papersoccer.AI.Abstraction.IGameAI;
-import com.example.papersoccer.papersoccer.Enums.NodeTypeEnum;
 import com.example.papersoccer.papersoccer.GameObjects.GameHandler;
 import com.example.papersoccer.papersoccer.GameObjects.Move.PartialMove;
+import com.example.papersoccer.papersoccer.GameObjects.Move.PossibleMove;
 import com.example.papersoccer.papersoccer.GameObjects.Node;
 import com.example.papersoccer.papersoccer.GameObjects.Player;
 import com.example.papersoccer.papersoccer.Helpers.MathHelper;
@@ -11,7 +11,7 @@ import com.example.papersoccer.papersoccer.Helpers.Tree;
 
 public class MinimaxAI implements IGameAI
 {
-    private int searchDepth = 2;
+    private int searchDepth = 6;
     private Tree<MoveData> MoveDataTree;
 
     private class MoveData
@@ -34,7 +34,7 @@ public class MinimaxAI implements IGameAI
 
         @Override
         public String toString() {
-            return information;
+            return String.format("TOTAL: %f | %s", returnValue, information);
         }
     }
 
@@ -42,7 +42,8 @@ public class MinimaxAI implements IGameAI
     public PartialMove MakeMove(GameHandler gameHandler)
     {
         MoveDataTree = new Tree<>(null);
-        MoveData bestMove = alphaBetaPruning(searchDepth, gameHandler, gameHandler.currentPlayersTurn, Double.MIN_VALUE, Double.MAX_VALUE, MoveDataTree);
+        MoveData bestMove = alphaBetaPruning(searchDepth, gameHandler, gameHandler.currentPlayersTurn, -50000, 50000, MoveDataTree);
+        MoveDataTree = MoveDataTree.setAsParent(bestMove);
         System.out.printf(MoveDataTree.toString());
         return bestMove.returnMove;
     }
@@ -60,27 +61,22 @@ public class MinimaxAI implements IGameAI
         MoveData bestMove = null;
         if (maximizingPlayer == state.currentPlayersTurn)
         {
-            double bestScore = alpha;
-
-            for (PartialMove partialMove : state.allAvailiblePartialMovesFromNode(state.ballNode))
+            for (PossibleMove possibleMove : state.allPossibleMovesFromNode(state.ballNode))
             {
-                GameHandler clone = new GameHandler(state);
-                partialMove.madeTheMove = clone.currentPlayersTurn;
-                clone.MakePartialMove(partialMove);
-                returnMove = alphaBetaPruning(currentDepth - 1, clone, maximizingPlayer, bestScore, beta, tree);
+                PartialMove partialMove = new PartialMove(possibleMove.oldNode, possibleMove.newNode, state.currentPlayersTurn);
+                state.MakePartialMove(partialMove);
+                returnMove = alphaBetaPruning(currentDepth - 1, state, maximizingPlayer, alpha, beta, tree);
+                state.UndoLastMove();
 
-                if ((bestMove == null) || (bestMove.returnValue < returnMove.returnValue))
-                {
+                if ((bestMove == null) || (bestMove.returnValue < returnMove.returnValue)) {
                     bestMove = returnMove;
                     bestMove.returnMove = partialMove;
                 }
-                if (returnMove.returnValue > alpha)
-                {
+                if (returnMove.returnValue > alpha) {
                     alpha = returnMove.returnValue;
                     bestMove = returnMove;
                 }
-                if (beta <= alpha)
-                {
+                if (beta <= alpha) {
                     bestMove.returnValue = beta;
                     bestMove.returnMove = null;
                     return bestMove; // pruning
@@ -90,16 +86,13 @@ public class MinimaxAI implements IGameAI
         }
         else
         {
-            double worstScore = beta;
-
-            for (PartialMove partialMove : state.allAvailiblePartialMovesFromNode(state.ballNode))
+            for (PossibleMove possibleMove : state.allPossibleMovesFromNode(state.ballNode))
             {
-                tree = tree.addLeaf(new MoveData(state.currentPlayersTurn.playerName));
-
-                GameHandler clone = new GameHandler(state);
-                partialMove.madeTheMove = clone.currentPlayersTurn;
-                clone.MakePartialMove(partialMove);
-                returnMove = alphaBetaPruning(currentDepth - 1, clone, maximizingPlayer, alpha, worstScore, tree);
+                PartialMove partialMove = new PartialMove(possibleMove.oldNode, possibleMove.newNode, state.currentPlayersTurn);
+                partialMove.madeTheMove = state.currentPlayersTurn;
+                state.MakePartialMove(partialMove);
+                returnMove = alphaBetaPruning(currentDepth - 1, state, maximizingPlayer, alpha, beta, tree);
+                state.UndoLastMove();
 
                 if ((bestMove == null) || (bestMove.returnValue > returnMove.returnValue)) {
                     bestMove = returnMove;
@@ -125,9 +118,9 @@ public class MinimaxAI implements IGameAI
 
         if (clone.getWinner(clone.ballNode) == maximizingPlayer) moveData.insertValueContext(1000, "GOAL!!");
 
-        moveData.insertValueContext(-clone.numberOfTurns, "Number of turns");
+        moveData.insertValueContext(clone.numberOfTurns, "Number of turns");
 
-        if (clone.ballNode.nodeType == NodeTypeEnum.BounceAble) moveData.insertValueContext(5, "Bounceable");
+        //if (clone.ballNode.nodeType == NodeTypeEnum.BounceAble) moveData.insertValueContext(5, "Bounceable");
 
         Node opponentsGoal = clone.getOpponent(maximizingPlayer).goalNode;
         double distanceToOpponentsGoal = -MathHelper.distance(opponentsGoal.xCord, clone.ballNode.xCord, opponentsGoal.yCord, clone.ballNode.yCord);

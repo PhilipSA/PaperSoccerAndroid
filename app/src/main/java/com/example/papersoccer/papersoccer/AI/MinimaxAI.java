@@ -120,8 +120,6 @@ public class MinimaxAI implements IGameAI
 
         moveData.insertValueContext(-clone.numberOfTurns, "Number of turns");
 
-        //if (clone.ballNode.nodeType == NodeTypeEnum.BounceAble) moveData.insertValueContext(5, "Bounceable");
-
         Node opponentsGoal = clone.getOpponent(maximizingPlayer).goalNode;
         double distanceToOpponentsGoal = -MathHelper.distance(opponentsGoal.xCord, clone.ballNode.xCord, opponentsGoal.yCord, clone.ballNode.yCord);
 

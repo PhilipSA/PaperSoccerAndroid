@@ -37,7 +37,7 @@ public class GameView extends View {
 	public int gridSizeX = 8;
 	public int gridSizeY = 10;
 
-	private int gridStrokeWidth = 3;
+	private int gridStrokeWidth = 4;
 	private int gridColor = Color.rgb(242, 244, 247);
 
 	public float leftEdgeMargin = 30;

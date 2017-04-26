@@ -25,7 +25,6 @@ public class GameHandler implements Cloneable {
 	public Player player2;
 
 	public Player currentPlayersTurn;
-	public int myPlayerNumber = 0;
 
 	public int numberOfTurns = 0;
 
@@ -39,17 +38,15 @@ public class GameHandler implements Cloneable {
 	private boolean isMultiplayer;
 	private boolean aiTurn = false;
 	
-	public GameHandler(final GameActivity gameActivity, int gridX, int gridY, DifficultyEnum difficulty, Player player1, Player player2, boolean isMultiplayer)
+	public GameHandler(final GameActivity gameActivity, int gridX, int gridY, DifficultyEnum difficulty, ArrayList<Player> players, boolean isMultiplayer)
 	{
-		this.player1 = player1;
-		this.player2 = player2;
+		this.player1 = players.get(0);
+		this.player2 = players.get(1);
 
-		currentPlayersTurn = player1;
+		currentPlayersTurn = players.get(0);
 
 		this.isMultiplayer = isMultiplayer;
 
-		myPlayerNumber = 1;
-		
 		makeNodes(gridX, gridY);
 		ballNode = findNodeByXY(gridX/2, gridY/2);
 		
@@ -149,7 +146,7 @@ public class GameHandler implements Cloneable {
 			winner(getWinner(ballNode));
 			return;
 		}
-		if (myPlayerNumber != currentPlayersTurn.playerNumber && !isMultiplayer)
+		if (currentPlayersTurn.isAi && !isMultiplayer)
 		{
 			aiTurn = true;
 			gameAIHandler.MakeAIMove();

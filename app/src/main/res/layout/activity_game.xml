@@ -36,12 +36,15 @@
         android:id="@+id/player2TextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/player1TextView"
-        android:layout_alignParentTop="true"
         android:text="Player2"
         style="@style/PlayerNameOverlayText"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:background="@drawable/drawable_back"/>
+        android:background="@drawable/drawable_back"
+        android:layout_marginLeft="11dp"
+        android:layout_marginStart="11dp"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+id/quitButton"
+        android:layout_toEndOf="@+id/quitButton" />
 
     <TextView
         android:id="@+id/player2ScoreTextView"
@@ -50,10 +53,12 @@
         android:text="Player2: 0"
         android:textColor="#FFFFFF"
         android:textSize="20dp"
-        android:layout_alignBaseline="@+id/player2TextView"
-        android:layout_alignBottom="@+id/player2TextView"
-        android:layout_alignLeft="@+id/playagainButton"
-        android:layout_alignStart="@+id/playagainButton" />
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+id/player1TextView"
+        android:layout_toEndOf="@+id/player1TextView"
+        android:layout_marginLeft="11dp"
+        android:layout_marginStart="11dp"
+        android:layout_marginTop="9dp" />
 
     <TextView
         android:id="@+id/player1ScoreTextView"
@@ -72,8 +77,13 @@
         android:layout_height="wrap_content"
         android:text="Winner!"
         android:visibility="invisible"
-        android:textColor="#FFFFFF"
-        android:textSize="50dp"
+        android:textSize="55sp"
+        android:textStyle="bold"
+        android:textColor="@color/light_font"
+        android:shadowColor="@color/text_shadow"
+        android:shadowDx="1"
+        android:shadowDy="1"
+        android:shadowRadius="20"
         android:layout_marginTop="115dp"
         android:layout_below="@+id/player1ScoreTextView"
         android:layout_centerHorizontal="true" />

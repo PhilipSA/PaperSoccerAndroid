@@ -6,11 +6,13 @@ public class Player {
 	public int playerColor;
 	public Node goalNode;
 	public int score;
+	public boolean isAi;
 	
-	public Player(String name, int number, int color)
+	public Player(String name, int number, int color, boolean isAi)
 	{
 		this.playerName = name;
 		this.playerNumber = number;
 		this.playerColor = color;
+		this.isAi = isAi;
 	}
 }

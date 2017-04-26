@@ -16,7 +16,8 @@ public class EuclideanAI implements IGameAI {
 
         for (PossibleMove possibleMove : gameHandler.allPossibleMovesFromNode(gameHandler.ballNode))
         {
-            tempManhattan = MathHelper.euclideanDistance(possibleMove.newNode.xCord, 5, possibleMove.newNode.yCord, 10);
+            tempManhattan = MathHelper.euclideanDistance(possibleMove.newNode.xCord, gameHandler.getOpponent(gameHandler.currentPlayersTurn).goalNode.xCord,
+                    possibleMove.newNode.yCord, gameHandler.getOpponent(gameHandler.currentPlayersTurn).goalNode.yCord);
             if (tempManhattan < manhattanDistance)
             {
                 manhattanDistance = tempManhattan;

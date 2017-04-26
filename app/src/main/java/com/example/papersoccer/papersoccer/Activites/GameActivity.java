@@ -22,8 +22,15 @@ import com.example.papersoccer.papersoccer.Enums.DifficultyEnum;
 import com.example.papersoccer.papersoccer.GameObjects.GameHandler;
 import com.example.papersoccer.papersoccer.GameObjects.Node;
 import com.example.papersoccer.papersoccer.GameObjects.Player;
+import com.example.papersoccer.papersoccer.GameObjects.PlayerActivityData;
 import com.example.papersoccer.papersoccer.R;
 import com.example.papersoccer.papersoccer.GameObjects.LinesToDraw;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Random;
 
 public class GameActivity extends Activity {
 
@@ -47,8 +54,16 @@ public class GameActivity extends Activity {
 	private GameHandler gameHandler;
 	
 	public String myName;
+
+	public Map<Player, PlayerActivityData> playerActivityDataMap = new HashMap<>();
 	
 	private Button playAgain;
+
+	protected void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		outState.putInt(gameHandler.player1.playerName, gameHandler.player1.score);
+		outState.putInt(gameHandler.player2.playerName, gameHandler.player2.score);
+	}
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -78,16 +93,39 @@ public class GameActivity extends Activity {
 		player1NameTextView.setTextColor(player1Color);
 		player2NameTextView.setTextColor(player2Color);
 
-		if (!isMultiplayer) player2NameTextView.setText("Ai"+difficulty);
-		player1NameTextView.setText(playerName);
-		
-        final Player player1 = new Player(playerName, 1, player1Color);
-        final Player player2 = new Player(player2NameTextView.getText().toString(), 2, player2Color);
-		
-        gameHandler = new GameHandler(this, gameView.gridSizeX, gameView.gridSizeY, DifficultyEnum.valueOf(difficulty), player1, player2, isMultiplayer);
+		ArrayList<Player> players = new ArrayList<>();
+		if (!isMultiplayer)
+		{
+			players = assignPlayerAndAi(difficulty, playerName);
+		}
+		else
+		{
+			players.add(new Player(playerName, 1, player1Color, false));
+			players.add(new Player("Player2", 2, player2Color, false));
+		}
+
+		player1NameTextView.setText(players.get(0).playerName);
+		player2NameTextView.setText(players.get(1).playerName);
+
+		if (savedInstanceState != null) {
+			players.get(0).score = savedInstanceState.getInt(players.get(0).playerName);
+			players.get(1).score = savedInstanceState.getInt(players.get(1).playerName);
+		}
+
+		PlayerActivityData playerActivityData = new PlayerActivityData(player1NameTextView, player1ScoreTextView);
+		playerActivityDataMap.put(players.get(0), playerActivityData);
+		PlayerActivityData playerActivityData2 = new PlayerActivityData(player2NameTextView, player2ScoreTextView);
+		playerActivityDataMap.put(players.get(1), playerActivityData2);
+
+		SetScoreText(players.get(0));
+		SetScoreText(players.get(1));
+
+        gameHandler = new GameHandler(this, gameView.gridSizeX, gameView.gridSizeY, DifficultyEnum.valueOf(difficulty), players, isMultiplayer);
         UpdateDrawData();
 		
 		playAgain = (Button)findViewById(R.id.playagainButton);
+
+		gameHandler.UpdateGameState();
 
 		gameView.setOnTouchListener(new View.OnTouchListener()
         {
@@ -106,6 +144,26 @@ public class GameActivity extends Activity {
 		});
 
 	} //OnCreate
+
+	private ArrayList<Player> assignPlayerAndAi(String difficulty, String playerName)
+	{
+		ArrayList<Player> players = new ArrayList<>();
+		Random random = new Random();
+		if (random.nextBoolean()) {
+			players.add(new Player(playerName, 1, player1Color, false));
+			players.add(new Player("Ai" + difficulty, 2, player2Color, true));
+		}
+		else {
+			players.add(new Player("Ai" + difficulty, 1, player1Color, true));
+			players.add(new Player(playerName, 2, player2Color, false));
+		}
+		return players;
+	}
+
+	private void SetScoreText(Player player)
+	{
+		playerActivityDataMap.get(player).playerScoreTextView.setText(String.format("%s: %d", player.playerName, player.score));
+	}
 
 	public void UpdateDrawData()
 	{
@@ -159,6 +217,7 @@ public class GameActivity extends Activity {
 	
 	public void Winner(Player player)
 	{
+		SetScoreText(player);
 		playerWinnerTextView.setText(String.format("%s scored a goal!", player.playerName));
 		playerWinnerTextView.setVisibility(View.VISIBLE);
 		playAgain.setVisibility(View.VISIBLE);

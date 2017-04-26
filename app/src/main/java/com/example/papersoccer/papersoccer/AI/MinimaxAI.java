@@ -163,7 +163,7 @@ public class MinimaxAI implements IGameAI
         MoveData moveData = new MoveData(clone.currentPlayersTurn.playerName);
 
         if (clone.isGameOver() && clone.getWinner(clone.ballNode).winner == maximizingPlayer) moveData.insertValueContext(1000, "GOAL!!");
-        //if (clone.isGameOver() && clone.getWinner(clone.ballNode).winner != maximizingPlayer) moveData.insertValueContext(-1000, "NOOOO!!");
+        if (clone.isGameOver() && clone.getWinner(clone.ballNode).winner != maximizingPlayer) moveData.insertValueContext(-1000, "NOOOO!!");
 
         moveData.insertValueContext(-clone.numberOfTurns, "Number of turns");
 

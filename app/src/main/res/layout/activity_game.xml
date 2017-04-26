@@ -106,10 +106,8 @@
         android:text="Player1"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:background="@drawable/drawable_tooltip_back"
-        android:layout_above="@+id/quitButton"
-        android:layout_alignParentLeft="true"
+        android:layout_above="@+id/player1TextView"
         android:layout_alignParentStart="true"
-        android:layout_toStartOf="@+id/player1TextView"
-        android:layout_toLeftOf="@+id/player1TextView" />
+        android:layout_marginBottom="16dp" />
 
 </RelativeLayout>

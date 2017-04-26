@@ -1,106 +1,19 @@
 package com.example.papersoccer.papersoccer.Activites;
 
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
+import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageView;
-
 import com.example.papersoccer.papersoccer.R;
-import com.shivam.library.imageslider.ImageSlider;
-import com.shivam.library.imageslider.ImageSlider.PageAnimation;
 
 public class HowToPlayActivity extends AppCompatActivity {
-
-    // custom indicators ids
-    private int[] images={R.drawable.tutorial1,R.drawable.tutorial2,R.drawable.tutorial3,R.drawable.tutorial4};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_how_to_play);
-        ImageSlider slider = (ImageSlider) findViewById(R.id.imageSlider);
-        SectionsPagerAdapter  mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
-        slider.setAdapter(mSectionsPagerAdapter);
 
-        //slider.setCustomIndicators(bundle.getIntArray("indicator"));   // set custom indicator type 1
-        //slider.setCustomIndicators(bundle.getIntArray("indicator"));   // set custom indicator type 2
-        //slider.showIndicators(false);                                // show/hide indicator
-
-        //slider.setIndicatorsSize(size);      // set indicator size, set 10 it by default (dp)
-
-        ViewPager pager = slider.getViewPager();   // perform other operations on pager
-
-        slider.setPageAnimation(PageAnimation.CARD_STACK);
-        //slider.setPageAnimation(PageAnimation.PARALLAX);
-        //slider.setPageAnimation(PageAnimation.FADE);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-    }
-
-    @Override
-    public boolean onSupportNavigateUp(){
-        finish();
-        return true;
-    }
-
-    // dummy fragment
-    public static class PlaceholderFragment extends Fragment {
-
-        public PlaceholderFragment() {
-
-        }
-
-        public static PlaceholderFragment newInstance(Integer pic) {
-
-            PlaceholderFragment fragment = new PlaceholderFragment();
-            Bundle args = new Bundle();
-            args.putInt("index", pic);
-            fragment.setArguments(args);
-            return fragment;
-        }
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
-
-            View rootView = inflater.inflate(R.layout.image_fragment, container, false);
-            Bundle args = getArguments();
-            int index = args.getInt("index", 0);
-            ImageView imageView=(ImageView)rootView.findViewById(R.id.image);
-            imageView.setImageResource(index);
-            return rootView;
-        }
-    }
-
-
-    public class SectionsPagerAdapter extends FragmentPagerAdapter {   // adapter to set in ImageSlider
-
-        public SectionsPagerAdapter(FragmentManager fm) {
-            super(fm);
-        }
-
-        @Override
-        public Fragment getItem(int position) {
-
-            return PlaceholderFragment.newInstance(images[position]);
-        }
-
-        @Override
-        public int getCount() {
-
-            return 4;
-        }
-
-        @Override
-        public CharSequence getPageTitle(int position) {
-
-            return null;
-        }
+        ViewPager mViewPager = (ViewPager) findViewById(R.id.viewPageAndroid);
+        ImageSliderAdapter adapterView = new ImageSliderAdapter(this);
+        mViewPager.setAdapter(adapterView);
     }
 }

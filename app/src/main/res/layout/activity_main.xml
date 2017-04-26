@@ -7,82 +7,79 @@
     tools:context="${relativePackage}.${activityClass}">
 
     <Button
-        android:id="@+id/singleplayerButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginTop="126dp"
-        android:text="Singleplayer"
-        android:onClick="SingleplayerClick" />
-
-    <Button
-        android:id="@+id/localMultiplayerButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:text="Local multiplayer"
-        android:onClick="LocalMultiplayerClick"
-        android:layout_below="@+id/singleplayerButton"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
-
-    <Button
-        android:id="@+id/settingsButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:text="Settings"
-        android:onClick="SettingsClick"
-        android:layout_below="@+id/localMultiplayerButton"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
-
-    <Button
+        style="@style/MainMenuButton"
         android:id="@+id/howToPlayButton"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="19dp"
+        android:layout_height="50dp"
         android:text="How to play"
         android:onClick="HowToPlayClick"
-        android:layout_below="@+id/settingsButton"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
-
-    <Button
-        android:id="@+id/exitButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:onClick="ExitClick"
-        android:text="Exit"
-        android:layout_above="@+id/adView"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
+        android:layout_below="@+id/localMultiplayerButton"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentStart="true" />
 
     <ImageView
         android:layout_width="fill_parent"
         android:layout_height="100dp"
         android:src="@drawable/main_logo"
-        android:layout_alignParentLeft="true"
+        android:id="@+id/imageView"
+        android:layout_alignParentTop="true"
         android:layout_alignParentStart="true" />
 
     <com.google.android.gms.ads.AdView
         android:id="@+id/adView"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
         android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
         ads:adSize="BANNER"
-        ads:adUnitId="@string/banner_ad_unit_id">
-    </com.google.android.gms.ads.AdView>
+        ads:adUnitId="@string/banner_ad_unit_id"></com.google.android.gms.ads.AdView>
+
+    <Button
+        style="@style/MainMenuButton"
+        android:id="@+id/singleplayerButton"
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:onClick="SingleplayerClick"
+        android:text="Singleplayer"
+        android:layout_below="@+id/imageView"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true" />
+
+    <Button
+        style="@style/MainMenuButton"
+        android:id="@+id/settingsButton"
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:layout_marginTop="32dp"
+        android:onClick="SettingsClick"
+        android:text="Settings"
+        android:layout_below="@+id/singleplayerButton"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true" />
+
+    <Button
+        style="@style/MainMenuButton"
+        android:id="@+id/localMultiplayerButton"
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:layout_marginTop="35dp"
+        android:onClick="LocalMultiplayerClick"
+        android:text="Local multiplayer"
+        android:layout_below="@+id/settingsButton"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true" />
+
+    <Button
+        style="@style/MainMenuButton"
+        android:id="@+id/exitButton"
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:layout_above="@+id/adView"
+        android:layout_marginBottom="10dp"
+        android:onClick="ExitClick"
+        android:text="Exit"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentStart="true" />
+
 
 </RelativeLayout>

@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "506696839848",
+    "firebase_url": "https://papersoccer-d80f6.firebaseio.com",
+    "project_id": "papersoccer-d80f6",
+    "storage_bucket": "papersoccer-d80f6.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:506696839848:android:0c9b6c5d3d9d5f55",
+        "android_client_info": {
+          "package_name": "com.example.papersoccer.papersoccer"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "506696839848-nr3odpb9uvqt0kumd9nvm8meqdt9q216.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.papersoccer.papersoccer",
+            "certificate_hash": "4b578d21e713b51923e8b32cdb8934e53c660d2e"
+          }
+        },
+        {
+          "client_id": "506696839848-2vl28r8k5i8mgafvvd3umlgkjcg7549h.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB0zEVFmt1e_9c3tE_iMDrBULyhpmPC2Rs"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "506696839848-2vl28r8k5i8mgafvvd3umlgkjcg7549h.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

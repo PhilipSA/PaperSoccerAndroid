@@ -5,7 +5,7 @@ android {
     buildToolsVersion "25.0.2"
     defaultConfig {
         applicationId "com.example.papersoccer.papersoccer"
-        minSdkVersion 15
+        minSdkVersion 17
         targetSdkVersion 25
         versionCode 1
         versionName "1.0"
@@ -29,6 +29,7 @@ dependencies {
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     compile 'com.google.guava:guava:19.0'
     compile 'com.google.firebase:firebase-ads:10.0.1'
+    compile 'com.shivam.library:imageslider:1.1@aar'
     testCompile 'junit:junit:4.12'
 }
 

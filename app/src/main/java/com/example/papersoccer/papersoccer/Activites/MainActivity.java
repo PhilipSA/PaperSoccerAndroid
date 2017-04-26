@@ -43,6 +43,12 @@ public class MainActivity extends Activity {
 		Intent intent = new Intent(this, SettingsActivity.class);
 		startActivity(intent);
 	}
+
+	public void HowToPlayClick(View view)
+	{
+		Intent intent = new Intent(this, HowToPlayActivity.class);
+		startActivity(intent);
+	}
 	
 	public void ExitClick(View view)
 	{

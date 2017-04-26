@@ -25,7 +25,11 @@ public class GameAIHandler
 		}
 		else if (difficulty == DifficultyEnum.Hard)
 		{
-			gameAI = new MinimaxAI();
+			gameAI = new MinimaxAI(3);
+		}
+		else if (difficulty == DifficultyEnum.VeryHard)
+		{
+			gameAI = new MinimaxAI(7);
 		}
 	}
 

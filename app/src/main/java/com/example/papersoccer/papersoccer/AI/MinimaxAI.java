@@ -162,7 +162,8 @@ public class MinimaxAI implements IGameAI
     {
         MoveData moveData = new MoveData(clone.currentPlayersTurn.playerName);
 
-        if (clone.getWinner(clone.ballNode) == maximizingPlayer) moveData.insertValueContext(1000, "GOAL!!");
+        if (clone.isGameOver() && clone.getWinner(clone.ballNode).winner == maximizingPlayer) moveData.insertValueContext(1000, "GOAL!!");
+        //if (clone.isGameOver() && clone.getWinner(clone.ballNode).winner != maximizingPlayer) moveData.insertValueContext(-1000, "NOOOO!!");
 
         moveData.insertValueContext(-clone.numberOfTurns, "Number of turns");
 
@@ -174,22 +175,4 @@ public class MinimaxAI implements IGameAI
 
         return moveData;
     }
-
-//    private MoveData minmaxEvaluation(GameHandler clone, Player maximizingPlayer, Tree<MoveData> tree)
-//    {
-//        MoveData moveData = new MoveData(clone.currentPlayersTurn.playerName);
-//
-//        if (clone.getWinner(clone.ballNode) == maximizingPlayer) moveData.insertValueContext(1000, "GOAL!!");
-//
-//        moveData.insertValueContext(-clone.numberOfTurns, "Number of turns");
-//
-//        Node opponentsGoal = clone.getOpponent(maximizingPlayer).goalNode;
-//        double distanceToOpponentsGoal = -MathHelper.distance(opponentsGoal.xCord, clone.ballNode.xCord, opponentsGoal.yCord, clone.ballNode.yCord);
-//
-//        //Distance to opponents goal
-//        moveData.insertValueContext(distanceToOpponentsGoal, "Distance to opponents goal");
-//
-//        tree.addLeaf(moveData);
-//        return moveData;
-//    }
 }

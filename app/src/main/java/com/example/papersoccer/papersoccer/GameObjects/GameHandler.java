@@ -9,9 +9,11 @@ import com.example.papersoccer.papersoccer.AI.GameAIHandler;
 import com.example.papersoccer.papersoccer.Activites.GameActivity;
 import com.example.papersoccer.papersoccer.Enums.DifficultyEnum;
 import com.example.papersoccer.papersoccer.Enums.NodeTypeEnum;
+import com.example.papersoccer.papersoccer.Enums.VictoryConditionEnum;
 import com.example.papersoccer.papersoccer.GameObjects.Move.PartialMove;
 import com.example.papersoccer.papersoccer.GameObjects.Move.PossibleMove;
 import com.example.papersoccer.papersoccer.Helpers.MathHelper;
+import com.example.papersoccer.papersoccer.R;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
@@ -189,6 +191,14 @@ public class GameHandler implements Cloneable {
 	public void MakeMove(PartialMove partialMove)
 	{
 		MakePartialMove(partialMove);
+
+		if(ballNode.nodeType != NodeTypeEnum.Empty) {
+			gameActivity.PlaySoundEffect(R.raw.bounce);
+		}
+		else {
+			gameActivity.PlaySoundEffect(R.raw.soccerkick);
+		}
+
 		DrawPartialMove(partialMove, partialMove.madeTheMove.playerColor);
 		++numberOfTurns;
 	}
@@ -226,36 +236,35 @@ public class GameHandler implements Cloneable {
 
 	public boolean isGameOver()
 	{
-		Player winner = getWinner(ballNode);
-		if (winner != null)
+		if (getWinner(ballNode) != null)
 		{
 			return true;
 		};
 		return false;
 	}
 
-	public Player getWinner(Node n)
+	public Victory getWinner(Node node)
 	{
-		if(n.nodeType == NodeTypeEnum.Goal)
+		if(node.nodeType == NodeTypeEnum.Goal)
 		{
-			if (n.id == currentPlayersTurn.goalNode.id)
+			if (node.id == currentPlayersTurn.goalNode.id)
 			{
-				return getOpponent(currentPlayersTurn);
+				return new Victory(getOpponent(currentPlayersTurn), VictoryConditionEnum.Goal);
 			}
-			return currentPlayersTurn;
+			return new Victory(currentPlayersTurn, VictoryConditionEnum.Goal);
 		}	
-		else if (allPossibleMovesFromNode(n).size() == 0)
+		else if (allPossibleMovesFromNode(node).size() == 0)
 		{
-			return getOpponent(currentPlayersTurn);
+			return new Victory(getOpponent(currentPlayersTurn), VictoryConditionEnum.OpponentOutOfMoves);
 		}
 		return null;
 	}
 	
 	//Let the activity know we have a winner
-	public void winner(Player winningPlayer)
+	public void winner(Victory victory)
 	{
-		winningPlayer.score += 1;
-		gameActivity.Winner(winningPlayer);
+		victory.winner.score += 1;
+		gameActivity.Winner(victory);
 	}
 		
 	//Converts screen coordinates to node coordinates

@@ -13,6 +13,7 @@
     />
 
     <Button
+        style="@style/MainMenuButton"
         android:id="@+id/quitButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -23,6 +24,7 @@
         android:visibility="visible" />
 
     <Button
+        style="@style/MainMenuButton"
         android:id="@+id/playagainButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

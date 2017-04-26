@@ -15,16 +15,21 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 import android.widget.Button;
 import android.widget.TextView;
 
 import com.example.papersoccer.papersoccer.Enums.DifficultyEnum;
+import com.example.papersoccer.papersoccer.Enums.VictoryConditionEnum;
 import com.example.papersoccer.papersoccer.GameObjects.GameHandler;
 import com.example.papersoccer.papersoccer.GameObjects.Node;
 import com.example.papersoccer.papersoccer.GameObjects.Player;
 import com.example.papersoccer.papersoccer.GameObjects.PlayerActivityData;
+import com.example.papersoccer.papersoccer.GameObjects.Victory;
 import com.example.papersoccer.papersoccer.R;
 import com.example.papersoccer.papersoccer.GameObjects.LinesToDraw;
+import com.example.papersoccer.papersoccer.Sound.FXPlayer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -47,6 +52,8 @@ public class GameActivity extends Activity {
 
 	private int player1Color = Color.BLUE;
 	private int player2Color = Color.RED;
+
+	private Map<Integer, FXPlayer> soundEffects = new HashMap<>();
 
 	private int screenHeight;
 	private int screenWidth;
@@ -127,6 +134,11 @@ public class GameActivity extends Activity {
 
 		gameHandler.UpdateGameState();
 
+		soundEffects.put(R.raw.soccerkick, new FXPlayer(this, R.raw.soccerkick));
+		soundEffects.put(R.raw.goodresult, new FXPlayer(this, R.raw.goodresult));
+		soundEffects.put(R.raw.failure, new FXPlayer(this, R.raw.failure));
+		soundEffects.put(R.raw.bounce, new FXPlayer(this, R.raw.bounce));
+
 		gameView.setOnTouchListener(new View.OnTouchListener()
         {
 			@Override
@@ -158,6 +170,11 @@ public class GameActivity extends Activity {
 			players.add(new Player(playerName, 2, player2Color, false));
 		}
 		return players;
+	}
+
+	public void PlaySoundEffect(int soundEffectId)
+	{
+		soundEffects.get(soundEffectId).PlaySoundEffect();
 	}
 
 	private void SetScoreText(Player player)
@@ -215,10 +232,30 @@ public class GameActivity extends Activity {
 	    return height;      
 	}
 	
-	public void Winner(Player player)
+	public void Winner(Victory victory)
 	{
-		SetScoreText(player);
-		playerWinnerTextView.setText(String.format("%s scored a goal!", player.playerName));
+		SetScoreText(victory.winner);
+
+		if (victory.victoryConditionEnum == VictoryConditionEnum.Goal) {
+			playerWinnerTextView.setText(String.format("%s scored a goal!", victory.winner.playerName));
+		}
+		else {
+			playerWinnerTextView.setText(String.format("%s won because the opponent ran out of moves!", victory.winner.playerName));
+		}
+
+		if (victory.winner.isAi)
+		{
+			PlaySoundEffect(R.raw.failure);
+		}
+		else {
+			PlaySoundEffect(R.raw.goodresult);
+		}
+
+		AlphaAnimation anim = new AlphaAnimation(0.5f, 0.0f);
+		anim.setDuration(Integer.MAX_VALUE);
+		anim.setRepeatMode(Animation.REVERSE);
+		gameView.setAnimation(anim);
+
 		playerWinnerTextView.setVisibility(View.VISIBLE);
 		playAgain.setVisibility(View.VISIBLE);
 		gameView.setEnabled(false);

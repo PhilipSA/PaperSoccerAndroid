@@ -20,7 +20,7 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:onClick="Quit"
-        android:text="Quit"
+        android:text="@string/quit_button_text"
         android:visibility="visible" />
 
     <Button
@@ -31,7 +31,7 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
         android:onClick="ResetGame"
-        android:text="Play again"
+        android:text="@string/play_again_button_text"
         android:visibility="invisible" />
 
     <TextView

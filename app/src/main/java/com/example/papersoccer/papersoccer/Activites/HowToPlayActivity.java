@@ -26,7 +26,7 @@ public class HowToPlayActivity extends AppCompatActivity {
         leftArrow.setVisibility(View.INVISIBLE);
 
         ViewPager mViewPager = (ViewPager)findViewById(R.id.viewpager);
-        ImageSliderAdapter adapterView = new ImageSliderAdapter(this);
+        VideoSliderAdapter adapterView = new VideoSliderAdapter(this, this);
         mViewPager.setAdapter(adapterView);
 
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {

@@ -8,7 +8,15 @@
     <string name="player_name">Player name</string>
     <string name="default_player_name">Player1</string>
 
+    <string name="howToPlayButtonText">How to play</string>
+
     <string name="banner_ad_unit_id">ca-app-pub-3940256099942544/6300978111</string>
 
     <string name="pref_difficultyLevelTypes_default">Medium</string>
+    <string name="singleplayer_button_text">Singleplayer</string>
+    <string name="settings_button_text">Settings</string>
+    <string name="local_multiplayer_button_text">Local multiplayer</string>
+    <string name="exit_button_text">Exit</string>
+    <string name="play_again_button_text">Play again</string>
+    <string name="quit_button_text">Quit</string>
 </resources>

@@ -19,4 +19,9 @@
     <string name="exit_button_text">Exit</string>
     <string name="play_again_button_text">Play again</string>
     <string name="quit_button_text">Quit</string>
+    <string name="game_victory_out_of_moves">won because the opponent ran out of moves!</string>
+    <string name="game_victory_scored_goal">scored a goal!</string>
+
+    <string name="game_partial_turn">turn</string>
+    <string name="game_partial_its">It\'s</string>
 </resources>

@@ -16,4 +16,8 @@
     <string name="default_player_name">Spelare1</string>
     <string name="quit_button_text">Bakåt</string>
     <string name="play_again_button_text">Spela igen</string>
+    <string name="game_victory_out_of_moves">vann för motspelare fick slut på drag!</string>
+    <string name="game_victory_scored_goal">gjorde mål!</string>
+    <string name="game_partial_turn">tur</string>
+    <string name="game_partial_its">Det är</string>
 </resources>

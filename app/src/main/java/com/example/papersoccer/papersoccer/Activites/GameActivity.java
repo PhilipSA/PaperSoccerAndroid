@@ -184,7 +184,7 @@ public class GameActivity extends Activity {
 
 	public void UpdateDrawData()
 	{
-		playerTurnTextView.setText(String.format("It's %s turn", gameHandler.currentPlayersTurn.playerName));
+		playerTurnTextView.setText(String.format("%s %s %s", getString(R.string.game_partial_its), gameHandler.currentPlayersTurn.playerName, getString(R.string.game_partial_turn)));
 		playerTurnTextView.setTextColor(gameHandler.currentPlayersTurn.playerColor);
 		gameView.UpdateBallPosition(gameHandler.nodeToCoords(gameHandler.ballNode), gameHandler.currentPlayersTurn);
 	}
@@ -237,10 +237,10 @@ public class GameActivity extends Activity {
 		SetScoreText(victory.winner);
 
 		if (victory.victoryConditionEnum == VictoryConditionEnum.Goal) {
-			playerWinnerTextView.setText(String.format("%s scored a goal!", victory.winner.playerName));
+			playerWinnerTextView.setText(String.format("%s %s", victory.winner.playerName, getString(R.string.game_victory_scored_goal)));
 		}
 		else {
-			playerWinnerTextView.setText(String.format("%s won because the opponent ran out of moves!", victory.winner.playerName));
+			playerWinnerTextView.setText(String.format("%s %s", victory.winner.playerName, getString(R.string.game_victory_out_of_moves)));
 		}
 
 		if (victory.winner.isAi)

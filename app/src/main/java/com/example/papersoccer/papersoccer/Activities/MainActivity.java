@@ -1,4 +1,4 @@
-package com.example.papersoccer.papersoccer.Activites;
+package com.example.papersoccer.papersoccer.Activities;
 
 import android.app.Activity;
 import android.content.Intent;

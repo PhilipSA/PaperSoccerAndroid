@@ -1,4 +1,4 @@
-package com.example.papersoccer.papersoccer.Activites;
+package com.example.papersoccer.papersoccer.Activities;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,11 +7,8 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ScaleDrawable;
-import android.os.Handler;
-import android.os.Looper;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -66,6 +63,10 @@ public class GameView extends View {
 	{
         super(context, attrs);
     }
+
+	public GameView(Context context, AttributeSet attrs, int defStyle) {
+		super(context, attrs, defStyle);
+	}
     
     public void UpdateBallPosition(float[] ballCoords, Player playerTurn)
     {

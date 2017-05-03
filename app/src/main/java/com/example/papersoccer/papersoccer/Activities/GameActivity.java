@@ -1,4 +1,4 @@
-package com.example.papersoccer.papersoccer.Activites;
+package com.example.papersoccer.papersoccer.Activities;
 
 import android.app.Activity;
 import android.content.Context;
@@ -33,7 +33,6 @@ import com.example.papersoccer.papersoccer.Sound.FXPlayer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
 
@@ -52,8 +51,6 @@ public class GameActivity extends Activity {
 
 	private int player1Color = Color.BLUE;
 	private int player2Color = Color.RED;
-
-	private Map<Integer, FXPlayer> soundEffects = new HashMap<>();
 
 	private int screenHeight;
 	private int screenWidth;
@@ -127,17 +124,14 @@ public class GameActivity extends Activity {
 		SetScoreText(players.get(0));
 		SetScoreText(players.get(1));
 
+		FXPlayer.InitSound(this);
+
         gameHandler = new GameHandler(this, gameView.gridSizeX, gameView.gridSizeY, DifficultyEnum.valueOf(difficulty), players, isMultiplayer);
         UpdateDrawData();
 		
 		playAgain = (Button)findViewById(R.id.playagainButton);
 
 		gameHandler.UpdateGameState();
-
-		soundEffects.put(R.raw.soccerkick, new FXPlayer(this, R.raw.soccerkick));
-		soundEffects.put(R.raw.goodresult, new FXPlayer(this, R.raw.goodresult));
-		soundEffects.put(R.raw.failure, new FXPlayer(this, R.raw.failure));
-		soundEffects.put(R.raw.bounce, new FXPlayer(this, R.raw.bounce));
 
 		gameView.setOnTouchListener(new View.OnTouchListener()
         {
@@ -170,11 +164,6 @@ public class GameActivity extends Activity {
 			players.add(new Player(playerName, 2, player2Color, false));
 		}
 		return players;
-	}
-
-	public void PlaySoundEffect(int soundEffectId)
-	{
-		soundEffects.get(soundEffectId).PlaySoundEffect();
 	}
 
 	private void SetScoreText(Player player)
@@ -245,10 +234,10 @@ public class GameActivity extends Activity {
 
 		if (victory.winner.isAi)
 		{
-			PlaySoundEffect(R.raw.failure);
+			FXPlayer.playSound(R.raw.failure);
 		}
 		else {
-			PlaySoundEffect(R.raw.goodresult);
+			FXPlayer.playSound(R.raw.goodresult);
 		}
 
 		AlphaAnimation anim = new AlphaAnimation(0.5f, 0.0f);

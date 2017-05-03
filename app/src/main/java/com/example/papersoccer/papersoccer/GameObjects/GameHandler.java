@@ -6,7 +6,7 @@ import java.util.HashSet;
 import java.util.UUID;
 
 import com.example.papersoccer.papersoccer.AI.GameAIHandler;
-import com.example.papersoccer.papersoccer.Activites.GameActivity;
+import com.example.papersoccer.papersoccer.Activities.GameActivity;
 import com.example.papersoccer.papersoccer.Enums.DifficultyEnum;
 import com.example.papersoccer.papersoccer.Enums.NodeTypeEnum;
 import com.example.papersoccer.papersoccer.Enums.VictoryConditionEnum;
@@ -14,6 +14,7 @@ import com.example.papersoccer.papersoccer.GameObjects.Move.PartialMove;
 import com.example.papersoccer.papersoccer.GameObjects.Move.PossibleMove;
 import com.example.papersoccer.papersoccer.Helpers.MathHelper;
 import com.example.papersoccer.papersoccer.R;
+import com.example.papersoccer.papersoccer.Sound.FXPlayer;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
@@ -193,10 +194,10 @@ public class GameHandler implements Cloneable {
 		MakePartialMove(partialMove);
 
 		if(ballNode.nodeType != NodeTypeEnum.Empty) {
-			gameActivity.PlaySoundEffect(R.raw.bounce);
+			FXPlayer.playSound(R.raw.bounce);
 		}
 		else {
-			gameActivity.PlaySoundEffect(R.raw.soccerkick);
+			FXPlayer.playSound(R.raw.soccerkick);
 		}
 
 		DrawPartialMove(partialMove, partialMove.madeTheMove.playerColor);

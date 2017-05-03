@@ -1,7 +1,18 @@
 package com.example.papersoccer.papersoccer.Sound;
 
 import android.app.Activity;
+import android.content.Context;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.media.SoundPool;
+import android.os.Build;
+
+import com.example.papersoccer.papersoccer.R;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import static android.content.Context.AUDIO_SERVICE;
 
 /**
  * Created by Admin on 2017-04-24.
@@ -9,35 +20,40 @@ import android.media.MediaPlayer;
 
 public class FXPlayer
 {
-    public MediaPlayer mediaPlayer;
-    int soundId;
-    Activity activity;
+    static SoundPool soundPool;
+    static Map<Integer, Integer> soundMap;
+    static AudioManager amg;
 
-    public FXPlayer(Activity activity, int soundId)
-    {
-        this.activity = activity;
-        this.soundId = soundId;
-    }
+    public static void InitSound(Activity activity) {
 
-    public void stop() {
-        if (mediaPlayer != null) {
-            mediaPlayer.release();
-            mediaPlayer = null;
+        int maxStreams = 1;
+        Context mContext = activity.getApplicationContext();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            soundPool = new SoundPool.Builder()
+                    .setMaxStreams(maxStreams)
+                    .build();
+        } else {
+            soundPool = new SoundPool(maxStreams, AudioManager.STREAM_MUSIC, 0);
         }
+
+        soundMap = new HashMap<>();
+        // fill your sounds
+        soundMap.put(R.raw.bounce, soundPool.load(mContext, R.raw.bounce, 1));
+        soundMap.put(R.raw.soccerkick, soundPool.load(mContext, R.raw.soccerkick, 2));
+        soundMap.put(R.raw.failure, soundPool.load(mContext, R.raw.failure, 1));
+        soundMap.put(R.raw.goodresult, soundPool.load(mContext, R.raw.goodresult, 1));
+
+        amg = (AudioManager)mContext.getSystemService(Context.AUDIO_SERVICE);
     }
 
-    public void PlaySoundEffect()
-    {
-        stop();
+    public static void playSound(int sound) {
 
-        mediaPlayer = MediaPlayer.create(activity, soundId);
-        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-            @Override
-            public void onCompletion(MediaPlayer mediaPlayer) {
-                stop();
-            }
-        });
+        soundPool.play(soundMap.get(sound), 1, 1, 1, 0, 1f);
+    }
 
-        mediaPlayer.start();
+    public final void cleanUpIfEnd() {
+        soundMap = null;
+        soundPool.release();
+        soundPool = null;
     }
 }

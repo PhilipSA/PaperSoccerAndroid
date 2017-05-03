@@ -1,4 +1,4 @@
-package com.example.papersoccer.papersoccer.Activites;
+package com.example.papersoccer.papersoccer.Activities;
 
 import android.app.Activity;
 import android.content.Context;
@@ -11,7 +11,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.VideoView;
 
-import com.bumptech.glide.Glide;
 import com.example.papersoccer.papersoccer.R;
 
 public class VideoSliderAdapter extends PagerAdapter {

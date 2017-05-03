@@ -4,12 +4,12 @@
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/football_field"
-    tools:context=".Activites.GameActivity" >
+    tools:context="${relativePackage}.${activityClass}" >
 
-    <com.example.papersoccer.papersoccer.Activites.GameView
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-    android:id="@+id/gameview"
+    <com.example.papersoccer.papersoccer.Activities.GameView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/gameview"
     />
 
     <Button

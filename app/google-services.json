@@ -10,7 +10,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:506696839848:android:0c9b6c5d3d9d5f55",
         "android_client_info": {
-          "package_name": "com.example.papersoccer.papersoccer"
+          "package_name": "com.ps.simplepapersoccer"
         }
       },
       "oauth_client": [
@@ -18,7 +18,7 @@
           "client_id": "506696839848-nr3odpb9uvqt0kumd9nvm8meqdt9q216.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.example.papersoccer.papersoccer",
+            "package_name": "com.ps.simplepapersoccer",
             "certificate_hash": "4b578d21e713b51923e8b32cdb8934e53c660d2e"
           }
         },

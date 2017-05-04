@@ -14,10 +14,6 @@ import java.util.Map;
 
 import static android.content.Context.AUDIO_SERVICE;
 
-/**
- * Created by Admin on 2017-04-24.
- */
-
 public class FXPlayer
 {
     static SoundPool soundPool;

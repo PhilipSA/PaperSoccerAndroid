@@ -6,7 +6,7 @@
         <item>@string/hard_difficulty</item>
         <item>@string/veryHard_difficulty</item>
     </string-array>
-    <string-array name="pref_difficulty_level_values">
+    <string-array name="pref_difficulty_level_values" translatable="false">
         <item>Easy</item>
         <item>Medium</item>
         <item>Hard</item>

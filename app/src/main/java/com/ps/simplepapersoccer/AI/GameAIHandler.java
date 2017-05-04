@@ -17,19 +17,19 @@ public class GameAIHandler
 
 		if (difficulty == DifficultyEnum.Easy)
 		{
-			gameAI = new RandomAI();
+			gameAI = new EuclideanAI();
 		}
 		else if (difficulty == DifficultyEnum.Medium)
 		{
-			gameAI = new EuclideanAI();
+			gameAI = new MinimaxAI(2);
 		}
 		else if (difficulty == DifficultyEnum.Hard)
 		{
-			gameAI = new MinimaxAI(3);
+			gameAI = new MinimaxAI(5);
 		}
 		else if (difficulty == DifficultyEnum.VeryHard)
 		{
-			gameAI = new MinimaxAI(7);
+			gameAI = new MinimaxAI(10);
 		}
 	}
 

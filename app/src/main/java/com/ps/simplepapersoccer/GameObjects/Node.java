@@ -2,6 +2,7 @@ package com.ps.simplepapersoccer.GameObjects;
 
 import com.ps.simplepapersoccer.Enums.NodeTypeEnum;
 
+import java.util.HashSet;
 import java.util.UUID;
 
 public class Node
@@ -10,6 +11,19 @@ public class Node
 	public int xCord;
 	public int yCord;
 	public NodeTypeEnum nodeType;
+	public HashSet<UUID> neighbors = new HashSet<>();
+
+	public void RemoveNeighborPair(Node other)
+	{
+		neighbors.remove(other.id);
+		other.neighbors.remove(this.id);
+	}
+
+	public void AddNeighborPair(Node other)
+	{
+		neighbors.add(other.id);
+		other.neighbors.add(this.id);
+	}
 	
 	Node(int x, int y, NodeTypeEnum nodeType)
 	{
@@ -25,5 +39,6 @@ public class Node
 		this.xCord = node.xCord;
 		this.yCord = node.yCord;
 		this.nodeType = node.nodeType;
+		this.neighbors = node.neighbors;
 	}
 }

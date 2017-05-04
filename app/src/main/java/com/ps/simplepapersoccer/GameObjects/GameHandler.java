@@ -15,14 +15,11 @@ import com.ps.simplepapersoccer.GameObjects.Move.PossibleMove;
 import com.ps.simplepapersoccer.Helpers.MathHelper;
 import com.ps.simplepapersoccer.R;
 import com.ps.simplepapersoccer.Sound.FXPlayer;
-import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Multimap;
 
-public class GameHandler implements Cloneable {
+public class GameHandler {
 
 	public HashMap<UUID, Node> nodeHashMap = new HashMap<>();
-	private Multimap<UUID, UUID> connectedNodes = HashMultimap.create();
 
 	public Player player1;
 	public Player player2;
@@ -104,40 +101,40 @@ public class GameHandler implements Cloneable {
 
 		player1.goalNode = player1Goalnode;
 		player2.goalNode = player2Goalnode;
+
+		GenerateAllNeighbors();
 	}
 
-	public HashSet<PossibleMove> allPossibleMovesFromNode(Node currentBallNode)
+	public void GenerateAllNeighbors()
+	{
+		for (Node node : nodeHashMap.values()) {
+			for (Node otherNode : nodeHashMap.values()) {
+				if (node.id == otherNode.id) continue;
+
+				double euclideanDistance = MathHelper.euclideanDistance(node.xCord, otherNode.xCord, node.yCord, otherNode.yCord);
+
+				if (node.nodeType == NodeTypeEnum.Wall && otherNode.nodeType == NodeTypeEnum.Wall) {
+					if (node.yCord != otherNode.yCord && otherNode.xCord != node.xCord && euclideanDistance < 2) {
+						node.AddNeighborPair(otherNode);
+					} else {
+						continue;
+					}
+				}
+				if (euclideanDistance < 2) node.AddNeighborPair(otherNode);
+			}
+		}
+	}
+
+	public HashSet<PossibleMove> allPossibleMovesFromNode(Node node)
 	{
 		HashSet<PossibleMove> possibleMoves = new HashSet<>();
 
-		for (Node n1 : nodeHashMap.values())
-		{
-			if (existsNodeConnection(currentBallNode, n1)) continue;
-			if (n1.id == currentBallNode.id) continue;
-
-			double euclideanDistance = MathHelper.euclideanDistance(currentBallNode.xCord, n1.xCord, currentBallNode.yCord, n1.yCord);
-
-			if(currentBallNode.nodeType == NodeTypeEnum.Wall && n1.nodeType == NodeTypeEnum.Wall)
-			{
-				if (currentBallNode.yCord != n1.yCord && n1.xCord != currentBallNode.xCord && euclideanDistance < 2)
-				{
-					possibleMoves.add(new PossibleMove(currentBallNode, n1));
-				}
-				else
-				{
-					continue;
-				}
-			}
-			if (euclideanDistance < 2) possibleMoves.add(new PossibleMove(currentBallNode, n1));
+		for (UUID uuid : node.neighbors) {
+			Node otherNode = nodeHashMap.get(uuid);
+			possibleMoves.add(new PossibleMove(node, otherNode));
 		}
-		return possibleMoves;
-	}
 
-	private boolean existsNodeConnection(Node node1, Node node2)
-	{
-		if (connectedNodes.get(node1.id).contains(node2.id)) return true;
-		if (connectedNodes.get(node2.id).contains(node1.id)) return true;
-		return false;
+		return possibleMoves;
 	}
 
 	public void UpdateGameState()
@@ -208,9 +205,9 @@ public class GameHandler implements Cloneable {
     {
 		PartialMove partialMove = Iterables.getLast(allPartialMoves);
 
-		connectedNodes.remove(partialMove.newNode.id, partialMove.oldNode.id);
+		partialMove.newNode.AddNeighborPair(partialMove.oldNode);
 
-		findNodeById(partialMove.newNode.id).nodeType = partialMove.newNode.nodeType;
+		nodeHashMap.get(partialMove.newNode.id).nodeType = partialMove.newNode.nodeType;
 
 		ballNode = partialMove.oldNode;
 
@@ -223,7 +220,7 @@ public class GameHandler implements Cloneable {
 	{
 		allPartialMoves.add(new PartialMove(new Node(partialMove.oldNode), new Node(partialMove.newNode), partialMove.madeTheMove));
 
-		connectedNodes.put(partialMove.newNode.id, partialMove.oldNode.id);
+		partialMove.newNode.RemoveNeighborPair(partialMove.oldNode);
 
 		if (partialMove.oldNode.nodeType == NodeTypeEnum.Empty)
 			partialMove.oldNode.nodeType = NodeTypeEnum.BounceAble;
@@ -254,7 +251,7 @@ public class GameHandler implements Cloneable {
 			}
 			return new Victory(currentPlayersTurn, VictoryConditionEnum.Goal);
 		}	
-		else if (allPossibleMovesFromNode(node).size() == 0)
+		else if (node.neighbors.size() == 0)
 		{
 			return new Victory(getOpponent(currentPlayersTurn), VictoryConditionEnum.OpponentOutOfMoves);
 		}
@@ -294,11 +291,6 @@ public class GameHandler implements Cloneable {
 	public void addNodeToNodeMap(Node node)
 	{
 		nodeHashMap.put(node.id, node);
-	}
-
-	public Node findNodeById(UUID id)
-	{
-		return nodeHashMap.get(id);
 	}
 	
 	//Converts node coordinates to screen coordinates

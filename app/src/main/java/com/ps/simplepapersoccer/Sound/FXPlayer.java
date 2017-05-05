@@ -13,11 +13,11 @@ import java.util.Map;
 
 public class FXPlayer
 {
-    static SoundPool soundPool;
-    static Map<Integer, Integer> soundMap;
-    static AudioManager amg;
+    private SoundPool soundPool;
+    private Map<Integer, Integer> soundMap;
+    private AudioManager audioManager;
 
-    public static void InitSound(Activity activity) {
+    public FXPlayer(Activity activity) {
 
         int maxStreams = 1;
         Context mContext = activity.getApplicationContext();
@@ -36,10 +36,10 @@ public class FXPlayer
         soundMap.put(R.raw.failure, soundPool.load(mContext, R.raw.failure, 1));
         soundMap.put(R.raw.goodresult, soundPool.load(mContext, R.raw.goodresult, 1));
 
-        amg = (AudioManager)mContext.getSystemService(Context.AUDIO_SERVICE);
+        audioManager = (AudioManager)mContext.getSystemService(Context.AUDIO_SERVICE);
     }
 
-    public static void playSound(int sound) {
+    public void playSound(int sound) {
 
         soundPool.play(soundMap.get(sound), 1, 1, 1, 0, 1f);
     }

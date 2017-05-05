@@ -23,6 +23,7 @@ import android.widget.TextView;
 import com.ps.simplepapersoccer.Enums.DifficultyEnum;
 import com.ps.simplepapersoccer.Enums.VictoryConditionEnum;
 import com.ps.simplepapersoccer.GameObjects.GameHandler;
+import com.ps.simplepapersoccer.GameObjects.Move.PartialMove;
 import com.ps.simplepapersoccer.GameObjects.Node;
 import com.ps.simplepapersoccer.GameObjects.Player;
 import com.ps.simplepapersoccer.GameObjects.PlayerActivityData;
@@ -55,7 +56,9 @@ public class GameActivity extends Activity {
 	private int screenHeight;
 	private int screenWidth;
 
-	private GameHandler gameHandler;
+	public FXPlayer fxPlayer;
+
+	public GameHandler gameHandler;
 	
 	public String myName;
 
@@ -84,7 +87,6 @@ public class GameActivity extends Activity {
 		myName = playerName;
 		
 		gameView = (GameView)findViewById(R.id.gameview);
-		gameView.SetValues(GameActivity.getWidth(this), GameActivity.getHeight(this), gameView.gridSizeX, gameView.gridSizeY);
 		
 		player1NameTextView = (TextView)findViewById(R.id.player1TextView);
 		player2NameTextView = (TextView)findViewById(R.id.player2TextView);
@@ -124,7 +126,7 @@ public class GameActivity extends Activity {
 		SetScoreText(players.get(0));
 		SetScoreText(players.get(1));
 
-		FXPlayer.InitSound(this);
+		fxPlayer = new FXPlayer(this);
 
         gameHandler = new GameHandler(this, gameView.gridSizeX, gameView.gridSizeY, DifficultyEnum.valueOf(difficulty), players, isMultiplayer);
         UpdateDrawData();
@@ -132,6 +134,8 @@ public class GameActivity extends Activity {
 		playAgain = (Button)findViewById(R.id.playagainButton);
 
 		gameHandler.UpdateGameState();
+
+		gameView.SetValues(GameActivity.getWidth(this), GameActivity.getHeight(this), gameView.gridSizeX, gameView.gridSizeY, this);
 
 		gameView.setOnTouchListener(new View.OnTouchListener()
         {
@@ -175,7 +179,7 @@ public class GameActivity extends Activity {
 	{
 		playerTurnTextView.setText(String.format("%s %s %s", getString(R.string.game_partial_its), gameHandler.currentPlayersTurn.playerName, getString(R.string.game_partial_turn)));
 		playerTurnTextView.setTextColor(gameHandler.currentPlayersTurn.playerColor);
-		gameView.UpdateBallPosition(gameHandler.nodeToCoords(gameHandler.ballNode), gameHandler.currentPlayersTurn);
+		gameView.UpdateBallPosition(nodeToCoords(gameHandler.ballNode), gameHandler.currentPlayersTurn);
 	}
 	
 	public void AddNewLineToDraw (float oldNodeCoords, float oldNodeCoords2, float newLineCoords, float newLineCoords2, int color)
@@ -184,8 +188,23 @@ public class GameActivity extends Activity {
 		UpdateDrawData();
 		gameView.invalidate();
 	}
-	
-	//Compability
+
+	public void DrawPartialMove(PartialMove move, int playerColor)
+	{
+		try {
+			float[] newLineCoords = nodeToCoords(move.newNode);
+			float[] oldNodeCoords = nodeToCoords(move.oldNode);
+			AddNewLineToDraw(oldNodeCoords[0], oldNodeCoords[1], newLineCoords[0], newLineCoords[1], playerColor);
+
+			UpdateDrawData();
+			gameView.invalidate();
+		}
+		catch(Exception e)
+		{
+			return;
+		}
+	}
+
 	public static int getWidth(Context mContext)
     {
 	    int width=0;
@@ -202,8 +221,7 @@ public class GameActivity extends Activity {
 	    }
 	    return width;
 	}
-	
-	//Compability
+
 	public static int getHeight(Context mContext)
     {
 	    int height=0;
@@ -234,10 +252,10 @@ public class GameActivity extends Activity {
 
 		if (victory.winner.isAi)
 		{
-			FXPlayer.playSound(R.raw.failure);
+			fxPlayer.playSound(R.raw.failure);
 		}
 		else {
-			FXPlayer.playSound(R.raw.goodresult);
+			fxPlayer.playSound(R.raw.goodresult);
 		}
 
 		AlphaAnimation anim = new AlphaAnimation(0.5f, 0.0f);
@@ -260,9 +278,19 @@ public class GameActivity extends Activity {
 		     }
 		});		
 	}
+
+	//Converts node coordinates to screen coordinates
+	public float[] nodeToCoords(Node n)
+	{
+		float[] coords = new float[2];
+		coords[0] = n.xCord * gameView.gridXdraw + gameView.leftEdge;
+		coords[1] = n.yCord * gameView.gridYdraw + gameView.topEdge;
+		return coords;
+	}
 	
 	public void Quit(View view)
 	{
+		fxPlayer.cleanUpIfEnd();
 		finish();
 	}
 

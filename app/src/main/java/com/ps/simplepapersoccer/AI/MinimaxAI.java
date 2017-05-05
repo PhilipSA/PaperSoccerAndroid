@@ -21,7 +21,6 @@ import java.util.HashSet;
 public class MinimaxAI implements IGameAI
 {
     private int searchDepth = 7;
-    private HashMap<GameHandler, Double> cachedValues;
 
     private class MoveData implements Comparable<MoveData>
     {
@@ -75,20 +74,12 @@ public class MinimaxAI implements IGameAI
     @Override
     public PartialMove MakeMove(GameHandler gameHandler)
     {
-        cachedValues = new HashMap<>();
-        long timer = System.nanoTime();
         MoveData bestMove = alphaBetaPruning(searchDepth, gameHandler, gameHandler.currentPlayersTurn, -50000, 50000);
-        long timerStop = System.nanoTime() - timer;
         return bestMove.returnMove;
     }
 
     private MoveData alphaBetaPruning(int currentDepth, GameHandler state, Player maximizingPlayer, double alpha, double beta)
     {
-        /*if (cachedValues.contains(lastMoveData) && lastMoveData.depth == currentDepth)
-        {
-            return lastMoveData;
-        }*/
-
         if (currentDepth == 0 || state.getWinner(state.ballNode) != null)
         {
             return new MoveData(minmaxEvaluation(state, maximizingPlayer));

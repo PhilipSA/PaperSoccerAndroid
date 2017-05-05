@@ -1,7 +1,9 @@
 package com.ps.simplepapersoccer.Activities;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -13,12 +15,15 @@ import android.util.AttributeSet;
 import android.view.View;
 
 import com.ps.simplepapersoccer.GameObjects.LinesToDraw;
+import com.ps.simplepapersoccer.GameObjects.Move.PossibleMove;
+import com.ps.simplepapersoccer.GameObjects.Node;
 import com.ps.simplepapersoccer.GameObjects.Player;
 import com.ps.simplepapersoccer.R;
 
 public class GameView extends View {
 
  	public List<LinesToDraw> drawLines = new ArrayList<LinesToDraw>();
+	private GameActivity gameActivity;
     
 	private Canvas canvas;
 	private Paint paint;
@@ -75,7 +80,7 @@ public class GameView extends View {
     	this.playerTurn = playerTurn;
     }
     
-    public void SetValues(int screenWidth, int screenHeight, int gridSizeX, int gridSizeY)
+    public void SetValues(int screenWidth, int screenHeight, int gridSizeX, int gridSizeY, GameActivity gameActivity)
     {
         topEdge = screenHeight/9;
 		leftEdge = screenWidth/leftEdgeMargin;
@@ -91,6 +96,8 @@ public class GameView extends View {
 		
 		this.middlePointX = (rightEdge+leftEdge)/2;
 		this.middlePointY = (bottomEdge+topEdge)/2;
+
+		this.gameActivity = gameActivity;
 		
 		this.invalidate();
     }
@@ -130,9 +137,10 @@ public class GameView extends View {
 			}
 		}
 
-
 		DrawGoal(topEdge, paint, Color.RED);
 		DrawGoal(bottomEdge, paint, Color.BLUE);
+
+		DrawPossibleMoves(paint);
 		
 		paint.setColor(Color.BLACK);
 		paint.setStrokeWidth(sideLineStrokeWidth);
@@ -156,6 +164,16 @@ public class GameView extends View {
 		image = new ScaleDrawable(image, 0, ballSize, ballSize).getDrawable();
 		image.setBounds((int)ballX-ballSize/2, (int)ballY-ballSize/2, (int)ballX+ballSize/2, (int)ballY+ballSize/2);
 		image.draw(canvas);
+	}
+
+	private void DrawPossibleMoves(Paint paint)
+	{
+		paint.setColor(gameActivity.gameHandler.currentPlayersTurn.playerColor);
+		if (gameActivity.gameHandler.aiTurn) return;
+		for (PossibleMove move : gameActivity.gameHandler.allPossibleMovesFromNode(gameActivity.gameHandler.ballNode)) {
+			float[] coords = gameActivity.nodeToCoords(move.newNode);
+			canvas.drawCircle(coords[0], coords[1], 20, paint);
+		}
 	}
 
 	private void DrawGoalLines(float edge, Paint paint, float edgeMargin, int color)

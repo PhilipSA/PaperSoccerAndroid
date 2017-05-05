@@ -36,7 +36,7 @@ public class GameHandler {
 	private GameAIHandler gameAIHandler;
 
 	private boolean isMultiplayer;
-	private boolean aiTurn = false;
+	public boolean aiTurn = false;
 	
 	public GameHandler(final GameActivity gameActivity, int gridX, int gridY, DifficultyEnum difficulty, ArrayList<Player> players, boolean isMultiplayer)
 	{
@@ -153,22 +153,6 @@ public class GameHandler {
 		};
 	}
 
-	public void DrawPartialMove(PartialMove move, int playerColor)
-	{
-		try {
-			float[] newLineCoords = nodeToCoords(move.newNode);
-			float[] oldNodeCoords = nodeToCoords(move.oldNode);
-			gameActivity.AddNewLineToDraw(oldNodeCoords[0], oldNodeCoords[1], newLineCoords[0], newLineCoords[1], playerColor);
-
-			gameActivity.UpdateDrawData();
-			gameActivity.gameView.invalidate();
-		}
-		catch(Exception e)
-		{
-			return;
-		}
-	}
-
 	public void PlayerMakeMove(Node node, Player player)
 	{
 		PartialMove partialMove = new PartialMove(ballNode, node, player);
@@ -191,13 +175,13 @@ public class GameHandler {
 		MakePartialMove(partialMove);
 
 		if(ballNode.nodeType != NodeTypeEnum.Empty) {
-			FXPlayer.playSound(R.raw.bounce);
+			gameActivity.fxPlayer.playSound(R.raw.bounce);
 		}
 		else {
-			FXPlayer.playSound(R.raw.soccerkick);
+			gameActivity.fxPlayer.playSound(R.raw.soccerkick);
 		}
 
-		DrawPartialMove(partialMove, partialMove.madeTheMove.playerColor);
+		gameActivity.DrawPartialMove(partialMove, partialMove.madeTheMove.playerColor);
 		++numberOfTurns;
 	}
 
@@ -291,15 +275,6 @@ public class GameHandler {
 	public void addNodeToNodeMap(Node node)
 	{
 		nodeHashMap.put(node.id, node);
-	}
-	
-	//Converts node coordinates to screen coordinates
-	public float[] nodeToCoords(Node n)
-	{
-		float[] coords = new float[2];
-		coords[0] = n.xCord * gameActivity.gameView.gridXdraw + gameActivity.gameView.leftEdge;
-		coords[1] = n.yCord * gameActivity.gameView.gridYdraw + gameActivity.gameView.topEdge;
-		return coords;
 	}
 
 	public Player getOpponent(Player myPlayer)

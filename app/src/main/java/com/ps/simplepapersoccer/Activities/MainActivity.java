@@ -53,5 +53,6 @@ public class MainActivity extends Activity {
 	public void ExitClick(View view)
 	{
 		finish();
+		System.exit(0);
 	}
 }

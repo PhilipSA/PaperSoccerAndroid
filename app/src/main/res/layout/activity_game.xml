@@ -36,24 +36,16 @@
 
     <TextView
         android:id="@+id/player2TextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:text="Player2"
-        style="@style/PlayerNameOverlayText"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:background="@drawable/drawable_back"
-        android:layout_marginLeft="11dp"
-        android:layout_marginStart="11dp"
-        android:layout_alignParentTop="true"
-        android:layout_toRightOf="@+id/quitButton"
-        android:layout_toEndOf="@+id/quitButton" />
+        style="@style/PlayerNameTextView"
+        android:layout_alignParentTop="true" />
 
     <TextView
         android:id="@+id/player2ScoreTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Player2: 0"
-        android:textColor="#FFFFFF"
+        android:textColor="@color/primary_text_color"
         android:textSize="20dp"
         android:layout_above="@+id/playerWinnerTextview"
         android:layout_alignParentRight="true"
@@ -64,7 +56,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Player1: 0"
-        android:textColor="#FFFFFF"
+        android:textColor="@color/primary_text_color"
         android:textSize="20dp"
         android:layout_below="@+id/player2TextView"
         android:layout_alignParentLeft="true"
@@ -90,14 +82,9 @@
 
     <TextView
         android:id="@+id/player1TextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
         android:text="Player1"
-        style="@style/PlayerNameOverlayText"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:background="@drawable/drawable_back"/>
+        style="@style/PlayerNameTextView"/>
 
     <TextView
         android:id="@+id/playerTurnTextView"

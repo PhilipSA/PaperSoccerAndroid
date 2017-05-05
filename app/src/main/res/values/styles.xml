@@ -8,13 +8,6 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
-    <style name="PlayerNameOverlayText">
-        <item name="android:paddingTop">4px</item>
-        <item name="android:paddingBottom">4px</item>
-        <item name="android:textColor">@color/primary_text_color</item>
-        <item name="android:textSize">35sp</item>
-    </style>
-
     <style name="MainMenuButton">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">50dp</item>
@@ -24,6 +17,17 @@
         <item name="android:shadowRadius">5.5</item>
         <item name="android:shadowDx">1.5</item>
         <item name="android:shadowDy">1.5</item>
+    </style>
+
+    <style name="PlayerNameTextView">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_centerHorizontal">true</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+        <item name="android:background">@drawable/drawable_back</item>
+        <item name="android:padding">4dp</item>
+        <item name="android:textColor">@color/primary_text_color</item>
+        <item name="android:textSize">35sp</item>
     </style>
 
 </resources>

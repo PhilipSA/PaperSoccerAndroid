@@ -11,7 +11,7 @@
     <style name="PlayerNameOverlayText">
         <item name="android:paddingTop">4px</item>
         <item name="android:paddingBottom">4px</item>
-        <item name="android:textColor">#ffffffff</item>
+        <item name="android:textColor">@color/primary_text_color</item>
         <item name="android:textSize">35sp</item>
     </style>
 
@@ -19,8 +19,8 @@
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">50dp</item>
         <item name="android:layout_marginTop">37dp</item>
-        <item name="android:background">#04ab1d</item>
-        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:background">@drawable/drawable_button_background</item>
+        <item name="android:textColor">@color/primary_text_color</item>
         <item name="android:shadowRadius">5.5</item>
         <item name="android:shadowDx">1.5</item>
         <item name="android:shadowDy">1.5</item>

@@ -3,7 +3,7 @@
     android:animateLayoutChanges="true"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/football_field"
+    android:background="@drawable/drawable_background"
     tools:context="${relativePackage}.${activityClass}" >
 
     <com.ps.simplepapersoccer.Activities.GameView

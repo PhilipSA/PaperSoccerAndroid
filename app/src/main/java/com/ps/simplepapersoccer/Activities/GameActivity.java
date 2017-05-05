@@ -129,13 +129,13 @@ public class GameActivity extends Activity {
 		fxPlayer = new FXPlayer(this);
 
         gameHandler = new GameHandler(this, gameView.gridSizeX, gameView.gridSizeY, DifficultyEnum.valueOf(difficulty), players, isMultiplayer);
-        UpdateDrawData();
 		
 		playAgain = (Button)findViewById(R.id.playagainButton);
 
 		gameHandler.UpdateGameState();
 
 		gameView.SetValues(GameActivity.getWidth(this), GameActivity.getHeight(this), gameView.gridSizeX, gameView.gridSizeY, this);
+		UpdateDrawData();
 
 		gameView.setOnTouchListener(new View.OnTouchListener()
         {

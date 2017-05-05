@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:ads="http://schemas.android.com/apk/res-auto"
-    android:background="@drawable/football_field"
+    android:background="@drawable/drawable_background"
     tools:context="${relativePackage}.${activityClass}">
 
     <Button

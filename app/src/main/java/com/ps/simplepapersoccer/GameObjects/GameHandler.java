@@ -37,6 +37,11 @@ public class GameHandler {
 
 	private boolean isMultiplayer;
 	public boolean aiTurn = false;
+
+	@Override
+	public int hashCode() {
+		return nodeHashMap.hashCode() ^ currentPlayersTurn.hashCode() ^ ballNode.hashCode();
+	}
 	
 	public GameHandler(final GameActivity gameActivity, int gridX, int gridY, DifficultyEnum difficulty, ArrayList<Player> players, boolean isMultiplayer)
 	{

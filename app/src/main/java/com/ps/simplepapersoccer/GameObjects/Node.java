@@ -13,6 +13,11 @@ public class Node
 	public NodeTypeEnum nodeType;
 	public HashSet<UUID> neighbors = new HashSet<>();
 
+	@Override
+	public int hashCode() {
+		return id.hashCode() ^ nodeType.hashCode() ^ neighbors.hashCode();
+	}
+
 	public void RemoveNeighborPair(Node other)
 	{
 		neighbors.remove(other.id);

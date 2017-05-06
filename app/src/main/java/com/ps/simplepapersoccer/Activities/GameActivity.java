@@ -153,7 +153,7 @@ public class GameActivity extends Activity {
 			}
 		});
 
-	} //OnCreate
+	}
 
 	private ArrayList<Player> assignPlayerAndAi(String difficulty, String playerName)
 	{

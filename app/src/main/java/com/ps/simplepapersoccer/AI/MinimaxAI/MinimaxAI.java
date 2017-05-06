@@ -1,9 +1,5 @@
-package com.ps.simplepapersoccer.AI;
+package com.ps.simplepapersoccer.AI.MinimaxAI;
 
-import android.support.annotation.NonNull;
-
-import com.google.common.base.Equivalence;
-import com.google.common.base.Stopwatch;
 import com.ps.simplepapersoccer.AI.Abstraction.IGameAI;
 import com.ps.simplepapersoccer.Enums.SortOrderEnum;
 import com.ps.simplepapersoccer.GameObjects.GameHandler;
@@ -16,55 +12,10 @@ import com.ps.simplepapersoccer.Helpers.MathHelper;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 
 public class MinimaxAI implements IGameAI
 {
     private int searchDepth = 7;
-
-    private class MoveData implements Comparable<MoveData>
-    {
-        public double returnValue;
-        public PartialMove returnMove;
-        public int depth;
-
-        public MoveData(double returnValue)
-        {
-            this.returnValue = returnValue;
-        }
-
-        public MoveData(PartialMove returnMove, int depth) {
-            this.returnMove = returnMove;
-            this.depth = depth;
-        }
-
-        @Override
-        public int compareTo(MoveData item) {
-            if (this.returnValue < item.returnValue) {
-                return -1;
-            }
-            else if(this.returnValue > item.returnValue){
-                return 1;
-            }
-
-            return 0;
-        }
-
-        @Override
-        public boolean equals(Object object) {
-            if (object == null) return false;
-            if (object.getClass() != getClass()) return false;
-            MoveData other = (MoveData)object;
-            if (!returnMove.equals(other.returnMove)) return false;
-            if (!(depth != other.depth)) return false;
-            return true;
-        }
-
-        @Override
-        public int hashCode() {
-            return returnMove.hashCode() ^ depth;
-        }
-    }
 
     public MinimaxAI(int searchDepth)
     {
@@ -74,12 +25,17 @@ public class MinimaxAI implements IGameAI
     @Override
     public PartialMove MakeMove(GameHandler gameHandler)
     {
+        long time = System.nanoTime();
         MoveData bestMove = alphaBetaPruning(searchDepth, gameHandler, gameHandler.currentPlayersTurn, -50000, 50000);
+        long stopTime = System.nanoTime() - time;
         return bestMove.returnMove;
+
     }
 
     private MoveData alphaBetaPruning(int currentDepth, GameHandler state, Player maximizingPlayer, double alpha, double beta)
     {
+        double alphaOrig = alpha;
+
         if (currentDepth == 0 || state.getWinner(state.ballNode) != null)
         {
             return new MoveData(minmaxEvaluation(state, maximizingPlayer));
@@ -107,9 +63,10 @@ public class MinimaxAI implements IGameAI
                 if (beta <= alpha) {
                     bestMove.returnValue = beta;
                     bestMove.returnMove = null;
-                    return bestMove; // pruning
+                    break; // pruning
                 }
             }
+
             return bestMove;
         }
         else
@@ -132,9 +89,10 @@ public class MinimaxAI implements IGameAI
                 if (beta <= alpha) {
                     bestMove.returnValue = alpha;
                     bestMove.returnMove = null;
-                    return bestMove; // pruning
+                    break; // pruning
                 }
             }
+
             return bestMove;
         }
     }

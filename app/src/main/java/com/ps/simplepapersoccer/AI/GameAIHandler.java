@@ -1,6 +1,7 @@
 package com.ps.simplepapersoccer.AI;
 
 import com.ps.simplepapersoccer.AI.Abstraction.IGameAI;
+import com.ps.simplepapersoccer.AI.MinimaxAI.MinimaxAI;
 import com.ps.simplepapersoccer.Enums.DifficultyEnum;
 import com.ps.simplepapersoccer.GameObjects.GameHandler;
 

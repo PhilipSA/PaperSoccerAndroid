@@ -1,6 +1,7 @@
 package com.ps.simplepapersoccer.AI.MinimaxAI;
 
 import com.ps.simplepapersoccer.AI.Abstraction.IGameAI;
+import com.ps.simplepapersoccer.Enums.NodeTypeEnum;
 import com.ps.simplepapersoccer.Enums.SortOrderEnum;
 import com.ps.simplepapersoccer.GameObjects.GameHandler;
 import com.ps.simplepapersoccer.GameObjects.Move.PartialMove;
@@ -134,6 +135,16 @@ public class MinimaxAI implements IGameAI
 
         Node opponentsGoal = state.getOpponent(maximizingPlayer).goalNode;
         score += -MathHelper.distance(opponentsGoal.xCord, state.ballNode.xCord, opponentsGoal.yCord, state.ballNode.yCord);
+
+        Node myGoal = maximizingPlayer.goalNode;
+
+        if (MathHelper.distance(opponentsGoal.xCord, state.ballNode.xCord, opponentsGoal.yCord, state.ballNode.yCord) == 1 &&
+                state.ballNode.nodeType == NodeTypeEnum.Wall &&
+                state.currentPlayersTurn == maximizingPlayer) score = 1000;
+
+        if (MathHelper.distance(myGoal.xCord, state.ballNode.xCord, myGoal.yCord, state.ballNode.yCord) == 1 &&
+                state.ballNode.nodeType == NodeTypeEnum.Wall &&
+                state.currentPlayersTurn != maximizingPlayer) score = -1000;
 
         return score;
     }

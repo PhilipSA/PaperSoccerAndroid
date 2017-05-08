@@ -1,4 +1,4 @@
-package com.ps.simplepapersoccer.GameObjects;
+package com.ps.simplepapersoccer.GameObjects.Game;
 
 public class LinesToDraw
 {

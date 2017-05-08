@@ -1,5 +1,7 @@
 package com.ps.simplepapersoccer.GameObjects;
 
+import com.ps.simplepapersoccer.GameObjects.Game.Node;
+
 public class Player {
 	public String playerName;
 	public int playerNumber;

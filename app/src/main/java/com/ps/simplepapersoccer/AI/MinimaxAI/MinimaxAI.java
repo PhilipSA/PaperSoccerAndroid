@@ -3,10 +3,10 @@ package com.ps.simplepapersoccer.AI.MinimaxAI;
 import com.ps.simplepapersoccer.AI.Abstraction.IGameAI;
 import com.ps.simplepapersoccer.Enums.NodeTypeEnum;
 import com.ps.simplepapersoccer.Enums.SortOrderEnum;
-import com.ps.simplepapersoccer.GameObjects.GameHandler;
+import com.ps.simplepapersoccer.GameObjects.Game.GameHandler;
 import com.ps.simplepapersoccer.GameObjects.Move.PartialMove;
 import com.ps.simplepapersoccer.GameObjects.Move.PossibleMove;
-import com.ps.simplepapersoccer.GameObjects.Node;
+import com.ps.simplepapersoccer.GameObjects.Game.Node;
 import com.ps.simplepapersoccer.GameObjects.Player;
 import com.ps.simplepapersoccer.Helpers.MathHelper;
 
@@ -17,6 +17,12 @@ import java.util.HashMap;
 public class MinimaxAI implements IGameAI
 {
     private int searchDepth = 7;
+    private static final int TIME_LIMIT_MILLIS = 5000;
+    private static final int EVALS_PER_SECOND = 100;
+    private static final int winCutoff = 1000;
+    private static boolean searchCutoff = false;
+
+    private HashMap<GameHandler, Double> transpositionsMap;
 
     public MinimaxAI(int searchDepth)
     {
@@ -27,81 +33,141 @@ public class MinimaxAI implements IGameAI
     public PartialMove MakeMove(GameHandler gameHandler)
     {
         long time = System.nanoTime();
-        MoveData bestMove = alphaBetaPruning(searchDepth, gameHandler, gameHandler.currentPlayersTurn, -50000, 50000);
+        MoveData bestMove = chooseMove(gameHandler);
         long stopTime = System.nanoTime() - time;
         return bestMove.returnMove;
 
     }
 
-    private MoveData alphaBetaPruning(int currentDepth, GameHandler state, Player maximizingPlayer, double alpha, double beta)
-    {
-        double alphaOrig = alpha;
+    private MoveData chooseMove(GameHandler state) {
+        long startTime = System.currentTimeMillis();
+        double maxScore = Integer.MIN_VALUE;
+        MoveData bestMove = null;
+        Player maximPlayer = state.currentPlayersTurn;
 
-        if (currentDepth == 0 || state.getWinner(state.ballNode) != null)
-        {
-            return new MoveData(minmaxEvaluation(state, maximizingPlayer));
+        ArrayList<MoveData> moves = sortPossibleMovesByScore(SortOrderEnum.Descending, state, state.currentPlayersTurn);
+
+        for (MoveData move : moves) {
+
+            state.MakePartialMove(move.returnMove);
+
+            //
+            // Compute how long to spend looking at each move
+            //
+            long searchTimeLimit = ((TIME_LIMIT_MILLIS - 1000) / (moves.size()));
+
+            double score = iterativeDeepeningSearch(state, searchTimeLimit, maximPlayer);
+
+            state.UndoLastMove();
+
+            //
+            // If the search finds a winning move
+            //
+            if (score >= winCutoff) {
+                return move;
+            }
+
+            if (score > maxScore) {
+                maxScore = score;
+                bestMove = move;
+            }
         }
 
-        MoveData returnMove;
-        MoveData bestMove = null;
+        return bestMove;
+    }
+
+    //
+    // Run an iterative deepening search on a game state, taking no longer than the given time limit
+    //
+    private double iterativeDeepeningSearch(GameHandler state, long timeLimit, Player maximPlayer) {
+        long startTime = System.currentTimeMillis();
+        long endTime = startTime + timeLimit;
+        int depth = 1;
+        double score = 0;
+        searchCutoff = false;
+
+        while (true) {
+            long currentTime = System.currentTimeMillis();
+
+            if (currentTime >= endTime) {
+                break;
+            }
+
+            double searchResult = alphaBetaPruning(state, depth, maximPlayer, Integer.MIN_VALUE, Integer.MAX_VALUE, currentTime, endTime - currentTime);
+
+            //
+            // If the search finds a winning move, stop searching
+            //
+            if (searchResult >= winCutoff) {
+                return searchResult;
+            }
+
+            if (!searchCutoff) {
+                score = searchResult;
+            }
+
+            depth++;
+        }
+
+        return score;
+    }
+
+    private double alphaBetaPruning(GameHandler state, int currentDepth, Player maximizingPlayer, double alpha, double beta, long startTime, long timeLimit)
+    {
+        long currentTime = System.currentTimeMillis();
+        long elapsedTime = (currentTime - startTime);
+
+        if (elapsedTime >= timeLimit) {
+            searchCutoff = true;
+        }
+
+        if (searchCutoff || currentDepth == 0 || state.getWinner(state.ballNode()) != null)
+        {
+            return minmaxEvaluation(state, maximizingPlayer);
+        }
+
         if (maximizingPlayer == state.currentPlayersTurn)
         {
-            ArrayList<MoveData> possibleMoves = sortPossibleMovesByScore(SortOrderEnum.Descending, state, maximizingPlayer, currentDepth);
+            ArrayList<MoveData> possibleMoves = sortPossibleMovesByScore(SortOrderEnum.Descending, state, maximizingPlayer);
             for (MoveData possibleMove : possibleMoves)
             {
                 state.MakePartialMove(possibleMove.returnMove);
-                returnMove = alphaBetaPruning(currentDepth - 1, state, maximizingPlayer, alpha, beta);
+
+                alpha = Math.max(alpha, alphaBetaPruning(state, currentDepth - 1, maximizingPlayer, alpha, beta, startTime, timeLimit));
+
                 state.UndoLastMove();
 
-                if ((bestMove == null) || (bestMove.returnValue < returnMove.returnValue)) {
-                    bestMove = returnMove;
-                    bestMove.returnMove = possibleMove.returnMove;
-                }
-                if (returnMove.returnValue > alpha) {
-                    alpha = returnMove.returnValue;
-                    bestMove = returnMove;
-                }
                 if (beta <= alpha) {
-                    bestMove.returnValue = beta;
-                    bestMove.returnMove = null;
                     break; // pruning
                 }
             }
 
-            return bestMove;
+            return alpha;
         }
         else
         {
-            ArrayList<MoveData> possibleMoves = sortPossibleMovesByScore(SortOrderEnum.Ascending, state, maximizingPlayer, currentDepth);
+            ArrayList<MoveData> possibleMoves = sortPossibleMovesByScore(SortOrderEnum.Ascending, state, maximizingPlayer);
             for (MoveData possibleMove : possibleMoves)
             {
                 state.MakePartialMove(possibleMove.returnMove);
-                returnMove = alphaBetaPruning(currentDepth - 1, state, maximizingPlayer, alpha, beta);
+
+                beta = Math.min(beta, alphaBetaPruning(state, currentDepth - 1, maximizingPlayer, alpha, beta, startTime, timeLimit));
+
                 state.UndoLastMove();
 
-                if ((bestMove == null) || (bestMove.returnValue > returnMove.returnValue)) {
-                    bestMove = returnMove;
-                    bestMove.returnMove = possibleMove.returnMove;
-                }
-                if (returnMove.returnValue < beta) {
-                    beta = returnMove.returnValue;
-                    bestMove = returnMove;
-                }
                 if (beta <= alpha) {
-                    bestMove.returnValue = alpha;
-                    bestMove.returnMove = null;
                     break; // pruning
                 }
             }
 
-            return bestMove;
+            return beta;
         }
     }
 
-    private ArrayList<MoveData> sortPossibleMovesByScore(SortOrderEnum sortOrder, GameHandler state, Player maximzingPlayer, int depth)
+    private ArrayList<MoveData> sortPossibleMovesByScore(SortOrderEnum sortOrder, GameHandler state, Player maximzingPlayer)
     {
         ArrayList<MoveData> newPossibleMoves = new ArrayList<>();
-        for (PossibleMove possibleMove : state.allPossibleMovesFromNode(state.ballNode))
+        for (PossibleMove possibleMove : state.allPossibleMovesFromNode(state.ballNode()))
         {
             PartialMove partialMove = new PartialMove(possibleMove.oldNode, possibleMove.newNode, state.currentPlayersTurn);
             partialMove.madeTheMove = state.currentPlayersTurn;
@@ -128,22 +194,22 @@ public class MinimaxAI implements IGameAI
     {
         double score = 0;
 
-        if (state.isGameOver() && state.getWinner(state.ballNode).winner == maximizingPlayer) score = 1000;
-        if (state.isGameOver() && state.getWinner(state.ballNode).winner != maximizingPlayer) score = -1000;
+        if (state.isGameOver() && state.getWinner(state.ballNode()).winner == maximizingPlayer) score = 1000;
+        if (state.isGameOver() && state.getWinner(state.ballNode()).winner != maximizingPlayer) score = -1000;
 
         score += -state.numberOfTurns;
 
         Node opponentsGoal = state.getOpponent(maximizingPlayer).goalNode;
-        score += -MathHelper.distance(opponentsGoal.xCord, state.ballNode.xCord, opponentsGoal.yCord, state.ballNode.yCord);
+        score += -MathHelper.distance(opponentsGoal.xCord, state.ballNode().xCord, opponentsGoal.yCord, state.ballNode().yCord);
 
         Node myGoal = maximizingPlayer.goalNode;
 
-        if (MathHelper.distance(opponentsGoal.xCord, state.ballNode.xCord, opponentsGoal.yCord, state.ballNode.yCord) == 1 &&
-                state.ballNode.nodeType == NodeTypeEnum.Wall &&
+        if (MathHelper.distance(opponentsGoal.xCord, state.ballNode().xCord, opponentsGoal.yCord, state.ballNode().yCord) == 1 &&
+                state.ballNode().nodeType == NodeTypeEnum.Wall &&
                 state.currentPlayersTurn == maximizingPlayer) score = 1000;
 
-        if (MathHelper.distance(myGoal.xCord, state.ballNode.xCord, myGoal.yCord, state.ballNode.yCord) == 1 &&
-                state.ballNode.nodeType == NodeTypeEnum.Wall &&
+        if (MathHelper.distance(myGoal.xCord, state.ballNode().xCord, myGoal.yCord, state.ballNode().yCord) == 1 &&
+                state.ballNode().nodeType == NodeTypeEnum.Wall &&
                 state.currentPlayersTurn != maximizingPlayer) score = -1000;
 
         return score;

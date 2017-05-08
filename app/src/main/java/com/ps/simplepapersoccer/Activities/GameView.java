@@ -1,9 +1,7 @@
 package com.ps.simplepapersoccer.Activities;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -14,9 +12,8 @@ import android.graphics.drawable.ScaleDrawable;
 import android.util.AttributeSet;
 import android.view.View;
 
-import com.ps.simplepapersoccer.GameObjects.LinesToDraw;
+import com.ps.simplepapersoccer.GameObjects.Game.LinesToDraw;
 import com.ps.simplepapersoccer.GameObjects.Move.PossibleMove;
-import com.ps.simplepapersoccer.GameObjects.Node;
 import com.ps.simplepapersoccer.GameObjects.Player;
 import com.ps.simplepapersoccer.R;
 
@@ -170,7 +167,7 @@ public class GameView extends View {
 	{
 		paint.setColor(gameActivity.gameHandler.currentPlayersTurn.playerColor);
 		if (gameActivity.gameHandler.aiTurn) return;
-		for (PossibleMove move : gameActivity.gameHandler.allPossibleMovesFromNode(gameActivity.gameHandler.ballNode)) {
+		for (PossibleMove move : gameActivity.gameHandler.allPossibleMovesFromNode(gameActivity.gameHandler.ballNode())) {
 			float[] coords = gameActivity.nodeToCoords(move.newNode);
 			canvas.drawCircle(coords[0], coords[1], 20, paint);
 		}

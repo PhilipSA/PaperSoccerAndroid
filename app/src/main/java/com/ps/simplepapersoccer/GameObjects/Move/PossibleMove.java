@@ -1,6 +1,6 @@
 package com.ps.simplepapersoccer.GameObjects.Move;
 
-import com.ps.simplepapersoccer.GameObjects.Node;
+import com.ps.simplepapersoccer.GameObjects.Game.Node;
 
 /**
  * Created by Admin on 2017-04-24.

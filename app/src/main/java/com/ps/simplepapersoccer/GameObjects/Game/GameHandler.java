@@ -1,4 +1,4 @@
-package com.ps.simplepapersoccer.GameObjects;
+package com.ps.simplepapersoccer.GameObjects.Game;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,15 +12,12 @@ import com.ps.simplepapersoccer.Enums.NodeTypeEnum;
 import com.ps.simplepapersoccer.Enums.VictoryConditionEnum;
 import com.ps.simplepapersoccer.GameObjects.Move.PartialMove;
 import com.ps.simplepapersoccer.GameObjects.Move.PossibleMove;
+import com.ps.simplepapersoccer.GameObjects.Player;
 import com.ps.simplepapersoccer.Helpers.MathHelper;
 import com.ps.simplepapersoccer.R;
-import com.ps.simplepapersoccer.Sound.FXPlayer;
 import com.google.common.collect.Iterables;
 
 public class GameHandler {
-
-	public HashMap<UUID, Node> nodeHashMap = new HashMap<>();
-
 	public Player player1;
 	public Player player2;
 
@@ -28,19 +25,18 @@ public class GameHandler {
 
 	public int numberOfTurns = 0;
 
-	public Node ballNode;
-
-	private ArrayList<PartialMove> allPartialMoves = new ArrayList<>();
-
 	private GameActivity gameActivity;
 	private GameAIHandler gameAIHandler;
+	private GameBoard gameBoard;
 
 	private boolean isMultiplayer;
 	public boolean aiTurn = false;
 
+	public Node ballNode() { return gameBoard.ballNode; }
+
 	@Override
 	public int hashCode() {
-		return nodeHashMap.hashCode() ^ currentPlayersTurn.hashCode() ^ ballNode.hashCode();
+		return currentPlayersTurn.hashCode() ^ gameBoard.hashCode();
 	}
 	
 	public GameHandler(final GameActivity gameActivity, int gridX, int gridY, DifficultyEnum difficulty, ArrayList<Player> players, boolean isMultiplayer)
@@ -52,94 +48,19 @@ public class GameHandler {
 
 		this.isMultiplayer = isMultiplayer;
 
-		makeNodes(gridX, gridY);
-		ballNode = findNodeByXY(gridX/2, gridY/2);
+		gameBoard = new GameBoard(gridX, gridY);
+		player1.goalNode = gameBoard.goalNode1;
+		player2.goalNode = gameBoard.goalNode2;
 		
 		this.gameActivity = gameActivity;
 		gameActivity.reDraw();
 
 		gameAIHandler = new GameAIHandler(this, difficulty);
 	}
-	
-	//Creates the game nodes
-	private void makeNodes(int gridSizeX, int gridSizeY)
-	{
-		for (int y = 1; y < gridSizeY; ++y)
-		{
-			for (int x = 0; x <= gridSizeX; ++x)
-			{
-				//No node in the 4 cornes
-				if (x == 0 && y == 1) continue;
-				if (x == 0 && y == gridSizeY - 1) continue;
-				if (x == gridSizeX && y == 1) continue;
-				if (x == gridSizeX && y == gridSizeY - 1) continue;
-
-				//Check if wall
-				if (x == 0 || x == gridSizeX )
-					addNodeToNodeMap(new Node(x,y, NodeTypeEnum.Wall));
-				
-				//Check if top wall special case
-				else if (x != gridSizeX / 2 && y == 1)
-				{
-					addNodeToNodeMap(new Node(x,y, NodeTypeEnum.Wall));
-				}
-
-				//Check if bottom wall special case
-				else if (x != gridSizeX / 2 && y == gridSizeY - 1)
-				{
-					addNodeToNodeMap(new Node(x,y, NodeTypeEnum.Wall));
-				}
-				
-				//Regular empty node
-				else
-				{
-					addNodeToNodeMap(new Node(x,y, NodeTypeEnum.Empty));
-				}
-			}
-		}
-		//Make the 2 goal nodes
-		Node player1Goalnode = new Node(gridSizeX / 2, gridSizeY, NodeTypeEnum.Goal);
-		addNodeToNodeMap(player1Goalnode);
-		
-		Node player2Goalnode = new Node(gridSizeX / 2, 0, NodeTypeEnum.Goal);
-		addNodeToNodeMap(player2Goalnode);
-
-		player1.goalNode = player1Goalnode;
-		player2.goalNode = player2Goalnode;
-
-		GenerateAllNeighbors();
-	}
-
-	public void GenerateAllNeighbors()
-	{
-		for (Node node : nodeHashMap.values()) {
-			for (Node otherNode : nodeHashMap.values()) {
-				if (node.id == otherNode.id) continue;
-
-				double euclideanDistance = MathHelper.euclideanDistance(node.xCord, otherNode.xCord, node.yCord, otherNode.yCord);
-
-				if (node.nodeType == NodeTypeEnum.Wall && otherNode.nodeType == NodeTypeEnum.Wall) {
-					if (node.yCord != otherNode.yCord && otherNode.xCord != node.xCord && euclideanDistance < 2) {
-						node.AddNeighborPair(otherNode);
-					} else {
-						continue;
-					}
-				}
-				if (euclideanDistance < 2) node.AddNeighborPair(otherNode);
-			}
-		}
-	}
 
 	public HashSet<PossibleMove> allPossibleMovesFromNode(Node node)
 	{
-		HashSet<PossibleMove> possibleMoves = new HashSet<>();
-
-		for (UUID uuid : node.neighbors) {
-			Node otherNode = nodeHashMap.get(uuid);
-			possibleMoves.add(new PossibleMove(node, otherNode));
-		}
-
-		return possibleMoves;
+		return gameBoard.allPossibleMovesFromNode(node);
 	}
 
 	public void UpdateGameState()
@@ -148,7 +69,7 @@ public class GameHandler {
 
 		if(isGameOver())
 		{
-			winner(getWinner(ballNode));
+			winner(getWinner(ballNode()));
 			return;
 		}
 		if (currentPlayersTurn.isAi && !isMultiplayer)
@@ -160,7 +81,7 @@ public class GameHandler {
 
 	public void PlayerMakeMove(Node node, Player player)
 	{
-		PartialMove partialMove = new PartialMove(ballNode, node, player);
+		PartialMove partialMove = new PartialMove(ballNode(), node, player);
 		if (isPartialMoveLegal(partialMove, player) && !aiTurn)
 		{
 			MakeMove(partialMove);
@@ -179,7 +100,7 @@ public class GameHandler {
 	{
 		MakePartialMove(partialMove);
 
-		if(ballNode.nodeType != NodeTypeEnum.Empty) {
+		if(ballNode().nodeType != NodeTypeEnum.Empty) {
 			gameActivity.fxPlayer.playSound(R.raw.bounce);
 		}
 		else {
@@ -192,38 +113,21 @@ public class GameHandler {
 
 	public void UndoLastMove()
     {
-		PartialMove partialMove = Iterables.getLast(allPartialMoves);
-
-		partialMove.newNode.AddNeighborPair(partialMove.oldNode);
-
-		nodeHashMap.get(partialMove.newNode.id).nodeType = partialMove.newNode.nodeType;
-
-		ballNode = partialMove.oldNode;
-
-		allPartialMoves.remove(partialMove);
-
-		currentPlayersTurn = partialMove.madeTheMove;
+		currentPlayersTurn = gameBoard.UndoLastMove().madeTheMove;
     }
 
 	public void MakePartialMove(PartialMove partialMove)
 	{
-		allPartialMoves.add(new PartialMove(new Node(partialMove.oldNode), new Node(partialMove.newNode), partialMove.madeTheMove));
-
-		partialMove.newNode.RemoveNeighborPair(partialMove.oldNode);
-
-		if (partialMove.oldNode.nodeType == NodeTypeEnum.Empty)
-			partialMove.oldNode.nodeType = NodeTypeEnum.BounceAble;
+		gameBoard.MakePartialMove(partialMove);
 
 		if (partialMove.newNode.nodeType == NodeTypeEnum.Empty) {
 			changeTurn();
 		}
-
-		ballNode = partialMove.newNode;
 	}
 
 	public boolean isGameOver()
 	{
-		if (getWinner(ballNode) != null)
+		if (getWinner(gameBoard.ballNode) != null)
 		{
 			return true;
 		};
@@ -263,23 +167,7 @@ public class GameHandler {
 		x = x/gameActivity.gameView.gridXdraw;
 		y = y/gameActivity.gameView.gridYdraw;
 
-		return findNodeByXY((int)x, (int)y);
-	}
-	
-	//Returns the node with the XY coordinates
-	public Node findNodeByXY(int x, int y)
-	{
-		for (Node n : nodeHashMap.values())
-		{
-			if (n.xCord == x && n.yCord == y)			
-				return n;		
-		}
-		return null;
-	}
-
-	public void addNodeToNodeMap(Node node)
-	{
-		nodeHashMap.put(node.id, node);
+		return gameBoard.findNodeByXY((int)x, (int)y);
 	}
 
 	public Player getOpponent(Player myPlayer)
@@ -296,7 +184,7 @@ public class GameHandler {
 
 	public boolean isPartialMoveLegal(PartialMove partialMove, Player player)
 	{
-		HashSet<PossibleMove> test = allPossibleMovesFromNode(ballNode);
+		HashSet<PossibleMove> test = allPossibleMovesFromNode(ballNode());
 		return test.contains(new PossibleMove(partialMove.oldNode, partialMove.newNode)) && player == currentPlayersTurn;
 	}
 }

@@ -3,7 +3,7 @@ package com.ps.simplepapersoccer.AI;
 import android.os.AsyncTask;
 
 import com.ps.simplepapersoccer.AI.Abstraction.IGameAI;
-import com.ps.simplepapersoccer.GameObjects.GameHandler;
+import com.ps.simplepapersoccer.GameObjects.Game.GameHandler;
 import com.ps.simplepapersoccer.GameObjects.Move.PartialMove;
 
 public class MakeMoveAITask extends AsyncTask<Object, Void, PartialMove>

@@ -1,4 +1,4 @@
-package com.ps.simplepapersoccer.GameObjects;
+package com.ps.simplepapersoccer.GameObjects.Game;
 
 import com.ps.simplepapersoccer.Enums.NodeTypeEnum;
 

@@ -22,14 +22,14 @@ import android.widget.TextView;
 
 import com.ps.simplepapersoccer.Enums.DifficultyEnum;
 import com.ps.simplepapersoccer.Enums.VictoryConditionEnum;
-import com.ps.simplepapersoccer.GameObjects.GameHandler;
+import com.ps.simplepapersoccer.GameObjects.Game.GameHandler;
 import com.ps.simplepapersoccer.GameObjects.Move.PartialMove;
-import com.ps.simplepapersoccer.GameObjects.Node;
+import com.ps.simplepapersoccer.GameObjects.Game.Node;
 import com.ps.simplepapersoccer.GameObjects.Player;
 import com.ps.simplepapersoccer.GameObjects.PlayerActivityData;
-import com.ps.simplepapersoccer.GameObjects.Victory;
+import com.ps.simplepapersoccer.GameObjects.Game.Victory;
 import com.ps.simplepapersoccer.R;
-import com.ps.simplepapersoccer.GameObjects.LinesToDraw;
+import com.ps.simplepapersoccer.GameObjects.Game.LinesToDraw;
 import com.ps.simplepapersoccer.Sound.FXPlayer;
 
 import java.util.ArrayList;
@@ -179,7 +179,7 @@ public class GameActivity extends Activity {
 	{
 		playerTurnTextView.setText(String.format("%s %s %s", getString(R.string.game_partial_its), gameHandler.currentPlayersTurn.playerName, getString(R.string.game_partial_turn)));
 		playerTurnTextView.setTextColor(gameHandler.currentPlayersTurn.playerColor);
-		gameView.UpdateBallPosition(nodeToCoords(gameHandler.ballNode), gameHandler.currentPlayersTurn);
+		gameView.UpdateBallPosition(nodeToCoords(gameHandler.ballNode()), gameHandler.currentPlayersTurn);
 	}
 	
 	public void AddNewLineToDraw (float oldNodeCoords, float oldNodeCoords2, float newLineCoords, float newLineCoords2, int color)

@@ -3,7 +3,7 @@ package com.ps.simplepapersoccer.AI;
 import com.ps.simplepapersoccer.AI.Abstraction.IGameAI;
 import com.ps.simplepapersoccer.AI.MinimaxAI.MinimaxAI;
 import com.ps.simplepapersoccer.Enums.DifficultyEnum;
-import com.ps.simplepapersoccer.GameObjects.GameHandler;
+import com.ps.simplepapersoccer.GameObjects.Game.GameHandler;
 
 public class GameAIHandler
 {
@@ -30,7 +30,7 @@ public class GameAIHandler
 		}
 		else if (difficulty == DifficultyEnum.VeryHard)
 		{
-			gameAI = new MinimaxAI(7);
+			gameAI = new MinimaxAI(8);
 		}
 	}
 

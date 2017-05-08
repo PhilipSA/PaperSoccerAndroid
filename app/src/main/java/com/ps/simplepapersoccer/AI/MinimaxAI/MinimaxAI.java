@@ -17,12 +17,12 @@ import java.util.HashMap;
 public class MinimaxAI implements IGameAI
 {
     private int searchDepth = 7;
-    private static final int TIME_LIMIT_MILLIS = 5000;
+    private static final int TIME_LIMIT_MILLIS = 2000;
     private static final int EVALS_PER_SECOND = 100;
-    private static final int winCutoff = 1000;
+    private static final int winCutoff = 900;
     private static boolean searchCutoff = false;
 
-    private HashMap<GameHandler, Double> transpositionsMap;
+    private HashMap<Integer, TranspositionData> transpositionsMap = new HashMap<>();
 
     public MinimaxAI(int searchDepth)
     {
@@ -121,10 +121,41 @@ public class MinimaxAI implements IGameAI
             searchCutoff = true;
         }
 
+        double storedAlpha = alpha;
+        double storedBeta = beta;
+
+        TranspositionData transpositionData = transpositionsMap.get(state.hashCode());
+        if (transpositionData != null && transpositionData.depth >= currentDepth) {
+            if (transpositionData.scoreTypeEnum == ScoreTypeEnum.EXACT){
+                return transpositionData.score;
+            }
+            else if (transpositionData.scoreTypeEnum == ScoreTypeEnum.UPPER){
+                beta = Math.min(beta, transpositionData.score);
+            }
+            else if (transpositionData.scoreTypeEnum == ScoreTypeEnum.LOWER){
+                alpha = Math.max(alpha, transpositionData.score);
+            }
+            if(alpha >= beta){
+                return transpositionData.score;
+            }
+        }
+
         if (searchCutoff || currentDepth == 0 || state.getWinner(state.ballNode()) != null)
         {
-            return minmaxEvaluation(state, maximizingPlayer);
+            double value = minmaxEvaluation(state, maximizingPlayer);
+            if(value <= alpha) {
+                transpositionsMap.put(state.hashCode(), new TranspositionData(currentDepth, value, ScoreTypeEnum.LOWER));
+            }
+            else if(value >= beta) {
+                transpositionsMap.put(state.hashCode(), new TranspositionData(currentDepth, value, ScoreTypeEnum.UPPER));
+            }
+            else {
+                transpositionsMap.put(state.hashCode(), new TranspositionData(currentDepth, value, ScoreTypeEnum.EXACT));
+            }
+            return value;
         }
+
+        double bestScore = 0;
 
         if (maximizingPlayer == state.currentPlayersTurn)
         {
@@ -141,8 +172,7 @@ public class MinimaxAI implements IGameAI
                     break; // pruning
                 }
             }
-
-            return alpha;
+            bestScore = alpha;
         }
         else
         {
@@ -160,8 +190,22 @@ public class MinimaxAI implements IGameAI
                 }
             }
 
-            return beta;
+            bestScore = beta;
         }
+
+        TranspositionData next = new TranspositionData();
+        next.score = bestScore;
+        next.depth = currentDepth;
+        if(bestScore <= storedAlpha){
+            next.scoreTypeEnum = ScoreTypeEnum.UPPER;
+        }else if(bestScore >= storedBeta){
+            next.scoreTypeEnum = ScoreTypeEnum.LOWER ;
+        }else{
+            next.scoreTypeEnum = ScoreTypeEnum.EXACT;
+        }
+        transpositionsMap.put(state.hashCode(), next);
+
+        return bestScore;
     }
 
     private ArrayList<MoveData> sortPossibleMovesByScore(SortOrderEnum sortOrder, GameHandler state, Player maximzingPlayer)

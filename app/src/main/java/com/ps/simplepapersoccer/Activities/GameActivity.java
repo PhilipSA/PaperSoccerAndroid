@@ -177,7 +177,7 @@ public class GameActivity extends Activity {
 
 	public void UpdateDrawData()
 	{
-		playerTurnTextView.setText(String.format("%s %s %s", getString(R.string.game_partial_its), gameHandler.currentPlayersTurn.playerName, getString(R.string.game_partial_turn)));
+		playerTurnTextView.setText(String.format("%s %s%s", getString(R.string.game_partial_its), gameHandler.currentPlayersTurn.playerName, getString(R.string.game_partial_turn)));
 		playerTurnTextView.setTextColor(gameHandler.currentPlayersTurn.playerColor);
 		gameView.UpdateBallPosition(nodeToCoords(gameHandler.ballNode()), gameHandler.currentPlayersTurn);
 	}

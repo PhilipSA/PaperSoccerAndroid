@@ -16,25 +16,22 @@ import java.util.HashMap;
 
 public class MinimaxAI implements IGameAI
 {
-    private int searchDepth = 7;
-    private static final int TIME_LIMIT_MILLIS = 2000;
+    private static int TIME_LIMIT_MILLIS = 2000;
     private static final int EVALS_PER_SECOND = 100;
     private static final int winCutoff = 900;
     private static boolean searchCutoff = false;
 
     private HashMap<Integer, TranspositionData> transpositionsMap = new HashMap<>();
 
-    public MinimaxAI(int searchDepth)
+    public MinimaxAI(int timeLimitMilliSeconds)
     {
-        this.searchDepth = searchDepth;
+        TIME_LIMIT_MILLIS = timeLimitMilliSeconds;
     }
 
     @Override
     public PartialMove MakeMove(GameHandler gameHandler)
     {
-        long time = System.nanoTime();
         MoveData bestMove = chooseMove(gameHandler);
-        long stopTime = System.nanoTime() - time;
         return bestMove.returnMove;
 
     }

@@ -4,20 +4,23 @@ import android.app.Activity;
 import android.content.Context;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.VideoView;
 
 import com.ps.simplepapersoccer.R;
 
-public class VideoSliderAdapter extends PagerAdapter {
+public class TutorialPagerAdapter extends PagerAdapter {
     Context mContext;
     Activity activity;
 
-    VideoSliderAdapter(Context context, Activity activity) {
+    TutorialPagerAdapter(Context context, Activity activity) {
         this.mContext = context;
         this.activity = activity;
     }
@@ -27,35 +30,21 @@ public class VideoSliderAdapter extends PagerAdapter {
         return sliderImagesId.length;
     }
 
-    private int[] sliderImagesId = new int[]{ R.raw.tutorial1, R.raw.tutorial2 };
+    private int[] sliderImagesId = new int[]{ R.drawable.tutorial1, R.drawable.tutorial2, R.drawable.tutorial3, R.drawable.tutorial4 };
 
     @Override
     public boolean isViewFromObject(View v, Object obj) {
-        return v == ((VideoView) obj);
+        return v == obj;
     }
 
     @Override
     public Object instantiateItem(ViewGroup container, int i) {
-        VideoView videoView = new VideoView(mContext);
+        ImageView imageView = new ImageView(mContext);
 
-        String videoName = "tutorial1";
+        imageView.setImageDrawable(ContextCompat.getDrawable(mContext, sliderImagesId[i]));
 
-        int id = mContext.getResources().getIdentifier(videoName, "raw", activity.getPackageName());
-
-        String uri = "android.resource://" + mContext.getPackageName() + "/" + sliderImagesId[i];
-
-        videoView.setVideoURI(Uri.parse(uri));
-        videoView.start();
-
-        videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-            @Override
-            public void onPrepared(MediaPlayer mp) {
-                mp.setLooping(true);
-            }
-        });
-
-        ((ViewPager) container).addView(videoView, 0);
-        return videoView;
+        ((ViewPager) container).addView(imageView);
+        return imageView;
     }
 
     @Override

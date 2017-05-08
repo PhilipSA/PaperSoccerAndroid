@@ -5,6 +5,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.ps.simplepapersoccer.R;
 
@@ -12,6 +13,9 @@ public class HowToPlayActivity extends AppCompatActivity {
 
     ImageView leftArrow;
     ImageView rightArrow;
+    TextView viewPagerText;
+    private int[] sliderTextId = new int[]{ R.string.tutorial1_text, R.string.tutorial2_text, R.string.tutorial3_text, R.string.tutorial4_text };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -23,10 +27,12 @@ public class HowToPlayActivity extends AppCompatActivity {
         leftArrow = (ImageView)findViewById(R.id.left_nav);
         rightArrow = (ImageView)findViewById(R.id.right_nav);
 
+        viewPagerText = (TextView) findViewById(R.id.viewpagerText);
+
         leftArrow.setVisibility(View.INVISIBLE);
 
-        ViewPager mViewPager = (ViewPager)findViewById(R.id.viewpager);
-        VideoSliderAdapter adapterView = new VideoSliderAdapter(this, this);
+        final ViewPager mViewPager = (ViewPager)findViewById(R.id.viewpager);
+        TutorialPagerAdapter adapterView = new TutorialPagerAdapter(this, this);
         mViewPager.setAdapter(adapterView);
 
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -37,14 +43,19 @@ public class HowToPlayActivity extends AppCompatActivity {
 
             @Override
             public void onPageSelected(int position) {
+                viewPagerText.setText(getString(sliderTextId[position]));
                 if (position == 0)
                 {
                     leftArrow.setVisibility(View.INVISIBLE);
                     rightArrow.setVisibility(View.VISIBLE);
                 }
-                else {
+                else if (mViewPager.getAdapter().getCount() - 1 == position){
                     leftArrow.setVisibility(View.VISIBLE);
                     rightArrow.setVisibility(View.INVISIBLE);
+                }
+                else {
+                    leftArrow.setVisibility(View.VISIBLE);
+                    rightArrow.setVisibility(View.VISIBLE);
                 }
             }
 

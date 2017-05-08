@@ -22,6 +22,11 @@
     <string name="game_victory_out_of_moves">won because the opponent ran out of moves!</string>
     <string name="game_victory_scored_goal">scored a goal!</string>
 
-    <string name="game_partial_turn">turn</string>
+    <string name="game_partial_turn">s turn</string>
     <string name="game_partial_its">It\'s</string>
+
+    <string name="tutorial1_text">Paper soccer is a two player turn based game where the objective is to bring the ball to your opponents goal.</string>
+    <string name="tutorial2_text">You move by tapping on one of the grid crossed highlighted in your player color.</string>
+    <string name="tutorial3_text">You can\'t move to a cross if there is already a connection between the ball cross and that cross.</string>
+    <string name="tutorial4_text">If you land on a cross that the ball has visited before you gain an additional move. Walls (the black lines) also grants an extra turn but you can\'t move along the wall</string>
 </resources>

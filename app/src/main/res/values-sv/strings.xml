@@ -18,6 +18,10 @@
     <string name="play_again_button_text">Spela igen</string>
     <string name="game_victory_out_of_moves">vann för motspelare fick slut på drag!</string>
     <string name="game_victory_scored_goal">gjorde mål!</string>
-    <string name="game_partial_turn">tur</string>
+    <string name="game_partial_turn">s tur</string>
     <string name="game_partial_its">Det är</string>
+    <string name="tutorial1_text">Fotboll på papper är ett turbaserat spel för två spelare där målet är att föra bollen till motspelarens mål.</string>
+    <string name="tutorial2_text">Du flyttar bollen igenom att trycka på ett av rutnätskorsen målade i din spelarfärg.</string>
+    <string name="tutorial3_text">Du kan inte förflytta bollen till ett kors om det korset redan har en anslutning till korset bollen befinner sig på.</string>
+    <string name="tutorial4_text">Om du landar på ett kors som bollen tidigare har besökt får du göra ett extra drag. Väggar (de svarta linjerna) ger dig också ett extra drag men du kan inte förlytta bollen längs väggen.</string>
 </resources>

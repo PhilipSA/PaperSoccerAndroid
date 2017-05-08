@@ -22,15 +22,15 @@ public class GameAIHandler
 		}
 		else if (difficulty == DifficultyEnum.Medium)
 		{
-			gameAI = new MinimaxAI(2);
+			gameAI = new MinimaxAI(1200);
 		}
 		else if (difficulty == DifficultyEnum.Hard)
 		{
-			gameAI = new MinimaxAI(5);
+			gameAI = new MinimaxAI(1500);
 		}
 		else if (difficulty == DifficultyEnum.VeryHard)
 		{
-			gameAI = new MinimaxAI(8);
+			gameAI = new MinimaxAI(2500);
 		}
 	}
 

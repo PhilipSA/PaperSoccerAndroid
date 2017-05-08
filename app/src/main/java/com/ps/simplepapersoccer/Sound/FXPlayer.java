@@ -41,7 +41,7 @@ public class FXPlayer
 
     public void playSound(int sound) {
 
-        soundPool.play(soundMap.get(sound), 1, 1, 1, 0, 1f);
+        if (soundPool != null) soundPool.play(soundMap.get(sound), 1, 1, 1, 0, 1f);
     }
 
     public final void cleanUpIfEnd() {

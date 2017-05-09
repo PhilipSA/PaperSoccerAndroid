@@ -30,7 +30,7 @@ public class GameAIHandler
 		}
 		else if (difficulty == DifficultyEnum.VeryHard)
 		{
-			gameAI = new MinimaxAI(2500);
+			gameAI = new MinimaxAI(3000);
 		}
 	}
 

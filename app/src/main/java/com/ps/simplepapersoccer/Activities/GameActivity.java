@@ -21,6 +21,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.ps.simplepapersoccer.Enums.DifficultyEnum;
+import com.ps.simplepapersoccer.Enums.GameModeEnum;
 import com.ps.simplepapersoccer.Enums.VictoryConditionEnum;
 import com.ps.simplepapersoccer.GameObjects.Game.GameHandler;
 import com.ps.simplepapersoccer.GameObjects.Move.PartialMove;
@@ -82,7 +83,7 @@ public class GameActivity extends Activity {
 		String difficulty = sharedPreferences.getString("pref_difficultyLevel", "Medium");
 		String playerName = sharedPreferences.getString("pref_playerName", "Player");
 
-		boolean isMultiplayer = getIntent().getBooleanExtra("MULTIPLAYER_MODE", false);
+		int gameMode = getIntent().getIntExtra("MULTIPLAYER_MODE", GameModeEnum.PLAYER_VS_AI);
 
 		myName = playerName;
 		
@@ -100,14 +101,17 @@ public class GameActivity extends Activity {
 		player2NameTextView.setTextColor(player2Color);
 
 		ArrayList<Player> players = new ArrayList<>();
-		if (!isMultiplayer)
+		if (gameMode == GameModeEnum.PLAYER_VS_AI)
 		{
 			players = assignPlayerAndAi(difficulty, playerName);
 		}
-		else
+		else if (gameMode == GameModeEnum.MULTIPLAYER_MODE)
 		{
 			players.add(new Player(playerName, 1, player1Color, false));
 			players.add(new Player("Player2", 2, player2Color, false));
+		}
+		else {
+			players = assignTwoAi(difficulty, playerName);
 		}
 
 		player1NameTextView.setText(players.get(0).playerName);
@@ -128,7 +132,7 @@ public class GameActivity extends Activity {
 
 		fxPlayer = new FXPlayer(this);
 
-        gameHandler = new GameHandler(this, gameView.gridSizeX, gameView.gridSizeY, DifficultyEnum.valueOf(difficulty), players, isMultiplayer);
+        gameHandler = new GameHandler(this, gameView.gridSizeX, gameView.gridSizeY, DifficultyEnum.valueOf(difficulty), players, gameMode);
 		
 		playAgain = (Button)findViewById(R.id.playagainButton);
 
@@ -153,6 +157,21 @@ public class GameActivity extends Activity {
 			}
 		});
 
+	}
+
+	private ArrayList<Player> assignTwoAi(String difficulty, String playerName)
+	{
+		ArrayList<Player> players = new ArrayList<>();
+		Random random = new Random();
+		if (random.nextBoolean()) {
+			players.add(new Player("Calculatos Maximus", 1, player1Color, true));
+			players.add(new Player("Ai" + difficulty, 2, player2Color, true));
+		}
+		else {
+			players.add(new Player("Ai" + difficulty, 1, player1Color, true));
+			players.add(new Player("Calculatos Maximus", 2, player2Color, true));
+		}
+		return players;
 	}
 
 	private ArrayList<Player> assignPlayerAndAi(String difficulty, String playerName)

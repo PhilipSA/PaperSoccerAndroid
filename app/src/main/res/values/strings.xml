@@ -8,14 +8,19 @@
     <string name="player_name">Player name</string>
     <string name="default_player_name">Player1</string>
 
+    <string name="single_player_mode">Single Player</string>
+    <string name="local_multiplayer_mode">Local Multiplayer</string>
+    <string name="ai_vs_ai_mode">AI VS AI</string>
+
+    <string name="choose_game_mode">Choose Game Mode</string>
+
     <string name="howToPlayButtonText">How to play</string>
 
     <string name="banner_ad_unit_id" translatable="false">ca-app-pub-8311998646565881/5426668458</string>
 
     <string name="pref_difficultyLevelTypes_default">Medium</string>
-    <string name="singleplayer_button_text">Singleplayer</string>
+    <string name="play_text">Play</string>
     <string name="settings_button_text">Settings</string>
-    <string name="local_multiplayer_button_text">Local multiplayer</string>
     <string name="exit_button_text">Exit</string>
     <string name="play_again_button_text">Play again</string>
     <string name="quit_button_text">Quit</string>

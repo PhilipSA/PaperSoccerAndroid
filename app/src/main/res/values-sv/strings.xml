@@ -10,9 +10,7 @@
     <string name="player_name">Spelarnamn</string>
     <string name="pref_difficultyLevelTypes_default">Medel</string>
     <string name="settings_button_text">Inställningar</string>
-    <string name="singleplayer_button_text">En spelare</string>
     <string name="veryHard_difficulty">Svåraste</string>
-    <string name="local_multiplayer_button_text">Flera spelare lokalt</string>
     <string name="default_player_name">Spelare1</string>
     <string name="quit_button_text">Bakåt</string>
     <string name="play_again_button_text">Spela igen</string>
@@ -24,4 +22,9 @@
     <string name="tutorial2_text">Du flyttar bollen igenom att trycka på ett av rutnätskorsen målade i din spelarfärg.</string>
     <string name="tutorial3_text">Du kan inte förflytta bollen till ett kors om det korset redan har en anslutning till korset bollen befinner sig på.</string>
     <string name="tutorial4_text">Om du landar på ett kors som bollen tidigare har besökt får du göra ett extra drag. Väggar (de svarta linjerna) ger dig också ett extra drag men du kan inte förlytta bollen längs väggen.</string>
+    <string name="play_text">Spela</string>
+    <string name="local_multiplayer_mode">Flera spelare lokalt</string>
+    <string name="single_player_mode">En Spelare</string>
+    <string name="ai_vs_ai_mode">Dator Mot Dator</string>
+    <string name="choose_game_mode">Välj Spelläge</string>
 </resources>

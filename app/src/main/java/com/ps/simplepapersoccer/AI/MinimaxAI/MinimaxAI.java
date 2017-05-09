@@ -245,12 +245,11 @@ public class MinimaxAI implements IGameAI
 
         Node myGoal = maximizingPlayer.goalNode;
 
+        //Only one move from the goal
         if (MathHelper.distance(opponentsGoal.xCord, state.ballNode().xCord, opponentsGoal.yCord, state.ballNode().yCord) == 1 &&
-                state.ballNode().nodeType == NodeTypeEnum.Wall &&
                 state.currentPlayersTurn == maximizingPlayer) score = 1000;
 
         if (MathHelper.distance(myGoal.xCord, state.ballNode().xCord, myGoal.yCord, state.ballNode().yCord) == 1 &&
-                state.ballNode().nodeType == NodeTypeEnum.Wall &&
                 state.currentPlayersTurn != maximizingPlayer) score = -1000;
 
         return score;

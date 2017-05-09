@@ -1,5 +1,7 @@
 package com.ps.simplepapersoccer.GameObjects.Game;
 
+import android.graphics.Color;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -8,6 +10,7 @@ import java.util.UUID;
 import com.ps.simplepapersoccer.AI.GameAIHandler;
 import com.ps.simplepapersoccer.Activities.GameActivity;
 import com.ps.simplepapersoccer.Enums.DifficultyEnum;
+import com.ps.simplepapersoccer.Enums.GameModeEnum;
 import com.ps.simplepapersoccer.Enums.NodeTypeEnum;
 import com.ps.simplepapersoccer.Enums.VictoryConditionEnum;
 import com.ps.simplepapersoccer.GameObjects.Move.PartialMove;
@@ -29,7 +32,7 @@ public class GameHandler {
 	private GameAIHandler gameAIHandler;
 	private GameBoard gameBoard;
 
-	private boolean isMultiplayer;
+	private int gameMode;
 	public boolean aiTurn = false;
 
 	public Node ballNode() { return gameBoard.ballNode; }
@@ -39,14 +42,14 @@ public class GameHandler {
 		return currentPlayersTurn.hashCode() ^ gameBoard.hashCode();
 	}
 	
-	public GameHandler(final GameActivity gameActivity, int gridX, int gridY, DifficultyEnum difficulty, ArrayList<Player> players, boolean isMultiplayer)
+	public GameHandler(final GameActivity gameActivity, int gridX, int gridY, DifficultyEnum difficulty, ArrayList<Player> players, int gameMode)
 	{
 		this.player1 = players.get(0);
 		this.player2 = players.get(1);
 
 		currentPlayersTurn = players.get(0);
 
-		this.isMultiplayer = isMultiplayer;
+		this.gameMode = gameMode;
 
 		gameBoard = new GameBoard(gridX, gridY);
 		player1.goalNode = gameBoard.goalNode1;
@@ -72,7 +75,7 @@ public class GameHandler {
 			winner(getWinner(ballNode()));
 			return;
 		}
-		if (currentPlayersTurn.isAi && !isMultiplayer)
+		if (currentPlayersTurn.isAi && gameMode != GameModeEnum.MULTIPLAYER_MODE)
 		{
 			aiTurn = true;
 			gameAIHandler.MakeAIMove();

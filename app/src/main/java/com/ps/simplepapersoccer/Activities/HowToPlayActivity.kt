@@ -11,9 +11,9 @@ import com.ps.simplepapersoccer.R
 
 class HowToPlayActivity : AppCompatActivity() {
 
-    internal var leftArrow: ImageView = null!!
-    internal var rightArrow: ImageView = null!!
-    internal var viewPagerText: TextView = null!!
+    internal var leftArrow: ImageView? = null
+    internal var rightArrow: ImageView? = null
+    internal var viewPagerText: TextView? = null
     private val sliderTextId = intArrayOf(R.string.tutorial1_text, R.string.tutorial2_text, R.string.tutorial3_text, R.string.tutorial4_text)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -28,7 +28,7 @@ class HowToPlayActivity : AppCompatActivity() {
 
         viewPagerText = findViewById(R.id.viewpagerText) as TextView
 
-        leftArrow.visibility = View.INVISIBLE
+        leftArrow?.visibility = View.INVISIBLE
 
         val mViewPager = findViewById(R.id.viewpager) as ViewPager
         val adapterView = TutorialPagerAdapter(this, this)
@@ -40,16 +40,16 @@ class HowToPlayActivity : AppCompatActivity() {
             }
 
             override fun onPageSelected(position: Int) {
-                viewPagerText.text = getString(sliderTextId[position])
+                viewPagerText?.text = getString(sliderTextId[position])
                 if (position == 0) {
-                    leftArrow.visibility = View.INVISIBLE
-                    rightArrow.visibility = View.VISIBLE
+                    leftArrow?.visibility = View.INVISIBLE
+                    rightArrow?.visibility = View.VISIBLE
                 } else if (mViewPager.adapter.count - 1 == position) {
-                    leftArrow.visibility = View.VISIBLE
-                    rightArrow.visibility = View.INVISIBLE
+                    leftArrow?.visibility = View.VISIBLE
+                    rightArrow?.visibility = View.INVISIBLE
                 } else {
-                    leftArrow.visibility = View.VISIBLE
-                    rightArrow.visibility = View.VISIBLE
+                    leftArrow?.visibility = View.VISIBLE
+                    rightArrow?.visibility = View.VISIBLE
                 }
             }
 

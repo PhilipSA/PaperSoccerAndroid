@@ -26,7 +26,7 @@ class MainActivity : Activity() {
 
         mAdView = findViewById(R.id.adView) as AdView
         val adRequest = AdRequest.Builder().build()
-        (mAdView as AdView).loadAd(adRequest)
+        mAdView?.loadAd(adRequest)
     }
 
     fun SingleplayerClick(view: View) {

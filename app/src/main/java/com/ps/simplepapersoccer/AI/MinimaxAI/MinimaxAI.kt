@@ -144,7 +144,7 @@ class MinimaxAI(timeLimitMilliSeconds: Int) : IGameAI {
         if (maximizingPlayer === state.currentPlayersTurn) {
             val possibleMoves = sortPossibleMovesByScore(SortOrderEnum.Descending, state, maximizingPlayer)
             for (possibleMove in possibleMoves) {
-                state.MakePartialMove(possibleMove.returnMove as PartialMove)
+                state.MakePartialMove(possibleMove.returnMove!!)
 
                 alpha = Math.max(alpha, alphaBetaPruning(state, currentDepth - 1, maximizingPlayer, alpha, beta, startTime, timeLimit))
 
@@ -158,7 +158,7 @@ class MinimaxAI(timeLimitMilliSeconds: Int) : IGameAI {
         } else {
             val possibleMoves = sortPossibleMovesByScore(SortOrderEnum.Ascending, state, maximizingPlayer)
             for (possibleMove in possibleMoves) {
-                state.MakePartialMove(possibleMove.returnMove as PartialMove)
+                state.MakePartialMove(possibleMove.returnMove!!)
 
                 beta = Math.min(beta, alphaBetaPruning(state, currentDepth - 1, maximizingPlayer, alpha, beta, startTime, timeLimit))
 

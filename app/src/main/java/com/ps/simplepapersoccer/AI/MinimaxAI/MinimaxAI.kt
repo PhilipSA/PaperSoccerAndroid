@@ -9,10 +9,7 @@ import com.ps.simplepapersoccer.GameObjects.Move.PossibleMove
 import com.ps.simplepapersoccer.GameObjects.Game.Node
 import com.ps.simplepapersoccer.GameObjects.Player
 import com.ps.simplepapersoccer.Helpers.MathHelper
-
-import java.util.ArrayList
-import java.util.Collections
-import java.util.HashMap
+import java.util.*
 
 class MinimaxAI(timeLimitMilliSeconds: Int) : IGameAI {
 
@@ -224,11 +221,20 @@ class MinimaxAI(timeLimitMilliSeconds: Int) : IGameAI {
         val myGoal = maximizingPlayer.goalNode
 
         //Only one move from the goal
-        if (MathHelper.distance(opponentsGoal.xCord, state.ballNode().xCord, opponentsGoal.yCord, state.ballNode().yCord) == 1.0 && state.currentPlayersTurn === maximizingPlayer)
+        if (MathHelper.distance(opponentsGoal.xCord, state.ballNode().xCord, opponentsGoal.yCord, state.ballNode().yCord) < 2.0 && state.currentPlayersTurn === maximizingPlayer)
             score = 1000.0
 
-        if (MathHelper.distance(myGoal!!.xCord, state.ballNode().xCord, myGoal.yCord, state.ballNode().yCord) == 1.0 && state.currentPlayersTurn !== maximizingPlayer)
+        if (MathHelper.distance(myGoal!!.xCord, state.ballNode().xCord, myGoal.yCord, state.ballNode().yCord) < 2.0 && state.currentPlayersTurn !== maximizingPlayer)
             score = -1000.0
+
+        //Neighbors are bounceable
+        state.allPossibleMovesFromNode(state.ballNode()).forEach{
+            if (it.newNode.nodeType == NodeTypeEnum.BounceAble && state.currentPlayersTurn === maximizingPlayer) ++score
+            else if (it.newNode.nodeType == NodeTypeEnum.BounceAble) {
+                --score;
+            }
+        }
+
 
         return score
     }

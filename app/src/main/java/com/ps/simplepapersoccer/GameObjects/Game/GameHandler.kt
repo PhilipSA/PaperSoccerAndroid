@@ -66,7 +66,7 @@ class GameHandler(private val gameActivity: GameActivity, gridX: Int, gridY: Int
 
     fun PlayerMakeMove(node: Node, player: Player) {
         val partialMove = PartialMove(ballNode(), node, player)
-        if (isPartialMoveLegal(partialMove, player) && !aiTurn) {
+        if (isPartialMoveLegal(partialMove, player) && currentPlayersTurn == player) {
             MakeMove(partialMove)
             UpdateGameState()
         }

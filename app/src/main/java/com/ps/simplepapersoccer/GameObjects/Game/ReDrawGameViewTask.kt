@@ -9,6 +9,7 @@ class ReDrawGameViewTask internal constructor(private val gameView: GameView, pr
         activity.runOnUiThread({
             gameView.drawAsync(gameViewDrawData)
         })
+        Thread.sleep(200)
         return null
     }
 

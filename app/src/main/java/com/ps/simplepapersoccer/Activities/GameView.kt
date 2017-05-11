@@ -13,6 +13,7 @@ import com.ps.simplepapersoccer.GameObjects.Game.GameViewDrawData
 import com.ps.simplepapersoccer.GameObjects.Game.LinesToDraw
 
 import com.ps.simplepapersoccer.GameObjects.Game.Node
+import com.ps.simplepapersoccer.GameObjects.Player
 import com.ps.simplepapersoccer.R
 
 class GameView : View {
@@ -107,6 +108,7 @@ class GameView : View {
     fun drawAsync(gameViewDrawData: GameViewDrawData){
         drawLines?.add(gameViewDrawData.drawLine!!)
         this.gameViewDrawData = gameViewDrawData
+        gameActivity?.setPlayerTurnTextViewText()
         this.invalidate()
     }
 
@@ -175,12 +177,12 @@ class GameView : View {
     }
 
     private fun DrawGoalLines(edge: Float, paint: Paint, edgeMargin: Float, color: Int) {
-        canvas!!.drawLine(leftEdge, edgeMargin, middlePointX - gridXdraw, edgeMargin, paint)
-        canvas!!.drawLine(rightEdge, edgeMargin, middlePointX + gridXdraw, edgeMargin, paint)
+        canvas?.drawLine(leftEdge, edgeMargin, middlePointX - gridXdraw, edgeMargin, paint)
+        canvas?.drawLine(rightEdge, edgeMargin, middlePointX + gridXdraw, edgeMargin, paint)
 
-        canvas!!.drawLine(middlePointX + gridXdraw, edge, middlePointX + gridXdraw, edgeMargin, paint)
-        canvas!!.drawLine(middlePointX - gridXdraw, edge, middlePointX + gridXdraw, edge, paint)
-        canvas!!.drawLine(middlePointX - gridXdraw, edgeMargin, middlePointX - gridXdraw, edge, paint)
+        canvas?.drawLine(middlePointX + gridXdraw, edge, middlePointX + gridXdraw, edgeMargin, paint)
+        canvas?.drawLine(middlePointX - gridXdraw, edge, middlePointX + gridXdraw, edge, paint)
+        canvas?.drawLine(middlePointX - gridXdraw, edgeMargin, middlePointX - gridXdraw, edge, paint)
 
         paint.color = color
         paint.style = Paint.Style.STROKE
@@ -189,10 +191,10 @@ class GameView : View {
 
     private fun DrawGoal(edge: Float, paint: Paint, color: Int) {
         paint.color = color
-        canvas!!.drawCircle(middlePointX, edge, nodeSize.toFloat(), paint)
+        canvas?.drawCircle(middlePointX, edge, nodeSize.toFloat(), paint)
     }
 
     private fun DrawSideline(edge: Float, paint: Paint) {
-        canvas!!.drawLine(edge, topEdge + gridYdraw, edge, bottomEdge - gridYdraw, paint)
+        canvas?.drawLine(edge, topEdge + gridYdraw, edge, bottomEdge - gridYdraw, paint)
     }
 }

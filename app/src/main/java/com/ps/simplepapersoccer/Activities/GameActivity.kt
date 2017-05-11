@@ -133,8 +133,8 @@ class GameActivity : Activity() {
         gameView!!.setOnTouchListener { view, motionEvent ->
             if (motionEvent.action == MotionEvent.ACTION_DOWN) {
                 val touchedNode = nodeCoordsToNode(Math.round(motionEvent.x).toFloat(), Math.round(motionEvent.y).toFloat())
-                if (touchedNode != null) {
-                    gameHandler!!.PlayerMakeMove(touchedNode, gameHandler!!.currentPlayersTurn)
+                if (touchedNode != null && !drawTaskRunning) {
+                    gameHandler?.PlayerMakeMove(touchedNode, gameHandler!!.currentPlayersTurn)
                 }
             }
             false
@@ -171,6 +171,11 @@ class GameActivity : Activity() {
             players.add(Player(playerName, 2, player2Color, false))
         }
         return players
+    }
+
+    fun setPlayerTurnTextViewText() {
+        playerTurnTextView?.text = String.format("%s %s%s", getString(R.string.game_partial_its), gameHandler?.currentPlayersTurn?.playerName, getString(R.string.game_partial_turn))
+        playerTurnTextView?.setTextColor(gameHandler!!.currentPlayersTurn.playerColor)
     }
 
     private fun SetScoreText(player: Player) {

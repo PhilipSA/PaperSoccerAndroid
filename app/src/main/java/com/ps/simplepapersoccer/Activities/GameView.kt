@@ -178,7 +178,7 @@ class GameView : View {
         if (gameActivity?.gameHandler?.currentPlayersTurn?.isAi!!) return
         for (move in gameActivity?.gameHandler!!.allPossibleMovesFromNode(gameActivity?.gameHandler!!.ballNode())) {
             val coords = nodeToCoords(move.newNode)
-            canvas!!.drawCircle(coords[0], coords[1], 20f, paint)
+            canvas?.drawCircle(coords[0], coords[1], 20f, paint)
         }
     }
 

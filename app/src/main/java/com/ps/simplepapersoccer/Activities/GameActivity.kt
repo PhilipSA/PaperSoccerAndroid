@@ -132,16 +132,25 @@ class GameActivity : Activity() {
         gameView?.SetValues(GameActivity.getWidth(this), GameActivity.getHeight(this), gameView!!.gridSizeX, gameView!!.gridSizeY, this)
         gameView?.gameViewDrawData = GameViewDrawData(null, gameHandler?.currentPlayersTurn, gameHandler?.ballNode()?.xCord!!, gameHandler?.ballNode()?.yCord!!)
 
-        gameView!!.setOnTouchListener { view, motionEvent ->
-            if (motionEvent.action == MotionEvent.ACTION_DOWN) {
-                val touchedNode = nodeCoordsToNode(Math.round(motionEvent.x).toFloat(), Math.round(motionEvent.y).toFloat())
-                if (touchedNode != null && !drawTaskRunning) {
-                    gameHandler?.PlayerMakeMove(touchedNode, gameHandler!!.currentPlayersTurn)
+        if (gameMode != GameModeEnum.AI_VS_AI) {
+            gameView?.setOnTouchListener { view, motionEvent ->
+                if (motionEvent.action == MotionEvent.ACTION_DOWN) {
+                    val touchedNode = nodeCoordsToNode(Math.round(motionEvent.x).toFloat(), Math.round(motionEvent.y).toFloat())
+                    if (touchedNode != null && !drawTaskRunning) {
+                        gameHandler?.PlayerMakeMove(touchedNode, getNonAIPlayer())
+                    }
                 }
+                false
             }
-            false
         }
 
+    }
+
+    private fun getNonAIPlayer(): Player {
+        if (gameHandler?.currentPlayersTurn!!.isAi) return gameHandler!!.getOpponent(gameHandler!!.currentPlayersTurn)
+        else {
+            return gameHandler!!.currentPlayersTurn
+        }
     }
 
     fun nodeCoordsToNode(x: Float, y: Float): Node? {

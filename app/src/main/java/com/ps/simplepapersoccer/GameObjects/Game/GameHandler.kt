@@ -15,8 +15,8 @@ import com.ps.simplepapersoccer.GameObjects.Player
 import com.ps.simplepapersoccer.R
 
 class GameHandler(private val gameActivity: GameActivity, gridX: Int, gridY: Int, difficulty: DifficultyEnum, players: ArrayList<Player>, private val gameMode: Int) {
-    var player1: Player
-    var player2: Player
+    var player1: Player = players[0]
+    var player2: Player = players[1]
 
     var currentPlayersTurn: Player
 
@@ -34,8 +34,6 @@ class GameHandler(private val gameActivity: GameActivity, gridX: Int, gridY: Int
     }
 
     init {
-        this.player1 = players[0]
-        this.player2 = players[1]
 
         currentPlayersTurn = players[0]
 
@@ -52,8 +50,6 @@ class GameHandler(private val gameActivity: GameActivity, gridX: Int, gridY: Int
     }
 
     fun UpdateGameState() {
-        gameActivity.UpdateDrawData()
-
         if (isGameOver) {
             winner(getWinner(ballNode())!!)
             return
@@ -87,7 +83,7 @@ class GameHandler(private val gameActivity: GameActivity, gridX: Int, gridY: Int
             gameActivity.fxPlayer?.playSound(R.raw.soccerkick)
         }
 
-        gameActivity.DrawPartialMove(partialMove, partialMove.madeTheMove.playerColor)
+        gameActivity.DrawPartialMove(partialMove)
         ++numberOfTurns
     }
 

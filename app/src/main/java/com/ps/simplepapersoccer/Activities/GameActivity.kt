@@ -2,7 +2,6 @@ package com.ps.simplepapersoccer.Activities
 
 import android.app.Activity
 import android.content.Context
-import android.content.SharedPreferences
 import android.graphics.Color
 import android.graphics.Point
 import android.os.Build
@@ -10,7 +9,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.preference.PreferenceManager
-import android.view.Display
 import android.view.MotionEvent
 import android.view.View
 import android.view.Window
@@ -23,23 +21,20 @@ import android.widget.TextView
 import com.ps.simplepapersoccer.Enums.DifficultyEnum
 import com.ps.simplepapersoccer.Enums.GameModeEnum
 import com.ps.simplepapersoccer.Enums.VictoryConditionEnum
-import com.ps.simplepapersoccer.GameObjects.Game.GameHandler
+import com.ps.simplepapersoccer.GameObjects.Game.*
 import com.ps.simplepapersoccer.GameObjects.Move.PartialMove
-import com.ps.simplepapersoccer.GameObjects.Game.Node
 import com.ps.simplepapersoccer.GameObjects.Player
 import com.ps.simplepapersoccer.GameObjects.PlayerActivityData
-import com.ps.simplepapersoccer.GameObjects.Game.Victory
 import com.ps.simplepapersoccer.R
-import com.ps.simplepapersoccer.GameObjects.Game.LinesToDraw
 import com.ps.simplepapersoccer.Sound.FXPlayer
-
-import java.util.ArrayList
-import java.util.HashMap
-import java.util.Random
+import java.util.*
 
 class GameActivity : Activity() {
 
     var gameView: GameView? = null
+
+    var drawCallQueue: Queue<ReDrawGameViewTask>? = ArrayDeque<ReDrawGameViewTask>();
+    var drawTaskRunning: Boolean = false
 
     private var player1NameTextView: TextView? = null
     private var player2NameTextView: TextView? = null
@@ -132,8 +127,8 @@ class GameActivity : Activity() {
 
         gameHandler!!.UpdateGameState()
 
-        gameView!!.SetValues(GameActivity.getWidth(this), GameActivity.getHeight(this), gameView!!.gridSizeX, gameView!!.gridSizeY, this)
-        UpdateDrawData()
+        gameView?.SetValues(GameActivity.getWidth(this), GameActivity.getHeight(this), gameView!!.gridSizeX, gameView!!.gridSizeY, this)
+        gameView?.gameViewDrawData = GameViewDrawData(null, gameHandler?.currentPlayersTurn, gameHandler?.ballNode())
 
         gameView!!.setOnTouchListener { view, motionEvent ->
             if (motionEvent.action == MotionEvent.ACTION_DOWN) {
@@ -182,30 +177,21 @@ class GameActivity : Activity() {
         playerActivityDataMap[player]?.playerScoreTextView?.text = String.format("%s: %d", player.playerName, player.score)
     }
 
-    fun UpdateDrawData() {
-        playerTurnTextView!!.text = String.format("%s %s%s", getString(R.string.game_partial_its), gameHandler?.currentPlayersTurn?.playerName, getString(R.string.game_partial_turn))
-        playerTurnTextView!!.setTextColor(gameHandler!!.currentPlayersTurn.playerColor)
-        gameView?.UpdateBallPosition(gameView?.nodeToCoords(gameHandler?.ballNode() as Node) as FloatArray, gameHandler!!.currentPlayersTurn)
-    }
+    fun AddDrawDataToQueue(linesToDraw: LinesToDraw, ballNode: Node, playerTurn: Player ) {
+        drawCallQueue?.add(ReDrawGameViewTask(gameView!!, GameViewDrawData(linesToDraw, playerTurn, ballNode), this))
 
-    fun AddNewLineToDraw(oldNodeCoords: Float, oldNodeCoords2: Float, newLineCoords: Float, newLineCoords2: Float, color: Int) {
-        gameView?.drawLines?.add(LinesToDraw(oldNodeCoords, oldNodeCoords2, newLineCoords, newLineCoords2, color))
-        UpdateDrawData()
-        gameView?.invalidate()
-    }
-
-    fun DrawPartialMove(move: PartialMove, playerColor: Int) {
-        try {
-            val newLineCoords = gameView?.nodeToCoords(move.newNode)
-            val oldNodeCoords = gameView?.nodeToCoords(move.oldNode)
-            AddNewLineToDraw(oldNodeCoords?.get(0)!!, oldNodeCoords[1], newLineCoords?.get(0)!!, newLineCoords[1], playerColor)
-
-            UpdateDrawData()
-            gameView?.invalidate()
-        } catch (e: Exception) {
-            return
+        if (!drawTaskRunning) {
+            drawTaskRunning = true
+            drawCallQueue?.poll()?.execute()
         }
+    }
 
+    fun DrawPartialMove(move: PartialMove) {
+        val newLineCoords = gameView?.nodeToCoords(move.newNode)
+        val oldNodeCoords = gameView?.nodeToCoords(move.oldNode)
+
+        val linesToDraw = LinesToDraw(oldNodeCoords?.get(0)!!, oldNodeCoords[1], newLineCoords?.get(0)!!, newLineCoords[1], move.madeTheMove.playerColor)
+        AddDrawDataToQueue(linesToDraw, move.newNode, move.madeTheMove)
     }
 
     fun Winner(victory: Victory) {

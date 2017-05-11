@@ -9,15 +9,18 @@ import android.graphics.Paint
 import android.graphics.drawable.ScaleDrawable
 import android.util.AttributeSet
 import android.view.View
-
+import com.ps.simplepapersoccer.GameObjects.Game.GameViewDrawData
 import com.ps.simplepapersoccer.GameObjects.Game.LinesToDraw
+
 import com.ps.simplepapersoccer.GameObjects.Game.Node
-import com.ps.simplepapersoccer.GameObjects.Player
 import com.ps.simplepapersoccer.R
 
 class GameView : View {
 
     var drawLines: MutableList<LinesToDraw> = ArrayList()
+
+    var gameViewDrawData: GameViewDrawData? = null
+
     private var gameActivity: GameActivity? = null
 
     private var canvas: Canvas? = null
@@ -49,22 +52,11 @@ class GameView : View {
     protected var middlePointX: Float = 0.toFloat()
     protected var middlePointY: Float = 0.toFloat()
 
-    private var playerTurn: Player? = null
-
-    private var ballX: Float = 0.toFloat()
-    private var ballY: Float = 0.toFloat()
-
     constructor(context: Context) : super(context) {}
 
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs) {}
 
     constructor(context: Context, attrs: AttributeSet, defStyle: Int) : super(context, attrs, defStyle) {}
-
-    fun UpdateBallPosition(ballCoords: FloatArray, playerTurn: Player) {
-        this.ballX = ballCoords[0]
-        this.ballY = ballCoords[1]
-        this.playerTurn = playerTurn
-    }
 
     fun SetValues(screenWidth: Int, screenHeight: Int, gridSizeX: Int, gridSizeY: Int, gameActivity: GameActivity) {
         topEdge = (screenHeight / 9).toFloat()
@@ -110,6 +102,12 @@ class GameView : View {
         super.onDraw(canvas)
         this.canvas = canvas
         RedrawMap()
+    }
+
+    fun drawAsync(gameViewDrawData: GameViewDrawData){
+        drawLines?.add(gameViewDrawData.drawLine!!)
+        this.gameViewDrawData = gameViewDrawData
+        this.invalidate()
     }
 
     fun RedrawMap() {
@@ -161,6 +159,8 @@ class GameView : View {
         //Draw ball
         var image = resources.getDrawable(R.drawable.football)
         image = ScaleDrawable(image, 0, ballSize.toFloat(), ballSize.toFloat()).drawable
+        val ballX = nodeToCoords(gameViewDrawData?.ballNode!!)[0];
+        val ballY = nodeToCoords(gameViewDrawData?.ballNode!!)[1];
         image.setBounds(ballX.toInt() - ballSize / 2, ballY.toInt() - ballSize / 2, ballX.toInt() + ballSize / 2, ballY.toInt() + ballSize / 2)
         image.draw(canvas)
     }

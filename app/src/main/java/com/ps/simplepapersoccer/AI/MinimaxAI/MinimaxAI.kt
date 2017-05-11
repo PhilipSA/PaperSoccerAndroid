@@ -216,7 +216,7 @@ class MinimaxAI(timeLimitMilliSeconds: Int) : IGameAI {
         score += (-state.numberOfTurns).toDouble()
 
         val opponentsGoal = state.getOpponent(maximizingPlayer).goalNode
-        score += -MathHelper.distance(opponentsGoal!!.xCord, state.ballNode().xCord, opponentsGoal.yCord, state.ballNode().yCord)
+        score += -MathHelper.distance(opponentsGoal!!.xCord, state.ballNode().xCord, opponentsGoal.yCord, state.ballNode().yCord)*2
 
         val myGoal = maximizingPlayer.goalNode
 
@@ -234,7 +234,6 @@ class MinimaxAI(timeLimitMilliSeconds: Int) : IGameAI {
                 --score;
             }
         }
-
 
         return score
     }

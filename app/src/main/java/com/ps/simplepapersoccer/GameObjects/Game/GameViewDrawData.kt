@@ -1,17 +1,16 @@
 package com.ps.simplepapersoccer.GameObjects.Game
 
 import com.ps.simplepapersoccer.GameObjects.Player
+import java.util.ArrayList
 
 class GameViewDrawData {
     var drawLine: LinesToDraw? = null
     var playerTurn: Player? = null
-    var ballNodeX: Int = 0
-    var ballNodeY: Int = 0
+    var ballNode: Node? = null
 
-    constructor(drawLine: LinesToDraw?, playerTurn: Player?, ballNodeX: Int, ballNodeY: Int) {
+    constructor(drawLine: LinesToDraw?, playerTurn: Player?, ballNode: Node?, neighbors: ArrayList<Node>) {
         this.drawLine = drawLine
         this.playerTurn = playerTurn
-        this.ballNodeX = ballNodeX
-        this.ballNodeY = ballNodeY
+        this.ballNode = ballNode
     }
 }

@@ -130,7 +130,7 @@ class GameActivity : Activity() {
         setPlayerTurnTextViewText()
 
         gameView?.SetValues(GameActivity.getWidth(this), GameActivity.getHeight(this), gameView!!.gridSizeX, gameView!!.gridSizeY, this)
-        gameView?.gameViewDrawData = GameViewDrawData(null, gameHandler?.currentPlayersTurn, gameHandler?.ballNode()?.xCord!!, gameHandler?.ballNode()?.yCord!!)
+        gameView?.gameViewDrawData = GameViewDrawData(null, gameHandler?.currentPlayersTurn, gameHandler?.ballNode(), getAllNodeNeighbors(gameHandler?.ballNode()!!))
 
         if (gameMode != GameModeEnum.AI_VS_AI) {
             gameView?.setOnTouchListener { view, motionEvent ->
@@ -143,7 +143,10 @@ class GameActivity : Activity() {
                 false
             }
         }
+    }
 
+    private fun getAllNodeNeighbors(node: Node): ArrayList<Node> {
+        return node.neighbors.mapTo(ArrayList<Node>()) { gameHandler?.gameBoard?.nodeHashMap?.get(it)!! }
     }
 
     private fun getNonAIPlayer(): Player {
@@ -194,7 +197,9 @@ class GameActivity : Activity() {
     }
 
     fun AddDrawDataToQueue(linesToDraw: LinesToDraw, ballNode: Node, playerTurn: Player ) {
-        drawCallQueue?.add(ReDrawGameViewTask(gameView!!, GameViewDrawData(linesToDraw, playerTurn, ballNode.xCord, ballNode.yCord), this))
+        drawCallQueue?.add(ReDrawGameViewTask(gameView!!, GameViewDrawData(linesToDraw, playerTurn, ballNode, getAllNodeNeighbors(ballNode)), this))
+
+        gameView?.setCurrentTurnData(gameHandler?.currentPlayersTurn!!, getAllNodeNeighbors(ballNode))
 
         if (!drawTaskRunning) {
             drawTaskRunning = true

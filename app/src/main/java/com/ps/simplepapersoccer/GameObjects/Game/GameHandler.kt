@@ -23,7 +23,7 @@ class GameHandler(private val gameActivity: GameActivity, gridX: Int, gridY: Int
     var numberOfTurns = 0
     private val gameAIHandler: GameAIHandler
     val gameBoard: GameBoard
-    var aiTurn = false
+    var ongoingTurn = false
 
     fun ballNode(): Node {
         return gameBoard.ballNode as Node
@@ -50,27 +50,28 @@ class GameHandler(private val gameActivity: GameActivity, gridX: Int, gridY: Int
     }
 
     fun UpdateGameState() {
+        ongoingTurn = false
         if (isGameOver) {
             winner(getWinner(ballNode())!!)
             return
         }
         if (currentPlayersTurn.isAi && gameMode != GameModeEnum.MULTIPLAYER_MODE) {
-            aiTurn = true
             gameAIHandler.MakeAIMove()
         }
     }
 
     fun PlayerMakeMove(node: Node, player: Player) {
         val partialMove = PartialMove(ballNode(), node, player)
-        if (isPartialMoveLegal(partialMove, player) && currentPlayersTurn == player) {
+        if (isPartialMoveLegal(partialMove, player) && currentPlayersTurn == player && !ongoingTurn) {
+            ongoingTurn = true
             MakeMove(partialMove)
             UpdateGameState()
         }
     }
 
     fun AIMakeMove(move: PartialMove) {
+        ongoingTurn = true
         MakeMove(move)
-        aiTurn = false
         UpdateGameState()
     }
 

@@ -33,7 +33,7 @@ class GameActivity : Activity() {
 
     var gameView: GameView? = null
 
-    var drawCallQueue: Queue<ReDrawGameViewTask>? = ArrayDeque<ReDrawGameViewTask>();
+    var drawCallQueue: Queue<ReDrawGameViewTask>? = ArrayDeque<ReDrawGameViewTask>()
     var drawTaskRunning: Boolean = false
 
     private var player1NameTextView: TextView? = null
@@ -100,7 +100,7 @@ class GameActivity : Activity() {
             players.add(Player(playerName, 1, player1Color, false))
             players.add(Player("Player2", 2, player2Color, false))
         } else {
-            players = assignTwoAi(difficulty, playerName)
+            players = assignTwoAi(difficulty)
         }
 
         player1NameTextView!!.text = players[0].playerName
@@ -125,10 +125,12 @@ class GameActivity : Activity() {
 
         playAgain = findViewById(R.id.playagainButton) as Button
 
-        gameHandler!!.UpdateGameState()
+        gameHandler?.UpdateGameState()
+
+        setPlayerTurnTextViewText()
 
         gameView?.SetValues(GameActivity.getWidth(this), GameActivity.getHeight(this), gameView!!.gridSizeX, gameView!!.gridSizeY, this)
-        gameView?.gameViewDrawData = GameViewDrawData(null, gameHandler?.currentPlayersTurn, gameHandler?.ballNode())
+        gameView?.gameViewDrawData = GameViewDrawData(null, gameHandler?.currentPlayersTurn, gameHandler?.ballNode()?.xCord!!, gameHandler?.ballNode()?.yCord!!)
 
         gameView!!.setOnTouchListener { view, motionEvent ->
             if (motionEvent.action == MotionEvent.ACTION_DOWN) {
@@ -147,7 +149,7 @@ class GameActivity : Activity() {
         return gameHandler?.gameBoard?.findNodeByXY(coordsArray!![0].toInt(), coordsArray[1].toInt())
     }
 
-    private fun assignTwoAi(difficulty: String, playerName: String): ArrayList<Player> {
+    private fun assignTwoAi(difficulty: String): ArrayList<Player> {
         val players = ArrayList<Player>()
         val random = Random()
         if (random.nextBoolean()) {
@@ -183,7 +185,7 @@ class GameActivity : Activity() {
     }
 
     fun AddDrawDataToQueue(linesToDraw: LinesToDraw, ballNode: Node, playerTurn: Player ) {
-        drawCallQueue?.add(ReDrawGameViewTask(gameView!!, GameViewDrawData(linesToDraw, playerTurn, ballNode), this))
+        drawCallQueue?.add(ReDrawGameViewTask(gameView!!, GameViewDrawData(linesToDraw, playerTurn, ballNode.xCord, ballNode.yCord), this))
 
         if (!drawTaskRunning) {
             drawTaskRunning = true
@@ -203,9 +205,9 @@ class GameActivity : Activity() {
         SetScoreText(victory.winner)
 
         if (victory.victoryConditionEnum == VictoryConditionEnum.Goal) {
-            playerWinnerTextView!!.setText(String.format("%s %s", victory.winner.playerName, getString(R.string.game_victory_scored_goal)))
+            playerWinnerTextView?.text = String.format("%s %s", victory.winner.playerName, getString(R.string.game_victory_scored_goal))
         } else {
-            playerWinnerTextView!!.setText(String.format("%s %s", victory.winner.playerName, getString(R.string.game_victory_out_of_moves)))
+            playerWinnerTextView?.text = String.format("%s %s", victory.winner.playerName, getString(R.string.game_victory_out_of_moves))
         }
 
         if (victory.winner.isAi) {

@@ -88,6 +88,13 @@ class GameView : View {
         return coords
     }
 
+    fun localNodeCoordsToCoords(x: Int, y: Int): FloatArray {
+        val coords = FloatArray(2)
+        coords[0] = x * gridXdraw + leftEdge
+        coords[1] = y * gridYdraw + topEdge
+        return coords
+    }
+
     //Converts screen coordinates to node coordinates
     fun coordsToNode(x: Float, y: Float): FloatArray {
         var x = (x + gridXdraw.div(2)) / gridXdraw * gridXdraw
@@ -161,15 +168,14 @@ class GameView : View {
         //Draw ball
         var image = resources.getDrawable(R.drawable.football)
         image = ScaleDrawable(image, 0, ballSize.toFloat(), ballSize.toFloat()).drawable
-        val ballX = nodeToCoords(gameViewDrawData?.ballNode!!)[0];
-        val ballY = nodeToCoords(gameViewDrawData?.ballNode!!)[1];
-        image.setBounds(ballX.toInt() - ballSize / 2, ballY.toInt() - ballSize / 2, ballX.toInt() + ballSize / 2, ballY.toInt() + ballSize / 2)
+        val ballNodeCoords = localNodeCoordsToCoords(gameViewDrawData?.ballNodeX!!, gameViewDrawData?.ballNodeY!!)
+        image.setBounds(ballNodeCoords[0].toInt() - ballSize / 2, ballNodeCoords[1].toInt() - ballSize / 2, ballNodeCoords[0].toInt() + ballSize / 2, ballNodeCoords[1].toInt() + ballSize / 2)
         image.draw(canvas)
     }
 
     private fun DrawPossibleMoves(paint: Paint) {
         paint.color = gameActivity?.gameHandler?.currentPlayersTurn?.playerColor!!
-        if (gameActivity?.gameHandler?.aiTurn as Boolean) return
+        if (gameActivity?.gameHandler?.currentPlayersTurn?.isAi!!) return
         for (move in gameActivity?.gameHandler!!.allPossibleMovesFromNode(gameActivity?.gameHandler!!.ballNode())) {
             val coords = nodeToCoords(move.newNode)
             canvas!!.drawCircle(coords[0], coords[1], 20f, paint)

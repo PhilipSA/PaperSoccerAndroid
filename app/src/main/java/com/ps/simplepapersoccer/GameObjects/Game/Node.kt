@@ -4,13 +4,14 @@ import com.ps.simplepapersoccer.Enums.NodeTypeEnum
 
 import java.util.HashSet
 import java.util.UUID
+import java.util.concurrent.CopyOnWriteArraySet
 
 class Node {
     var id: UUID
     var xCord: Int = 0
     var yCord: Int = 0
     var nodeType: NodeTypeEnum
-    var neighbors = HashSet<UUID>()
+    var neighbors = CopyOnWriteArraySet<UUID>()
 
     override fun hashCode(): Int {
         return id.hashCode() xor nodeType.hashCode() xor neighbors.hashCode()

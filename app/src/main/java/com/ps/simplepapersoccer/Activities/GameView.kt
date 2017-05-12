@@ -8,15 +8,12 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.drawable.ScaleDrawable
 import android.util.AttributeSet
-import android.view.SurfaceView
 import android.view.View
 import com.ps.simplepapersoccer.GameObjects.Game.GameViewDrawData
 import com.ps.simplepapersoccer.GameObjects.Game.LinesToDraw
 
 import com.ps.simplepapersoccer.GameObjects.Game.Node
-import com.ps.simplepapersoccer.GameObjects.Player
 import com.ps.simplepapersoccer.R
-import java.util.concurrent.CopyOnWriteArrayList
 
 class GameView : View {
 
@@ -55,9 +52,6 @@ class GameView : View {
     protected var middlePointX: Float = 0.toFloat()
     protected var middlePointY: Float = 0.toFloat()
 
-    private var playersTurn: Player? = null
-    private var neighbors: MutableList<Node>? = ArrayList()
-
     constructor(context: Context) : super(context) {}
 
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs) {}
@@ -83,12 +77,6 @@ class GameView : View {
         this.gameActivity = gameActivity
 
         this.invalidate()
-    }
-
-    fun setCurrentTurnData(player: Player, neighborList: CopyOnWriteArrayList<Node>)
-    {
-        playersTurn = player
-        neighbors = neighborList
     }
 
     //Converts node coordinates to screen coordinates
@@ -185,13 +173,11 @@ class GameView : View {
     }
 
     private fun DrawPossibleMoves() {
-        if (playersTurn != null) {
-            paint?.color = playersTurn?.playerColor as Int
-            if (playersTurn?.isAi!!) return
-            neighbors!!
-                    .map { nodeToCoords(it) }
-                    .forEach { canvas?.drawCircle(it[0], it[1], 20f, paint) }
-        }
+        paint?.color = gameActivity?.gameHandler?.currentPlayersTurn?.playerColor as Int
+        if (gameActivity?.gameHandler?.currentPlayersTurn?.isAi!!) return
+        gameViewDrawData?.nodeNeighbors!!
+                .map { nodeToCoords(it) }
+                .forEach { canvas?.drawCircle(it[0], it[1], 20f, paint) }
     }
 
     private fun DrawGoalLines(edge: Float, paint: Paint, edgeMargin: Float, color: Int) {

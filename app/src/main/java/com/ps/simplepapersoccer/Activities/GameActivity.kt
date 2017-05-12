@@ -131,7 +131,7 @@ class GameActivity : Activity() {
         setPlayerTurnTextViewText()
 
         gameView?.SetValues(GameActivity.getWidth(this), GameActivity.getHeight(this), gameView!!.gridSizeX, gameView!!.gridSizeY, this)
-        gameView?.gameViewDrawData = GameViewDrawData(null, gameHandler?.currentPlayersTurn, gameHandler?.ballNode())
+        gameView?.gameViewDrawData = GameViewDrawData(null, gameHandler?.currentPlayersTurn, gameHandler?.ballNode(), getAllNodeNeighbors(gameHandler?.ballNode()!!))
 
         if (gameMode != GameModeEnum.AI_VS_AI) {
             gameView?.setOnTouchListener { view, motionEvent ->
@@ -197,10 +197,8 @@ class GameActivity : Activity() {
         playerActivityDataMap[player]?.playerScoreTextView?.text = String.format("%s: %d", player.playerName, player.score)
     }
 
-    fun AddDrawDataToQueue(linesToDraw: LinesToDraw, ballNode: Node, playerTurn: Player ) {
-        drawCallQueue?.add(ReDrawGameViewTask(gameView!!, GameViewDrawData(linesToDraw, playerTurn, ballNode), this))
-
-        gameView?.setCurrentTurnData(gameHandler?.currentPlayersTurn!!, getAllNodeNeighbors(ballNode))
+    fun AddDrawDataToQueue(linesToDraw: LinesToDraw, ballNode: Node, madeTheMove: Player ) {
+        drawCallQueue?.add(ReDrawGameViewTask(gameView!!, GameViewDrawData(linesToDraw, madeTheMove, ballNode, getAllNodeNeighbors(ballNode)), this))
 
         if (!drawTaskRunning) {
             drawTaskRunning = true

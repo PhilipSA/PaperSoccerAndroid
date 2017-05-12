@@ -137,7 +137,6 @@ class GameHandler(private val gameActivity: GameActivity, gridX: Int, gridY: Int
     }
 
     fun isPartialMoveLegal(partialMove: PartialMove, player: Player): Boolean {
-        val test = allPossibleMovesFromNode(ballNode())
-        return test.contains(PossibleMove(partialMove.oldNode, partialMove.newNode)) && player === currentPlayersTurn
+        return allPossibleMovesFromNode(ballNode()).contains(PossibleMove(partialMove.oldNode, partialMove.newNode)) && player === currentPlayersTurn
     }
 }

@@ -16,6 +16,7 @@ import com.ps.simplepapersoccer.GameObjects.Game.LinesToDraw
 import com.ps.simplepapersoccer.GameObjects.Game.Node
 import com.ps.simplepapersoccer.GameObjects.Player
 import com.ps.simplepapersoccer.R
+import java.util.concurrent.CopyOnWriteArrayList
 
 class GameView : View {
 
@@ -84,7 +85,7 @@ class GameView : View {
         this.invalidate()
     }
 
-    fun setCurrentTurnData(player: Player, neighborList: ArrayList<Node>)
+    fun setCurrentTurnData(player: Player, neighborList: CopyOnWriteArrayList<Node>)
     {
         playersTurn = player
         neighbors = neighborList

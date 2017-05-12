@@ -28,6 +28,7 @@ import com.ps.simplepapersoccer.GameObjects.PlayerActivityData
 import com.ps.simplepapersoccer.R
 import com.ps.simplepapersoccer.Sound.FXPlayer
 import java.util.*
+import java.util.concurrent.CopyOnWriteArrayList
 
 class GameActivity : Activity() {
 
@@ -130,7 +131,7 @@ class GameActivity : Activity() {
         setPlayerTurnTextViewText()
 
         gameView?.SetValues(GameActivity.getWidth(this), GameActivity.getHeight(this), gameView!!.gridSizeX, gameView!!.gridSizeY, this)
-        gameView?.gameViewDrawData = GameViewDrawData(null, gameHandler?.currentPlayersTurn, gameHandler?.ballNode(), getAllNodeNeighbors(gameHandler?.ballNode()!!))
+        gameView?.gameViewDrawData = GameViewDrawData(null, gameHandler?.currentPlayersTurn, gameHandler?.ballNode())
 
         if (gameMode != GameModeEnum.AI_VS_AI) {
             gameView?.setOnTouchListener { view, motionEvent ->
@@ -145,8 +146,8 @@ class GameActivity : Activity() {
         }
     }
 
-    private fun getAllNodeNeighbors(node: Node): ArrayList<Node> {
-        return node.neighbors.mapTo(ArrayList<Node>()) { gameHandler?.gameBoard?.nodeHashMap?.get(it)!! }
+    private fun getAllNodeNeighbors(node: Node): CopyOnWriteArrayList<Node> {
+        return node.neighbors.mapTo(CopyOnWriteArrayList<Node>()) { gameHandler?.gameBoard?.nodeHashMap?.get(it)!! }
     }
 
     private fun getNonAIPlayer(): Player {
@@ -197,7 +198,7 @@ class GameActivity : Activity() {
     }
 
     fun AddDrawDataToQueue(linesToDraw: LinesToDraw, ballNode: Node, playerTurn: Player ) {
-        drawCallQueue?.add(ReDrawGameViewTask(gameView!!, GameViewDrawData(linesToDraw, playerTurn, ballNode, getAllNodeNeighbors(ballNode)), this))
+        drawCallQueue?.add(ReDrawGameViewTask(gameView!!, GameViewDrawData(linesToDraw, playerTurn, ballNode), this))
 
         gameView?.setCurrentTurnData(gameHandler?.currentPlayersTurn!!, getAllNodeNeighbors(ballNode))
 

@@ -17,6 +17,7 @@ import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
 import android.widget.Button
 import android.widget.TextView
+import co.metalab.asyncawait.async
 
 import com.ps.simplepapersoccer.Enums.DifficultyEnum
 import com.ps.simplepapersoccer.Enums.GameModeEnum
@@ -33,9 +34,6 @@ import java.util.concurrent.CopyOnWriteArrayList
 class GameActivity : Activity() {
 
     var gameView: GameView? = null
-
-    var drawCallQueue: Queue<ReDrawGameViewTask>? = ArrayDeque<ReDrawGameViewTask>()
-    var drawTaskRunning: Boolean = false
 
     private var player1NameTextView: TextView? = null
     private var player2NameTextView: TextView? = null
@@ -137,7 +135,7 @@ class GameActivity : Activity() {
             gameView?.setOnTouchListener { view, motionEvent ->
                 if (motionEvent.action == MotionEvent.ACTION_DOWN) {
                     val touchedNode = nodeCoordsToNode(Math.round(motionEvent.x).toFloat(), Math.round(motionEvent.y).toFloat())
-                    if (touchedNode != null && !drawTaskRunning) {
+                    if (touchedNode != null) {
                         gameHandler?.PlayerMakeMove(touchedNode, getNonAIPlayer())
                     }
                 }
@@ -197,13 +195,15 @@ class GameActivity : Activity() {
         playerActivityDataMap[player]?.playerScoreTextView?.text = String.format("%s: %d", player.playerName, player.score)
     }
 
-    fun AddDrawDataToQueue(linesToDraw: LinesToDraw, ballNode: Node, madeTheMove: Player ) {
-        drawCallQueue?.add(ReDrawGameViewTask(gameView!!, GameViewDrawData(linesToDraw, madeTheMove, ballNode, getAllNodeNeighbors(ballNode)), this))
+    fun AddDrawDataToQueue(linesToDraw: LinesToDraw, ballNode: Node, madeTheMove: Player ) = async {
+        await { executeDrawGameTask(GameViewDrawData(linesToDraw, madeTheMove, ballNode, getAllNodeNeighbors(ballNode))) }
+    }
 
-        if (!drawTaskRunning) {
-            drawTaskRunning = true
-            drawCallQueue?.poll()?.execute()
-        }
+    fun executeDrawGameTask(gameViewDrawData: GameViewDrawData) = async {
+        runOnUiThread({
+            gameView?.drawAsync(gameViewDrawData)
+        })
+        Thread.sleep(200)
     }
 
     fun DrawPartialMove(move: PartialMove) {

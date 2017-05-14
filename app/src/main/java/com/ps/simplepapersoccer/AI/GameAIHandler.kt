@@ -1,5 +1,6 @@
 package com.ps.simplepapersoccer.AI
 
+import co.metalab.asyncawait.async
 import com.ps.simplepapersoccer.AI.Abstraction.IGameAI
 import com.ps.simplepapersoccer.AI.MinimaxAI.MinimaxAI
 import com.ps.simplepapersoccer.Enums.DifficultyEnum
@@ -20,7 +21,8 @@ class GameAIHandler(private val gameHandler: GameHandler, private val difficulty
         }
     }
 
-    fun MakeAIMove() {
-        MakeMoveAITask(gameAI!!, gameHandler).execute()
+    fun MakeAIMove() = async {
+        var aiMove = await { gameAI?.MakeMove(gameHandler) }
+        gameHandler.AIMakeMove(aiMove!!)
     }
 }

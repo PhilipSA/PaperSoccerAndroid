@@ -1,8 +1,5 @@
 package com.ps.simplepapersoccer.GameObjects.Game
 
-import java.util.ArrayList
-import java.util.HashSet
-
 import com.ps.simplepapersoccer.AI.GameAIHandler
 import com.ps.simplepapersoccer.Activities.GameActivity
 import com.ps.simplepapersoccer.Enums.DifficultyEnum
@@ -14,7 +11,7 @@ import com.ps.simplepapersoccer.GameObjects.Move.PossibleMove
 import com.ps.simplepapersoccer.GameObjects.Player
 import com.ps.simplepapersoccer.R
 
-class GameHandler(private val gameActivity: GameActivity, gridX: Int, gridY: Int, difficulty: DifficultyEnum, players: ArrayList<Player>, private val gameMode: Int) {
+class GameHandler(private val gameActivity: GameActivity?, gridX: Int, gridY: Int, difficulty: DifficultyEnum, players: ArrayList<Player>, private val gameMode: Int) {
     var player1: Player = players[0]
     var player2: Player = players[1]
 
@@ -40,7 +37,7 @@ class GameHandler(private val gameActivity: GameActivity, gridX: Int, gridY: Int
         gameBoard = GameBoard(gridX, gridY)
         player1.goalNode = gameBoard.goalNode1
         player2.goalNode = gameBoard.goalNode2
-        gameActivity.reDraw()
+        gameActivity?.reDraw()
 
         gameAIHandler = GameAIHandler(this, difficulty)
     }
@@ -79,12 +76,12 @@ class GameHandler(private val gameActivity: GameActivity, gridX: Int, gridY: Int
         MakePartialMove(partialMove)
 
         if (ballNode().nodeType != NodeTypeEnum.Empty) {
-            gameActivity.fxPlayer?.playSound(R.raw.bounce)
+            gameActivity?.fxPlayer?.playSound(R.raw.bounce)
         } else {
-            gameActivity.fxPlayer?.playSound(R.raw.soccerkick)
+            gameActivity?.fxPlayer?.playSound(R.raw.soccerkick)
         }
 
-        gameActivity.DrawPartialMove(partialMove)
+        gameActivity?.DrawPartialMove(partialMove)
         ++numberOfTurns
     }
 
@@ -123,7 +120,7 @@ class GameHandler(private val gameActivity: GameActivity, gridX: Int, gridY: Int
     //Let the activity know we have a winner
     fun winner(victory: Victory) {
         victory.winner.score += 1
-        gameActivity.Winner(victory)
+        gameActivity?.Winner(victory)
     }
 
     fun getOpponent(myPlayer: Player): Player {

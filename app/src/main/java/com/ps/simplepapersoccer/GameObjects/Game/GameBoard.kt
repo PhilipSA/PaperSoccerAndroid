@@ -1,6 +1,5 @@
 package com.ps.simplepapersoccer.GameObjects.Game
 
-import com.google.common.collect.Iterables
 import com.ps.simplepapersoccer.Enums.NodeTypeEnum
 import com.ps.simplepapersoccer.GameObjects.Move.PartialMove
 import com.ps.simplepapersoccer.GameObjects.Move.PossibleMove
@@ -95,7 +94,7 @@ class GameBoard(gridSizeX: Int, gridSizeY: Int) {
     }
 
     fun UndoLastMove(): PartialMove {
-        val partialMove = Iterables.getLast(allPartialMoves)
+        val partialMove = allPartialMoves.last()
 
         partialMove.newNode.AddNeighborPair(partialMove.oldNode)
 

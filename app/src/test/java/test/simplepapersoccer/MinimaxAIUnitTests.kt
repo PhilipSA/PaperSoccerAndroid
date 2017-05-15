@@ -18,8 +18,8 @@ class MinimaxAIUnitTests {
     @Before
     fun init()
     {
-        player1 = AIPlayer(DifficultyEnum.Medium, "TestSubject", 1, 0, true)
-        player2 = AIPlayer(DifficultyEnum.VeryHard, "TestOpponent", 2, 0, true)
+        player1 = AIPlayer(DifficultyEnum.VeryHard, "TestSubject", 1, 0, true)
+        player2 = AIPlayer(DifficultyEnum.Hard, "TestOpponent", 2, 0, true)
 
         var players = arrayListOf(player1!!, player2!!)
 
@@ -28,7 +28,7 @@ class MinimaxAIUnitTests {
 
     @Test
     @Throws(Exception::class)
-    fun minimaxAi_makes_valid_move() {
+    fun higher_difficulty_win_vs_lower_difficulty() {
         gameHandler?.UpdateGameState()
         assertEquals(player1?.score, 1)
     }

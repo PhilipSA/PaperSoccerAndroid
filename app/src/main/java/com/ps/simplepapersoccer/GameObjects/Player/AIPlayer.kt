@@ -17,7 +17,7 @@ class AIPlayer(val difficulty: DifficultyEnum, playerName: String, playerNumber:
         } else if (difficulty == DifficultyEnum.Hard) {
             gameAI = MinimaxAI(1500)
         } else if (difficulty == DifficultyEnum.VeryHard) {
-            gameAI = MinimaxAI(3000)
+            gameAI = MinimaxAI(2000)
         }
     }
 }

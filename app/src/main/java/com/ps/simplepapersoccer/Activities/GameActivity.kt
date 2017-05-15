@@ -24,8 +24,10 @@ import com.ps.simplepapersoccer.Enums.GameModeEnum
 import com.ps.simplepapersoccer.Enums.VictoryConditionEnum
 import com.ps.simplepapersoccer.GameObjects.Game.*
 import com.ps.simplepapersoccer.GameObjects.Move.PartialMove
-import com.ps.simplepapersoccer.GameObjects.Player
-import com.ps.simplepapersoccer.GameObjects.PlayerActivityData
+import com.ps.simplepapersoccer.GameObjects.Player.AIPlayer
+import com.ps.simplepapersoccer.GameObjects.Player.Abstraction.IPlayer
+import com.ps.simplepapersoccer.GameObjects.Player.Player
+import com.ps.simplepapersoccer.GameObjects.Player.PlayerActivityData
 import com.ps.simplepapersoccer.R
 import com.ps.simplepapersoccer.Sound.FXPlayer
 import java.util.*
@@ -56,7 +58,7 @@ class GameActivity : Activity() {
 
     var myName: String = ""
 
-    var playerActivityDataMap: MutableMap<Player, PlayerActivityData> = HashMap()
+    var playerActivityDataMap: MutableMap<IPlayer, PlayerActivityData> = HashMap()
 
     private var playAgain: Button? = null
 
@@ -92,14 +94,14 @@ class GameActivity : Activity() {
         player1NameTextView!!.setTextColor(player1Color)
         player2NameTextView!!.setTextColor(player2Color)
 
-        var players = ArrayList<Player>()
+        var players = ArrayList<IPlayer>()
         if (gameMode == GameModeEnum.PLAYER_VS_AI) {
-            players = assignPlayerAndAi(difficulty, playerName)
+            players = assignPlayerAndAi(difficulty, DifficultyEnum.valueOf(difficulty) ,playerName)
         } else if (gameMode == GameModeEnum.MULTIPLAYER_MODE) {
             players.add(Player(playerName, 1, player1Color, false))
             players.add(Player("Player2", 2, player2Color, false))
         } else {
-            players = assignTwoAi(difficulty)
+            players = assignTwoAi(difficulty, DifficultyEnum.valueOf(difficulty))
         }
 
         player1NameTextView!!.text = players[0].playerName
@@ -120,7 +122,7 @@ class GameActivity : Activity() {
 
         fxPlayer = FXPlayer(this)
 
-        gameHandler = GameHandler(this, gameView!!.gridSizeX, gameView!!.gridSizeY, DifficultyEnum.valueOf(difficulty), players, gameMode)
+        gameHandler = GameHandler(this, gameView!!.gridSizeX, gameView!!.gridSizeY, players, gameMode, true)
 
         playAgain = findViewById(R.id.playagainButton) as Button
 
@@ -148,11 +150,8 @@ class GameActivity : Activity() {
         return node.neighbors.mapTo(CopyOnWriteArrayList<Node>()) { gameHandler?.gameBoard?.nodeHashMap?.get(it)!! }
     }
 
-    private fun getNonAIPlayer(): Player {
-        if (gameHandler?.currentPlayersTurn!!.isAi) return gameHandler!!.getOpponent(gameHandler!!.currentPlayersTurn)
-        else {
-            return gameHandler!!.currentPlayersTurn
-        }
+    private fun getNonAIPlayer(): IPlayer {
+        if (gameHandler?.currentPlayersTurn!!.isAi) return gameHandler!!.getOpponent(gameHandler!!.currentPlayersTurn) else return gameHandler!!.currentPlayersTurn
     }
 
     fun nodeCoordsToNode(x: Float, y: Float): Node? {
@@ -160,27 +159,27 @@ class GameActivity : Activity() {
         return gameHandler?.gameBoard?.findNodeByXY(coordsArray!![0].toInt(), coordsArray[1].toInt())
     }
 
-    private fun assignTwoAi(difficulty: String): ArrayList<Player> {
-        val players = ArrayList<Player>()
+    private fun assignTwoAi(difficulty: String, difficultyEnum: DifficultyEnum): ArrayList<IPlayer> {
+        val players = ArrayList<IPlayer>()
         val random = Random()
         if (random.nextBoolean()) {
-            players.add(Player("Calculatos Maximus", 1, player1Color, true))
-            players.add(Player("Ai" + difficulty, 2, player2Color, true))
+            players.add(AIPlayer(difficultyEnum, "Calculatos Maximus", 1, player1Color, true))
+            players.add(AIPlayer(difficultyEnum, "Ai" + difficulty, 2, player2Color, true))
         } else {
-            players.add(Player("Ai" + difficulty, 1, player1Color, true))
-            players.add(Player("Calculatos Maximus", 2, player2Color, true))
+            players.add(AIPlayer(difficultyEnum, "Ai" + difficulty, 1, player1Color, true))
+            players.add(AIPlayer(difficultyEnum, "Calculatos Maximus", 2, player2Color, true))
         }
         return players
     }
 
-    private fun assignPlayerAndAi(difficulty: String, playerName: String): ArrayList<Player> {
-        val players = ArrayList<Player>()
+    private fun assignPlayerAndAi(difficulty: String, difficultyEnum: DifficultyEnum, playerName: String): ArrayList<IPlayer> {
+        val players = ArrayList<IPlayer>()
         val random = Random()
         if (random.nextBoolean()) {
             players.add(Player(playerName, 1, player1Color, false))
-            players.add(Player("Ai" + difficulty, 2, player2Color, true))
+            players.add(AIPlayer(difficultyEnum, "Ai" + difficulty, 2, player2Color, true))
         } else {
-            players.add(Player("Ai" + difficulty, 1, player1Color, true))
+            players.add(AIPlayer(difficultyEnum, "Ai" + difficulty, 1, player1Color, true))
             players.add(Player(playerName, 2, player2Color, false))
         }
         return players
@@ -191,11 +190,11 @@ class GameActivity : Activity() {
         playerTurnTextView?.setTextColor(gameHandler!!.currentPlayersTurn.playerColor)
     }
 
-    private fun SetScoreText(player: Player) {
+    private fun SetScoreText(player: IPlayer) {
         playerActivityDataMap[player]?.playerScoreTextView?.text = String.format("%s: %d", player.playerName, player.score)
     }
 
-    fun AddDrawDataToQueue(linesToDraw: LinesToDraw, ballNode: Node, madeTheMove: Player ) = async {
+    fun AddDrawDataToQueue(linesToDraw: LinesToDraw, ballNode: Node, madeTheMove: IPlayer) = async {
         await { executeDrawGameTask(GameViewDrawData(linesToDraw, madeTheMove, ballNode, getAllNodeNeighbors(ballNode))) }
     }
 

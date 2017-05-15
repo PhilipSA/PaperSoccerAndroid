@@ -1,9 +1,10 @@
 package com.ps.simplepapersoccer.GameObjects.Move
 
 import com.ps.simplepapersoccer.GameObjects.Game.Node
-import com.ps.simplepapersoccer.GameObjects.Player
+import com.ps.simplepapersoccer.GameObjects.Player.Abstraction.IPlayer
+import com.ps.simplepapersoccer.GameObjects.Player.Player
 
-class PartialMove(var oldNode: Node, var newNode: Node, var madeTheMove: Player) {
+class PartialMove(var oldNode: Node, var newNode: Node, var madeTheMove: IPlayer) {
 
     override fun equals(`object`: Any?): Boolean {
         if (`object` == null) return false

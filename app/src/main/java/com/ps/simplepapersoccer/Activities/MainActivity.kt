@@ -36,8 +36,6 @@ class MainActivity : Activity() {
         builder.setTitle(getString(R.string.choose_game_mode))
         builder.setItems(arrayOf<CharSequence>(getString(R.string.single_player_mode), getString(R.string.local_multiplayer_mode), getString(R.string.ai_vs_ai_mode))
         ) { dialog, which ->
-            // The 'which' argument contains the index position
-            // of the selected item
             when (which) {
                 0 -> intent.putExtra("MULTIPLAYER_MODE", GameModeEnum.PLAYER_VS_AI)
                 1 -> intent.putExtra("MULTIPLAYER_MODE", GameModeEnum.MULTIPLAYER_MODE)

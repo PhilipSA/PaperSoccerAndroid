@@ -6,9 +6,9 @@ android {
     buildToolsVersion "25.0.2"
     defaultConfig {
         applicationId "com.ps.simplepapersoccer"
-        minSdkVersion 16
+        minSdkVersion 15
         targetSdkVersion 25
-        versionCode 8
+        versionCode 9
         versionName "1.07"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }

@@ -8,14 +8,16 @@ import com.ps.simplepapersoccer.Enums.NodeTypeEnum
 import com.ps.simplepapersoccer.Enums.VictoryConditionEnum
 import com.ps.simplepapersoccer.GameObjects.Move.PartialMove
 import com.ps.simplepapersoccer.GameObjects.Move.PossibleMove
-import com.ps.simplepapersoccer.GameObjects.Player
+import com.ps.simplepapersoccer.GameObjects.Player.AIPlayer
+import com.ps.simplepapersoccer.GameObjects.Player.Abstraction.IPlayer
+import com.ps.simplepapersoccer.GameObjects.Player.Player
 import com.ps.simplepapersoccer.R
 
-class GameHandler(private val gameActivity: GameActivity?, gridX: Int, gridY: Int, difficulty: DifficultyEnum, players: ArrayList<Player>, private val gameMode: Int) {
-    var player1: Player = players[0]
-    var player2: Player = players[1]
+class GameHandler(private val gameActivity: GameActivity?, gridX: Int, gridY: Int, players: ArrayList<IPlayer>, private val gameMode: Int, aiIsAsync: Boolean) {
+    var player1: IPlayer = players[0]
+    var player2: IPlayer = players[1]
 
-    var currentPlayersTurn: Player
+    var currentPlayersTurn: IPlayer
 
     var numberOfTurns = 0
     private val gameAIHandler: GameAIHandler
@@ -39,7 +41,7 @@ class GameHandler(private val gameActivity: GameActivity?, gridX: Int, gridY: In
         player2.goalNode = gameBoard.goalNode2
         gameActivity?.reDraw()
 
-        gameAIHandler = GameAIHandler(this, difficulty)
+        gameAIHandler = GameAIHandler(this, aiIsAsync)
     }
 
     fun allPossibleMovesFromNode(node: Node): HashSet<PossibleMove> {
@@ -53,11 +55,11 @@ class GameHandler(private val gameActivity: GameActivity?, gridX: Int, gridY: In
             return
         }
         if (currentPlayersTurn.isAi && gameMode != GameModeEnum.MULTIPLAYER_MODE) {
-            gameAIHandler.MakeAIMove()
+            gameAIHandler.MakeAIMove(currentPlayersTurn as AIPlayer)
         }
     }
 
-    fun PlayerMakeMove(node: Node, player: Player) {
+    fun PlayerMakeMove(node: Node, player: IPlayer) {
         val partialMove = PartialMove(ballNode(), node, player)
         if (isPartialMoveLegal(partialMove, player) && currentPlayersTurn == player && !ongoingTurn) {
             ongoingTurn = true
@@ -123,17 +125,17 @@ class GameHandler(private val gameActivity: GameActivity?, gridX: Int, gridY: In
         gameActivity?.Winner(victory)
     }
 
-    fun getOpponent(myPlayer: Player): Player {
+    fun getOpponent(myPlayer: IPlayer): IPlayer {
         if (myPlayer === player1) return player2
         return player1
     }
 
-    fun changeTurn(): Player {
+    fun changeTurn(): IPlayer {
         currentPlayersTurn = getOpponent(currentPlayersTurn)
         return currentPlayersTurn
     }
 
-    fun isPartialMoveLegal(partialMove: PartialMove, player: Player): Boolean {
+    fun isPartialMoveLegal(partialMove: PartialMove, player: IPlayer): Boolean {
         return allPossibleMovesFromNode(ballNode()).contains(PossibleMove(partialMove.oldNode, partialMove.newNode)) && player === currentPlayersTurn
     }
 }

@@ -1,28 +1,18 @@
 package com.ps.simplepapersoccer.AI
 
 import co.metalab.asyncawait.async
-import com.ps.simplepapersoccer.AI.Abstraction.IGameAI
-import com.ps.simplepapersoccer.AI.MinimaxAI.MinimaxAI
-import com.ps.simplepapersoccer.Enums.DifficultyEnum
 import com.ps.simplepapersoccer.GameObjects.Game.GameHandler
+import com.ps.simplepapersoccer.GameObjects.Move.PartialMove
+import com.ps.simplepapersoccer.GameObjects.Player.AIPlayer
 
-class GameAIHandler(private val gameHandler: GameHandler, private val difficulty: DifficultyEnum) {
-    private var gameAI: IGameAI? = null
+class GameAIHandler(private val gameHandler: GameHandler, private val calculateAsync: Boolean) {
 
-    init {
-        if (difficulty == DifficultyEnum.Easy) {
-            gameAI = EuclideanAI()
-        } else if (difficulty == DifficultyEnum.Medium) {
-            gameAI = MinimaxAI(1200)
-        } else if (difficulty == DifficultyEnum.Hard) {
-            gameAI = MinimaxAI(1500)
-        } else if (difficulty == DifficultyEnum.VeryHard) {
-            gameAI = MinimaxAI(3000)
-        }
+    fun MakeAIMove(aiPlayer : AIPlayer) {
+        var aiMove = if(calculateAsync) MakeAIMoveAsync(aiPlayer) else aiPlayer.gameAI?.MakeMove(gameHandler)
+        gameHandler.AIMakeMove((aiMove as PartialMove?)!!)
     }
 
-    fun MakeAIMove() = async {
-        var aiMove = await { gameAI?.MakeMove(gameHandler) }
-        gameHandler.AIMakeMove(aiMove!!)
+    fun MakeAIMoveAsync(aiPlayer : AIPlayer) = async {
+        await { aiPlayer.gameAI?.MakeMove(gameHandler) }
     }
 }

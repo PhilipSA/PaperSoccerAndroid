@@ -5,9 +5,8 @@ import com.ps.simplepapersoccer.Enums.NodeTypeEnum
 import com.ps.simplepapersoccer.Enums.SortOrderEnum
 import com.ps.simplepapersoccer.GameObjects.Game.GameHandler
 import com.ps.simplepapersoccer.GameObjects.Move.PartialMove
-import com.ps.simplepapersoccer.GameObjects.Move.PossibleMove
-import com.ps.simplepapersoccer.GameObjects.Game.Node
-import com.ps.simplepapersoccer.GameObjects.Player
+import com.ps.simplepapersoccer.GameObjects.Player.Abstraction.IPlayer
+import com.ps.simplepapersoccer.GameObjects.Player.Player
 import com.ps.simplepapersoccer.Helpers.MathHelper
 import java.util.*
 
@@ -64,7 +63,7 @@ class MinimaxAI(timeLimitMilliSeconds: Int) : IGameAI {
     //
     // Run an iterative deepening search on a game state, taking no longer than the given time limit
     //
-    private fun iterativeDeepeningSearch(state: GameHandler, timeLimit: Long, maximPlayer: Player): Double {
+    private fun iterativeDeepeningSearch(state: GameHandler, timeLimit: Long, maximPlayer: IPlayer): Double {
         val startTime = System.currentTimeMillis()
         val endTime = startTime + timeLimit
         var depth = 1
@@ -97,7 +96,7 @@ class MinimaxAI(timeLimitMilliSeconds: Int) : IGameAI {
         return score
     }
 
-    private fun alphaBetaPruning(state: GameHandler, currentDepth: Int, maximizingPlayer: Player, alpha: Double, beta: Double, startTime: Long, timeLimit: Long): Double {
+    private fun alphaBetaPruning(state: GameHandler, currentDepth: Int, maximizingPlayer: IPlayer, alpha: Double, beta: Double, startTime: Long, timeLimit: Long): Double {
         var alpha = alpha
         var beta = beta
         val currentTime = System.currentTimeMillis()
@@ -184,7 +183,7 @@ class MinimaxAI(timeLimitMilliSeconds: Int) : IGameAI {
         return bestScore
     }
 
-    private fun sortPossibleMovesByScore(sortOrder: SortOrderEnum, state: GameHandler, maximzingPlayer: Player): ArrayList<MoveData> {
+    private fun sortPossibleMovesByScore(sortOrder: SortOrderEnum, state: GameHandler, maximzingPlayer: IPlayer): ArrayList<MoveData> {
         val newPossibleMoves = ArrayList<MoveData>()
         for (possibleMove in state.allPossibleMovesFromNode(state.ballNode())) {
             val partialMove = PartialMove(possibleMove.oldNode, possibleMove.newNode, state.currentPlayersTurn)
@@ -207,7 +206,7 @@ class MinimaxAI(timeLimitMilliSeconds: Int) : IGameAI {
         return newPossibleMoves
     }
 
-    private fun minmaxEvaluation(state: GameHandler, maximizingPlayer: Player): Double {
+    private fun minmaxEvaluation(state: GameHandler, maximizingPlayer: IPlayer): Double {
         var score = 0.0
 
         if (state.isGameOver && state.getWinner(state.ballNode())?.winner === maximizingPlayer) score = 1000.0

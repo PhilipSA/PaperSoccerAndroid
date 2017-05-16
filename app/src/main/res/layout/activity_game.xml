@@ -34,33 +34,35 @@
         android:text="@string/play_again_button_text"
         android:visibility="invisible" />
 
-    <TextView
+    <me.grantland.widget.AutofitTextView
         android:id="@+id/player2TextView"
         android:text="Player2"
         style="@style/PlayerNameTextView"
         android:layout_alignParentTop="true" />
 
-    <TextView
+    <me.grantland.widget.AutofitTextView
         android:id="@+id/player2ScoreTextView"
         android:layout_width="wrap_content"
+        android:maxLines="2"
+        android:maxWidth="140dp"
         android:layout_height="wrap_content"
         android:text="Player2: 0"
         android:textColor="@color/primary_text_color"
         android:textSize="20dp"
-        android:layout_above="@+id/playerWinnerTextview"
+        android:layout_below="@+id/player2TextView"
         android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
+        android:layout_marginTop="9dp" />
 
-    <TextView
+    <me.grantland.widget.AutofitTextView
         android:id="@+id/player1ScoreTextView"
         android:layout_width="wrap_content"
+        android:maxLines="2"
+        android:maxWidth="140dp"
         android:layout_height="wrap_content"
         android:text="Player1: 0"
         android:textColor="@color/primary_text_color"
         android:textSize="20dp"
         android:layout_below="@+id/player2TextView"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
         android:layout_marginTop="9dp" />
 
     <TextView
@@ -80,7 +82,7 @@
         android:layout_below="@+id/player1ScoreTextView"
         android:layout_centerHorizontal="true" />
 
-    <TextView
+    <me.grantland.widget.AutofitTextView
         android:id="@+id/player1TextView"
         android:layout_alignParentBottom="true"
         android:text="Player1"
@@ -94,7 +96,6 @@
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:background="@drawable/drawable_tooltip_back"
         android:layout_above="@+id/player1TextView"
-        android:layout_alignParentStart="true"
-        android:layout_marginBottom="16dp" />
+        android:layout_marginBottom="5dp" />
 
 </RelativeLayout>

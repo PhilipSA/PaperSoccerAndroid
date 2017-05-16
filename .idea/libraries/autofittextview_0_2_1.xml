@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="autofittextview-0.2.1">
+    <CLASSES>
+      <root url="file://$USER_HOME$/.android/build-cache/97cd64d5dd66eb8ea78f3cae31b05c1021a2f866/output/res" />
+      <root url="jar://$USER_HOME$/.android/build-cache/97cd64d5dd66eb8ea78f3cae31b05c1021a2f866/output/jars/classes.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/me.grantland/autofittextview/0.2.1/4e12caef5d0681a6c3dacb4ddcaa7589dc4f531c/autofittextview-0.2.1-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

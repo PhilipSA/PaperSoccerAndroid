@@ -1,5 +1,7 @@
 package com.ps.simplepapersoccer.GameObjects.Game
 
+import com.ps.simplepapersoccer.GameObjects.Game.Geometry.LinesToDraw
+import com.ps.simplepapersoccer.GameObjects.Game.Geometry.Node
 import com.ps.simplepapersoccer.GameObjects.Player.Abstraction.IPlayer
 import java.util.concurrent.CopyOnWriteArrayList
 

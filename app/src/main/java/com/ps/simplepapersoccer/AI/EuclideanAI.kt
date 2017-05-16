@@ -14,8 +14,7 @@ class EuclideanAI : IGameAI {
         var tempManhattan = 0.0
 
         for (possibleMove in gameHandler.allPossibleMovesFromNode(gameHandler.ballNode())) {
-            tempManhattan = MathHelper.euclideanDistance(possibleMove.newNode.xCord, gameHandler.getOpponent(gameHandler.currentPlayersTurn).goalNode!!.xCord,
-                    possibleMove.newNode.yCord, gameHandler.getOpponent(gameHandler.currentPlayersTurn).goalNode!!.yCord)
+            tempManhattan = MathHelper.euclideanDistance(possibleMove.newNode.coords, gameHandler.getOpponent(gameHandler.currentPlayersTurn).goalNode!!.coords)
             if (tempManhattan < manhattanDistance) {
                 manhattanDistance = tempManhattan
                 manhattanMove = PartialMove(possibleMove.oldNode, possibleMove.newNode, gameHandler.currentPlayersTurn)

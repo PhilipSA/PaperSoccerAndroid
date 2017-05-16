@@ -1,6 +1,10 @@
 package com.ps.simplepapersoccer.GameObjects.Game
 
+import android.graphics.Point
 import com.ps.simplepapersoccer.Enums.NodeTypeEnum
+import com.ps.simplepapersoccer.GameObjects.Game.Geometry.Abstraction.IntegerLine
+import com.ps.simplepapersoccer.GameObjects.Game.Geometry.GoalLines
+import com.ps.simplepapersoccer.GameObjects.Game.Geometry.Node
 import com.ps.simplepapersoccer.GameObjects.Move.PartialMove
 import com.ps.simplepapersoccer.GameObjects.Move.PossibleMove
 import com.ps.simplepapersoccer.Helpers.MathHelper
@@ -10,13 +14,16 @@ import java.util.HashMap
 import java.util.HashSet
 import java.util.UUID
 
-class GameBoard(gridSizeX: Int, gridSizeY: Int) {
+class GameBoard(private val gridSizeX: Int, private val gridSizeY: Int) {
     var nodeHashMap = HashMap<UUID, Node>()
 
     var ballNode: Node? = null
 
     var goalNode1: Node? = null
     var goalNode2: Node? = null
+
+    var topGoalLines: GoalLines? = null
+    var bottomGoalLines: GoalLines? = null
 
     private val allPartialMoves = ArrayList<PartialMove>()
 
@@ -25,40 +32,35 @@ class GameBoard(gridSizeX: Int, gridSizeY: Int) {
     }
 
     init {
+        topGoalLines = GoalLines(IntegerLine(Point(gridSizeX / 2, 0), Point(gridSizeX / 2, 0)),
+                IntegerLine(Point(gridSizeX / 2 - 1, 1), Point(gridSizeX / 2 + 1, 1)))
+        bottomGoalLines = GoalLines(IntegerLine(Point(gridSizeX / 2 - 1, gridSizeY), Point(gridSizeX / 2 + 1, gridSizeY)),
+                IntegerLine(Point(gridSizeX / 2 - 1, gridSizeY - 1), Point(gridSizeX / 2 + 1, gridSizeY - 1)))
         makeNodes(gridSizeX, gridSizeY)
-        ballNode = findNodeByXY(gridSizeX / 2, gridSizeY / 2) as Node
+        ballNode = findNodeByCoords(Point(gridSizeX / 2, gridSizeY / 2)) as Node
+    }
+
+    private fun isEdgeNode(point: Point) : Boolean {
+        return (point.x == 0 || point.x == gridSizeX || point.y == 1 || point.y == gridSizeY - 1) && !topGoalLines!!.contains(point) && !bottomGoalLines!!.contains(point)
     }
 
     private fun makeNodes(gridSizeX: Int, gridSizeY: Int) {
         for (y in 1..gridSizeY - 1) {
             for (x in 0..gridSizeX) {
-                //No node in the 4 cornes
-                if (x == 0 && y == 1) continue
-                if (x == 0 && y == gridSizeY - 1) continue
-                if (x == gridSizeX && y == 1) continue
-                if (x == gridSizeX && y == gridSizeY - 1) continue
-
                 //Check if wall
-                if (x == 0 || x == gridSizeX)
-                    addNodeToNodeMap(Node(x, y, NodeTypeEnum.Wall))
-                else if (x != gridSizeX / 2 && y == 1) {
-                    addNodeToNodeMap(Node(x, y, NodeTypeEnum.Wall))
-                } else if (x != gridSizeX / 2 && y == gridSizeY - 1) {
-                    addNodeToNodeMap(Node(x, y, NodeTypeEnum.Wall))
-                } else {
-                    addNodeToNodeMap(Node(x, y, NodeTypeEnum.Empty))
-                }//Regular empty node
-                //Check if bottom wall special case
-                //Check if top wall special case
+                if (isEdgeNode(Point(x, y))) addNodeToNodeMap(Node(Point(x, y), NodeTypeEnum.Wall))
+                else {
+                    addNodeToNodeMap(Node(Point(x, y), NodeTypeEnum.Empty))
+                }
             }
         }
+
         //Make the 2 goal nodes
-        goalNode1 = Node(gridSizeX / 2, gridSizeY, NodeTypeEnum.Goal)
+        goalNode1 = Node(Point(gridSizeX / 2, gridSizeY), NodeTypeEnum.Goal)
         addNodeToNodeMap(goalNode1 as Node)
 
-        goalNode2 = Node(gridSizeX / 2, 0, NodeTypeEnum.Goal)
+        goalNode2 = Node(Point(gridSizeX / 2, 0), NodeTypeEnum.Goal)
         addNodeToNodeMap(goalNode2 as Node)
-
 
         GenerateAllNeighbors()
     }
@@ -68,10 +70,10 @@ class GameBoard(gridSizeX: Int, gridSizeY: Int) {
             for (otherNode in nodeHashMap.values) {
                 if (node.id === otherNode.id) continue
 
-                val euclideanDistance = MathHelper.euclideanDistance(node.xCord, otherNode.xCord, node.yCord, otherNode.yCord)
+                val euclideanDistance = MathHelper.euclideanDistance(node.coords, otherNode.coords)
 
                 if (node.nodeType == NodeTypeEnum.Wall && otherNode.nodeType == NodeTypeEnum.Wall) {
-                    if (node.yCord != otherNode.yCord && otherNode.xCord != node.xCord && euclideanDistance < 2) {
+                    if (node.coords.y != otherNode.coords.y && otherNode.coords.x != node.coords.x && euclideanDistance < 2) {
                         node.AddNeighborPair(otherNode)
                     } else {
                         continue
@@ -119,12 +121,8 @@ class GameBoard(gridSizeX: Int, gridSizeY: Int) {
     }
 
     //Returns the node with the XY coordinates
-    fun findNodeByXY(x: Int, y: Int): Node? {
-        for (n in nodeHashMap.values) {
-            if (n.xCord == x && n.yCord == y)
-                return n
-        }
-        return null
+    fun findNodeByCoords(point: Point): Node? {
+        return nodeHashMap.values.firstOrNull { it.coords == point }
     }
 
     fun addNodeToNodeMap(node: Node) {

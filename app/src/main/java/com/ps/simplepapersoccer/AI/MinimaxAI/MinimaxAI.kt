@@ -215,15 +215,15 @@ class MinimaxAI(timeLimitMilliSeconds: Int) : IGameAI {
         score += (-state.numberOfTurns).toDouble()
 
         val opponentsGoal = state.getOpponent(maximizingPlayer).goalNode
-        score += -MathHelper.distance(opponentsGoal!!.xCord, state.ballNode().xCord, opponentsGoal.yCord, state.ballNode().yCord)*2
+        score += -MathHelper.distance(opponentsGoal!!.coords, state.ballNode().coords)*2
 
         val myGoal = maximizingPlayer.goalNode
 
         //Only one move from the goal
-        if (MathHelper.distance(opponentsGoal.xCord, state.ballNode().xCord, opponentsGoal.yCord, state.ballNode().yCord) < 2.0 && state.currentPlayersTurn === maximizingPlayer)
+        if (MathHelper.distance(opponentsGoal.coords, state.ballNode().coords) < 2.0 && state.currentPlayersTurn === maximizingPlayer)
             score = 1000.0
 
-        if (MathHelper.distance(myGoal!!.xCord, state.ballNode().xCord, myGoal.yCord, state.ballNode().yCord) < 2.0 && state.currentPlayersTurn !== maximizingPlayer)
+        if (MathHelper.distance(myGoal!!.coords, state.ballNode().coords) < 2.0 && state.currentPlayersTurn !== maximizingPlayer)
             score = -1000.0
 
         //Neighbors are bounceable

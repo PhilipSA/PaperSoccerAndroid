@@ -2,16 +2,14 @@ package com.ps.simplepapersoccer.GameObjects.Game
 
 import com.ps.simplepapersoccer.AI.GameAIHandler
 import com.ps.simplepapersoccer.Activities.GameActivity
-import com.ps.simplepapersoccer.Enums.DifficultyEnum
 import com.ps.simplepapersoccer.Enums.GameModeEnum
 import com.ps.simplepapersoccer.Enums.NodeTypeEnum
 import com.ps.simplepapersoccer.Enums.VictoryConditionEnum
+import com.ps.simplepapersoccer.GameObjects.Game.Geometry.Node
 import com.ps.simplepapersoccer.GameObjects.Move.PartialMove
 import com.ps.simplepapersoccer.GameObjects.Move.PossibleMove
 import com.ps.simplepapersoccer.GameObjects.Player.AIPlayer
 import com.ps.simplepapersoccer.GameObjects.Player.Abstraction.IPlayer
-import com.ps.simplepapersoccer.GameObjects.Player.Player
-import com.ps.simplepapersoccer.R
 
 class GameHandler(private val gameActivity: GameActivity?, gridX: Int, gridY: Int, players: ArrayList<IPlayer>, val gameMode: Int, aiIsAsync: Boolean, private val waitForGameViewDraw: Boolean) {
     var player1: IPlayer = players[0]

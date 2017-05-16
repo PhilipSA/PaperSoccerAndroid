@@ -1,5 +1,6 @@
-package com.ps.simplepapersoccer.GameObjects.Game
+package com.ps.simplepapersoccer.GameObjects.Game.Geometry
 
+import android.graphics.Point
 import com.ps.simplepapersoccer.Enums.NodeTypeEnum
 
 import java.util.HashSet
@@ -7,11 +8,12 @@ import java.util.UUID
 import java.util.concurrent.CopyOnWriteArraySet
 
 class Node {
-    var id: UUID
-    var xCord: Int = 0
-    var yCord: Int = 0
+    var coords: Point
     var nodeType: NodeTypeEnum
-    var neighbors = CopyOnWriteArraySet<UUID>()
+
+    var id: UUID
+    var neighbors: CopyOnWriteArraySet<UUID>
+    var coordNeighbors: CopyOnWriteArraySet<Node>
 
     override fun hashCode(): Int {
         return id.hashCode() xor nodeType.hashCode() xor neighbors.hashCode()
@@ -27,18 +29,24 @@ class Node {
         other.neighbors.add(this.id)
     }
 
-    internal constructor(x: Int, y: Int, nodeType: NodeTypeEnum) {
-        id = UUID.randomUUID()
-        this.xCord = x
-        this.yCord = y
-        this.nodeType = nodeType
+    fun AddCoordNeighborPair(other: Node) {
+        coordNeighbors.add(other)
+        other.coordNeighbors.add(this)
     }
 
-    internal constructor(node: Node) {
+    constructor(coords: Point, nodeType: NodeTypeEnum) {
+        id = UUID.randomUUID()
+        this.coords = coords
+        this.nodeType = nodeType
+        this.neighbors = CopyOnWriteArraySet<UUID>()
+        this.coordNeighbors = CopyOnWriteArraySet<Node>()
+    }
+
+    constructor(node: Node) {
         this.id = node.id
-        this.xCord = node.xCord
-        this.yCord = node.yCord
+        this.coords = node.coords
         this.nodeType = node.nodeType
         this.neighbors = node.neighbors
+        this.coordNeighbors = node.coordNeighbors
     }
 }

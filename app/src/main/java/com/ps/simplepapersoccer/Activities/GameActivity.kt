@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.graphics.Color
 import android.graphics.Point
+import android.graphics.PointF
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -24,6 +25,8 @@ import com.ps.simplepapersoccer.Enums.GameModeEnum
 import com.ps.simplepapersoccer.Enums.NodeTypeEnum
 import com.ps.simplepapersoccer.Enums.VictoryConditionEnum
 import com.ps.simplepapersoccer.GameObjects.Game.*
+import com.ps.simplepapersoccer.GameObjects.Game.Geometry.LinesToDraw
+import com.ps.simplepapersoccer.GameObjects.Game.Geometry.Node
 import com.ps.simplepapersoccer.GameObjects.Move.PartialMove
 import com.ps.simplepapersoccer.GameObjects.Player.AIPlayer
 import com.ps.simplepapersoccer.GameObjects.Player.Abstraction.IPlayer
@@ -50,9 +53,6 @@ class GameActivity : Activity() {
     private val player1Color = Color.BLUE
     private val player2Color = Color.RED
 
-    private val screenHeight: Int = 0
-    private val screenWidth: Int = 0
-
     var fxPlayer: FXPlayer? = null
 
     var gameHandler: GameHandler? = null
@@ -77,6 +77,9 @@ class GameActivity : Activity() {
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
         val difficulty = sharedPreferences.getString("pref_difficultyLevel", "Medium")
         val playerName = sharedPreferences.getString("pref_playerName", "Player")
+
+        var gridSizeX = 8
+        var gridSizeY = 10
 
         val gameMode = intent.getIntExtra("MULTIPLAYER_MODE", GameModeEnum.PLAYER_VS_AI)
 
@@ -123,7 +126,7 @@ class GameActivity : Activity() {
 
         fxPlayer = FXPlayer(this)
 
-        gameHandler = GameHandler(this, gameView!!.gridSizeX, gameView!!.gridSizeY, players, gameMode, true, gameView != null)
+        gameHandler = GameHandler(this, gridSizeX, gridSizeY, players, gameMode, true, gameView != null)
 
         playAgain = findViewById(R.id.playagainButton) as Button
 
@@ -131,7 +134,7 @@ class GameActivity : Activity() {
 
         setPlayerTurnTextViewText()
 
-        gameView?.SetValues(GameActivity.getWidth(this), GameActivity.getHeight(this), gameView!!.gridSizeX, gameView!!.gridSizeY, this)
+        gameView?.SetValues(GameActivity.getWidth(this), GameActivity.getHeight(this), gridSizeX, gridSizeY, this, gameHandler?.gameBoard!!)
         gameView?.gameViewDrawData = GameViewDrawData(null, gameHandler?.currentPlayersTurn, gameHandler?.currentPlayersTurn, gameHandler?.ballNode(), getAllNodeNeighbors(gameHandler?.ballNode()!!))
 
         if (gameMode != GameModeEnum.AI_VS_AI) {
@@ -157,7 +160,7 @@ class GameActivity : Activity() {
 
     fun nodeCoordsToNode(x: Float, y: Float): Node? {
         val coordsArray = gameView?.coordsToNode(x, y)
-        return gameHandler?.gameBoard?.findNodeByXY(coordsArray!![0].toInt(), coordsArray[1].toInt())
+        return gameHandler?.gameBoard?.findNodeByCoords(Point(coordsArray!![0].toInt(), coordsArray[1].toInt()))
     }
 
     private fun assignTwoAi(difficulty: String, difficultyEnum: DifficultyEnum): ArrayList<IPlayer> {
@@ -223,7 +226,7 @@ class GameActivity : Activity() {
         val newLineCoords = gameView?.nodeToCoords(move.newNode)
         val oldNodeCoords = gameView?.nodeToCoords(move.oldNode)
 
-        val linesToDraw = LinesToDraw(oldNodeCoords?.get(0)!!, oldNodeCoords[1], newLineCoords?.get(0)!!, newLineCoords[1], move.madeTheMove.playerColor)
+        val linesToDraw = LinesToDraw(PointF(oldNodeCoords?.get(0)!!, oldNodeCoords[1]), PointF(newLineCoords?.get(0)!!, newLineCoords[1]), move.madeTheMove.playerColor)
         AddDrawDataToQueue(linesToDraw, move.newNode, move.madeTheMove)
     }
 

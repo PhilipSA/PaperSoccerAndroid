@@ -64,19 +64,18 @@ class GameHandler(private val gameActivity: GameActivity?, gridX: Int, gridY: In
         if (isPartialMoveLegal(partialMove, player) && currentPlayersTurn == player && !ongoingTurn) {
             ongoingTurn = true
             MakeMove(partialMove)
-            UpdateGameState()
+            //UpdateGameState()
         }
     }
 
     fun AIMakeMove(move: PartialMove) {
         ongoingTurn = true
         MakeMove(move)
-        UpdateGameState()
+        //UpdateGameState()
     }
 
     fun MakeMove(partialMove: PartialMove) {
         MakePartialMove(partialMove)
-
         gameActivity?.DrawPartialMove(partialMove)
         ++numberOfTurns
     }

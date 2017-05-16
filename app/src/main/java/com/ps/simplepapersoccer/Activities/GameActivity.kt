@@ -196,15 +196,18 @@ class GameActivity : Activity() {
     }
 
     fun AddDrawDataToQueue(linesToDraw: LinesToDraw, ballNode: Node, madeTheMove: IPlayer) = async {
-        await { executeDrawGameTask(GameViewDrawData(linesToDraw, madeTheMove, gameHandler?.currentPlayersTurn, ballNode, getAllNodeNeighbors(ballNode))) }
+        await { executeUpdateGameViewTask(GameViewDrawData(linesToDraw, madeTheMove, gameHandler?.currentPlayersTurn, ballNode, getAllNodeNeighbors(ballNode))) }
     }
 
-    fun executeDrawGameTask(gameViewDrawData: GameViewDrawData) = async {
+    fun executeUpdateGameViewTask(gameViewDrawData: GameViewDrawData) {
         runOnUiThread({
             playBallSound(gameViewDrawData)
             gameView?.drawAsync(gameViewDrawData)
         })
         Thread.sleep(200)
+        runOnUiThread({
+            gameHandler?.UpdateGameState()
+        })
     }
 
     fun playBallSound(gameViewDrawData: GameViewDrawData) {

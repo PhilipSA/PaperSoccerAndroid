@@ -13,7 +13,7 @@ import com.ps.simplepapersoccer.GameObjects.Player.Abstraction.IPlayer
 import com.ps.simplepapersoccer.GameObjects.Player.Player
 import com.ps.simplepapersoccer.R
 
-class GameHandler(private val gameActivity: GameActivity?, gridX: Int, gridY: Int, players: ArrayList<IPlayer>, private val gameMode: Int, aiIsAsync: Boolean, private val waitForGameViewDraw: Boolean) {
+class GameHandler(private val gameActivity: GameActivity?, gridX: Int, gridY: Int, players: ArrayList<IPlayer>, val gameMode: Int, aiIsAsync: Boolean, private val waitForGameViewDraw: Boolean) {
     var player1: IPlayer = players[0]
     var player2: IPlayer = players[1]
 

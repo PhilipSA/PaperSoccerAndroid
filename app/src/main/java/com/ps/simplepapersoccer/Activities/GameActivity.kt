@@ -236,7 +236,7 @@ class GameActivity : Activity() {
             playerWinnerTextView?.text = String.format("%s %s", victory.winner.playerName, getString(R.string.game_victory_out_of_moves))
         }
 
-        if (victory.winner.isAi) {
+        if (victory.winner.isAi && gameHandler?.gameMode == GameModeEnum.PLAYER_VS_AI) {
             fxPlayer?.playSound(R.raw.failure)
         } else {
             fxPlayer?.playSound(R.raw.goodresult)

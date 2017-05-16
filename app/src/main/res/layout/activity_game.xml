@@ -95,7 +95,6 @@
         android:text="Player1"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:background="@drawable/drawable_tooltip_back"
-        android:layout_above="@+id/player1TextView"
-        android:layout_marginBottom="5dp" />
+        android:layout_above="@+id/player1TextView" />
 
 </RelativeLayout>

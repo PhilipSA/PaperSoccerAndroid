@@ -23,13 +23,13 @@ class MinimaxAIUnitTests {
 
         var players = arrayListOf(player1!!, player2!!)
 
-        gameHandler = GameHandler(null, 10, 12, players, GameModeEnum.AI_VS_AI, false)
+        gameHandler = GameHandler(null, 10, 12, players, GameModeEnum.AI_VS_AI, false, false)
     }
 
     @Test
     @Throws(Exception::class)
     fun higher_difficulty_win_vs_lower_difficulty() {
         gameHandler?.UpdateGameState()
-        assertEquals(player1?.score, 1)
+        assertEquals(1, player1?.score)
     }
 }

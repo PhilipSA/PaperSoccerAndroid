@@ -123,7 +123,7 @@ class GameActivity : Activity() {
 
         fxPlayer = FXPlayer(this)
 
-        gameHandler = GameHandler(this, gameView!!.gridSizeX, gameView!!.gridSizeY, players, gameMode, true)
+        gameHandler = GameHandler(this, gameView!!.gridSizeX, gameView!!.gridSizeY, players, gameMode, true, gameView != null)
 
         playAgain = findViewById(R.id.playagainButton) as Button
 

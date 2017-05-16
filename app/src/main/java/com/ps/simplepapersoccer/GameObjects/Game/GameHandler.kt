@@ -13,7 +13,7 @@ import com.ps.simplepapersoccer.GameObjects.Player.Abstraction.IPlayer
 import com.ps.simplepapersoccer.GameObjects.Player.Player
 import com.ps.simplepapersoccer.R
 
-class GameHandler(private val gameActivity: GameActivity?, gridX: Int, gridY: Int, players: ArrayList<IPlayer>, private val gameMode: Int, aiIsAsync: Boolean) {
+class GameHandler(private val gameActivity: GameActivity?, gridX: Int, gridY: Int, players: ArrayList<IPlayer>, private val gameMode: Int, aiIsAsync: Boolean, private val waitForGameViewDraw: Boolean) {
     var player1: IPlayer = players[0]
     var player2: IPlayer = players[1]
 
@@ -64,20 +64,19 @@ class GameHandler(private val gameActivity: GameActivity?, gridX: Int, gridY: In
         if (isPartialMoveLegal(partialMove, player) && currentPlayersTurn == player && !ongoingTurn) {
             ongoingTurn = true
             MakeMove(partialMove)
-            //UpdateGameState()
         }
     }
 
     fun AIMakeMove(move: PartialMove) {
         ongoingTurn = true
         MakeMove(move)
-        //UpdateGameState()
     }
 
     fun MakeMove(partialMove: PartialMove) {
         MakePartialMove(partialMove)
         gameActivity?.DrawPartialMove(partialMove)
         ++numberOfTurns
+        if (!waitForGameViewDraw) UpdateGameState()
     }
 
     fun UndoLastMove() {

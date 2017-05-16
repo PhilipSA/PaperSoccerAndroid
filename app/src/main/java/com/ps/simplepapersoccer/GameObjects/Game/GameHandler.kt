@@ -77,12 +77,6 @@ class GameHandler(private val gameActivity: GameActivity?, gridX: Int, gridY: In
     fun MakeMove(partialMove: PartialMove) {
         MakePartialMove(partialMove)
 
-        if (ballNode().nodeType != NodeTypeEnum.Empty) {
-            gameActivity?.fxPlayer?.playSound(R.raw.bounce)
-        } else {
-            gameActivity?.fxPlayer?.playSound(R.raw.soccerkick)
-        }
-
         gameActivity?.DrawPartialMove(partialMove)
         ++numberOfTurns
     }

@@ -13,7 +13,7 @@ class AIPlayer(val difficulty: DifficultyEnum, playerName: String, playerNumber:
         if (difficulty == DifficultyEnum.Easy) {
             gameAI = EuclideanAI()
         } else if (difficulty == DifficultyEnum.Medium) {
-            gameAI = MinimaxAI(1200)
+            gameAI = MinimaxAI(1100)
         } else if (difficulty == DifficultyEnum.Hard) {
             gameAI = MinimaxAI(1500)
         } else if (difficulty == DifficultyEnum.VeryHard) {

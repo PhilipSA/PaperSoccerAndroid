@@ -21,6 +21,7 @@ import co.metalab.asyncawait.async
 
 import com.ps.simplepapersoccer.Enums.DifficultyEnum
 import com.ps.simplepapersoccer.Enums.GameModeEnum
+import com.ps.simplepapersoccer.Enums.NodeTypeEnum
 import com.ps.simplepapersoccer.Enums.VictoryConditionEnum
 import com.ps.simplepapersoccer.GameObjects.Game.*
 import com.ps.simplepapersoccer.GameObjects.Move.PartialMove
@@ -200,9 +201,19 @@ class GameActivity : Activity() {
 
     fun executeDrawGameTask(gameViewDrawData: GameViewDrawData) = async {
         runOnUiThread({
+            playBallSound(gameViewDrawData)
             gameView?.drawAsync(gameViewDrawData)
         })
         Thread.sleep(200)
+    }
+
+    fun playBallSound(gameViewDrawData: GameViewDrawData) {
+        if (gameHandler?.isGameOver!!) return
+        if (gameViewDrawData.ballNode?.nodeType != NodeTypeEnum.Empty) {
+            fxPlayer?.playSound(R.raw.bounce)
+        } else {
+            fxPlayer?.playSound(R.raw.soccerkick)
+        }
     }
 
     fun DrawPartialMove(move: PartialMove) {

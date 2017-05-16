@@ -173,8 +173,8 @@ class GameView : View {
     }
 
     private fun DrawPossibleMoves() {
-        paint?.color = gameActivity?.gameHandler?.currentPlayersTurn?.playerColor as Int
-        if (gameActivity?.gameHandler?.currentPlayersTurn?.isAi!!) return
+        paint?.color = gameViewDrawData?.currentPlayerTurn?.playerColor as Int
+        if (gameViewDrawData?.currentPlayerTurn?.isAi!!) return
         gameViewDrawData?.nodeNeighbors!!
                 .map { nodeToCoords(it) }
                 .forEach { canvas?.drawCircle(it[0], it[1], 20f, paint) }

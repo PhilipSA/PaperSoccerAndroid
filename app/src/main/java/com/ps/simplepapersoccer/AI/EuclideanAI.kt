@@ -9,7 +9,7 @@ import com.ps.simplepapersoccer.Helpers.MathHelper
 class EuclideanAI : IGameAI {
 
     override fun MakeMove(gameHandler: GameHandler): PartialMove {
-        var manhattanMove: PartialMove = null!!
+        var manhattanMove: PartialMove? = null
         var manhattanDistance = Integer.MAX_VALUE.toDouble()
         var tempManhattan = 0.0
 
@@ -21,6 +21,6 @@ class EuclideanAI : IGameAI {
                 manhattanMove = PartialMove(possibleMove.oldNode, possibleMove.newNode, gameHandler.currentPlayersTurn)
             }
         }
-        return manhattanMove
+        return manhattanMove!!
     }
 }

@@ -8,6 +8,7 @@ import com.ps.simplepapersoccer.GameObjects.Move.PartialMove
 import com.ps.simplepapersoccer.GameObjects.Player.Abstraction.IPlayer
 import com.ps.simplepapersoccer.GameObjects.Player.Player
 import com.ps.simplepapersoccer.Helpers.MathHelper
+import com.ps.simplepapersoccer.Helpers.PathFindingHelper
 import java.util.*
 
 class MinimaxAI(timeLimitMilliSeconds: Int) : IGameAI {
@@ -215,7 +216,8 @@ class MinimaxAI(timeLimitMilliSeconds: Int) : IGameAI {
         score += (-state.numberOfTurns).toDouble()
 
         val opponentsGoal = state.getOpponent(maximizingPlayer).goalNode
-        score += -MathHelper.distance(opponentsGoal!!.coords, state.ballNode().coords)*2
+        //score += -MathHelper.distance(opponentsGoal!!.coords, state.ballNode().coords)*2
+        score += -PathFindingHelper.findPath(state.ballNode(), opponentsGoal!!, state.gameBoard.nodeHashMap.values.toList())?.size * 2
 
         val myGoal = maximizingPlayer.goalNode
 
@@ -233,7 +235,6 @@ class MinimaxAI(timeLimitMilliSeconds: Int) : IGameAI {
                 --score;
             }
         }
-
         return score
     }
 

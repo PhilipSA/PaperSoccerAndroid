@@ -3,7 +3,6 @@ package com.ps.simplepapersoccer.GameObjects.Game.Geometry
 import android.graphics.Point
 import com.ps.simplepapersoccer.Enums.NodeTypeEnum
 
-import java.util.HashSet
 import java.util.UUID
 import java.util.concurrent.CopyOnWriteArraySet
 
@@ -17,6 +16,10 @@ class Node {
 
     override fun hashCode(): Int {
         return id.hashCode() xor nodeType.hashCode() xor neighbors.hashCode()
+    }
+
+    fun pairMatchesType(other: Node, firstNodeType: NodeTypeEnum, otherNodeType: NodeTypeEnum): Boolean {
+        return (nodeType == firstNodeType && other.nodeType == otherNodeType) || (nodeType == otherNodeType && other.nodeType == firstNodeType)
     }
 
     fun isDiagonalNeighbor(other: Node): Boolean {

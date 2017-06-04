@@ -19,6 +19,10 @@ class Node {
         return id.hashCode() xor nodeType.hashCode() xor neighbors.hashCode()
     }
 
+    fun isDiagonalNeighbor(other: Node): Boolean {
+        return coords.y != other.coords.y && other.coords.x != this.coords.x
+    }
+
     fun RemoveNeighborPair(other: Node) {
         neighbors.remove(other.id)
         other.neighbors.remove(this.id)

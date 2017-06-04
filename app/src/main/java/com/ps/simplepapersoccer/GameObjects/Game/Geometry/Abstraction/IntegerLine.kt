@@ -1,21 +1,51 @@
 package com.ps.simplepapersoccer.GameObjects.Game.Geometry.Abstraction
 
 import android.graphics.Point
-import java.lang.Math.abs
+import com.ps.simplepapersoccer.Helpers.MathHelper.euclideanDistance
 
 class IntegerLine(var fromPoint: Point, var toPoint: Point) {
+    var allPoints: MutableList<Point> = mutableListOf()
+    val length: Int get() = euclideanDistance(fromPoint, toPoint).toInt()
+
+    init {
+        var x = fromPoint.x
+        var y = fromPoint.y
+        val w = toPoint.x - fromPoint.x
+        val h = toPoint.y - fromPoint.y
+        var dx1 = 0
+        var dy1 = 0
+        var dx2 = 0
+        var dy2 = 0
+        if (w < 0) dx1 = -1 else if (w > 0) dx1 = 1
+        if (h < 0) dy1 = -1 else if (h > 0) dy1 = 1
+        if (w < 0) dx2 = -1 else if (w > 0) dx2 = 1
+        var longest = Math.abs(w)
+        var shortest = Math.abs(h)
+        if (longest <= shortest) {
+            longest = Math.abs(h)
+            shortest = Math.abs(w)
+            if (h < 0) dy2 = -1 else if (h > 0) dy2 = 1
+            dx2 = 0
+        }
+        var numerator = longest shr 1
+        for (i in 0..longest) {
+            allPoints.add(Point(x, y))
+            numerator += shortest
+            if (numerator >= longest) {
+                numerator -= longest
+                x += dx1
+                y += dy1
+            } else {
+                x += dx2
+                y += dy2
+            }
+        }
+    }
+
     fun contains(point: Point) : Boolean
     {
-        //C = arg
-        var crossproduct = (point.y - fromPoint.y) * (toPoint.x - fromPoint.x) - (point.x - fromPoint.x) * (toPoint.y - fromPoint.y)
-        if (abs(crossproduct) != 0) return false   // (or != 0 if using integers)
-
-        var dotproduct = (point.x - fromPoint.x) * (toPoint.x - fromPoint.x) + (point.y - fromPoint.y)*(toPoint.y - fromPoint.y)
-        if (dotproduct < 0) return false
-
-        var squaredlengthba = (toPoint.x - fromPoint.x)*(toPoint.x - fromPoint.x) + (toPoint.y - fromPoint.y)*(toPoint.y - fromPoint.y)
-        if (dotproduct > squaredlengthba) return false
-
-        return true
+        if (euclideanDistance(fromPoint, point) + euclideanDistance(toPoint, point) == euclideanDistance(fromPoint, toPoint))
+            return true; // C is on the line.
+        return false;    // C is not on the line.
     }
 }

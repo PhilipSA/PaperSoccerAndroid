@@ -3,7 +3,7 @@ package com.ps.simplepapersoccer.GameObjects.Game
 import android.graphics.Point
 import com.ps.simplepapersoccer.Enums.NodeTypeEnum
 import com.ps.simplepapersoccer.GameObjects.Game.Geometry.Abstraction.IntegerLine
-import com.ps.simplepapersoccer.GameObjects.Game.Geometry.GoalLines
+import com.ps.simplepapersoccer.GameObjects.Game.Geometry.Goal
 import com.ps.simplepapersoccer.GameObjects.Game.Geometry.Node
 import com.ps.simplepapersoccer.GameObjects.Move.PartialMove
 import com.ps.simplepapersoccer.GameObjects.Move.PossibleMove
@@ -22,8 +22,8 @@ class GameBoard(private val gridSizeX: Int, private val gridSizeY: Int) {
     var goalNode1: Node? = null
     var goalNode2: Node? = null
 
-    var topGoalLines: GoalLines? = null
-    var bottomGoalLines: GoalLines? = null
+    var topGoalLines: Goal
+    var bottomGoalLines: Goal
 
     private val allPartialMoves = ArrayList<PartialMove>()
 
@@ -32,10 +32,12 @@ class GameBoard(private val gridSizeX: Int, private val gridSizeY: Int) {
     }
 
     init {
-        topGoalLines = GoalLines(IntegerLine(Point(gridSizeX / 2, 0), Point(gridSizeX / 2, 0)),
-                IntegerLine(Point(gridSizeX / 2 - 1, 1), Point(gridSizeX / 2 + 1, 1)))
-        bottomGoalLines = GoalLines(IntegerLine(Point(gridSizeX / 2 - 1, gridSizeY), Point(gridSizeX / 2 + 1, gridSizeY)),
-                IntegerLine(Point(gridSizeX / 2 - 1, gridSizeY - 1), Point(gridSizeX / 2 + 1, gridSizeY - 1)))
+        topGoalLines = Goal(IntegerLine(Point(gridSizeX / 2 - 1, 0), Point(gridSizeX / 2 + 1, 0)),
+                IntegerLine(Point(gridSizeX / 2 - 1, 0), Point(gridSizeX / 2 - 1, 1)),
+                IntegerLine(Point(gridSizeX / 2 + 1, 0), Point(gridSizeX / 2 + 1, 1)))
+        bottomGoalLines = Goal(IntegerLine(Point(gridSizeX / 2 - 1, gridSizeY), Point(gridSizeX / 2 + 1, gridSizeY)),
+                IntegerLine(Point(gridSizeX / 2 - 1, gridSizeY - 1), Point(gridSizeX / 2 - 1, gridSizeY)),
+                IntegerLine(Point(gridSizeX / 2 + 1, gridSizeY - 1), Point(gridSizeX / 2 + 1, gridSizeY)))
         makeNodes(gridSizeX, gridSizeY)
         ballNode = findNodeByCoords(Point(gridSizeX / 2, gridSizeY / 2)) as Node
     }
@@ -55,12 +57,13 @@ class GameBoard(private val gridSizeX: Int, private val gridSizeY: Int) {
             }
         }
 
-        //Make the 2 goal nodes
-        goalNode1 = Node(Point(gridSizeX / 2, gridSizeY), NodeTypeEnum.Goal)
-        addNodeToNodeMap(goalNode1 as Node)
+        for (node in topGoalLines?.allNodes!!) {
+            addNodeToNodeMap(node)
+        }
 
-        goalNode2 = Node(Point(gridSizeX / 2, 0), NodeTypeEnum.Goal)
-        addNodeToNodeMap(goalNode2 as Node)
+        for (node in bottomGoalLines?.allNodes!!) {
+            addNodeToNodeMap(node)
+        }
 
         GenerateAllNeighbors()
     }
@@ -71,9 +74,10 @@ class GameBoard(private val gridSizeX: Int, private val gridSizeY: Int) {
                 if (node.id === otherNode.id) continue
 
                 val euclideanDistance = MathHelper.euclideanDistance(node.coords, otherNode.coords)
+                if (euclideanDistance.toInt() === 1) node.AddCoordNeighborPair(otherNode)
 
                 if (node.nodeType == NodeTypeEnum.Wall && otherNode.nodeType == NodeTypeEnum.Wall) {
-                    if (node.coords.y != otherNode.coords.y && otherNode.coords.x != node.coords.x && euclideanDistance < 2) {
+                    if (node.isDiagonalNeighbor(otherNode) && euclideanDistance < 2) {
                         node.AddNeighborPair(otherNode)
                     } else {
                         continue

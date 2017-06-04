@@ -5,5 +5,6 @@ enum class NodeTypeEnum {
     Wall,
     ContainsBall,
     BounceAble,
-    Goal
+    Goal,
+    Post
 }

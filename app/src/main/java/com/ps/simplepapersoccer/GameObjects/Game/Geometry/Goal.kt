@@ -7,20 +7,21 @@ import com.ps.simplepapersoccer.GameObjects.Game.Geometry.Abstraction.IntegerLin
 class Goal(var goalLine: IntegerLine, var leftPost: IntegerLine, var rightPost: IntegerLine) {
     fun contains(point: Point) : Boolean
     {
-        return goalLine.contains(point) || leftPost.contains(point) || rightPost.contains(point)
+        return goalLine.contains(point) || leftPost.contains(point) || rightPost.contains(point) || outerGoalLine.contains(point)
     }
     val height : Int get() = leftPost.length
     val width : Int get() = goalLine.length
+    val outerGoalLine: IntegerLine get() = IntegerLine(leftPost.toPoint, rightPost.toPoint)
     val allNodes: MutableList<Node> get() {
         var nodes: MutableList<Node> = mutableListOf<Node>()
         goalLine.allPoints.forEach {
             nodes.add(Node(it, NodeTypeEnum.Goal))
         }
         leftPost.allPoints.forEach {
-            nodes.add(Node(it, NodeTypeEnum.Post))
+            if (!goalLine.contains(it)) nodes.add(Node(it, NodeTypeEnum.Post))
         }
         rightPost.allPoints.forEach {
-            nodes.add(Node(it, NodeTypeEnum.Post))
+            if (!goalLine.contains(it)) nodes.add(Node(it, NodeTypeEnum.Post))
         }
         return nodes
     }

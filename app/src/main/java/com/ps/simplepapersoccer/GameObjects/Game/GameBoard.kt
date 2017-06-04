@@ -17,33 +17,31 @@ import java.util.UUID
 class GameBoard(private val gridSizeX: Int, private val gridSizeY: Int) {
     var nodeHashMap = HashMap<UUID, Node>()
 
-    var ballNode: Node? = null
+    var ballNode: Node
 
-    var goalNode1: Node? = null
-    var goalNode2: Node? = null
+    lateinit var goalNode1: Node
+    lateinit var goalNode2: Node
 
-    var topGoalLines: Goal
-    var bottomGoalLines: Goal
+    var topGoalLines: Goal = Goal(IntegerLine(Point(gridSizeX / 2 - 1, 0), Point(gridSizeX / 2 + 1, 0)),
+            IntegerLine(Point(gridSizeX / 2 - 1, 0), Point(gridSizeX / 2 - 1, 1)),
+            IntegerLine(Point(gridSizeX / 2 + 1, 0), Point(gridSizeX / 2 + 1, 1)))
+    var bottomGoalLines: Goal = Goal(IntegerLine(Point(gridSizeX / 2 - 1, gridSizeY), Point(gridSizeX / 2 + 1, gridSizeY)),
+            IntegerLine(Point(gridSizeX / 2 - 1, gridSizeY - 1), Point(gridSizeX / 2 - 1, gridSizeY)),
+            IntegerLine(Point(gridSizeX / 2 + 1, gridSizeY - 1), Point(gridSizeX / 2 + 1, gridSizeY)))
 
     private val allPartialMoves = ArrayList<PartialMove>()
 
     override fun hashCode(): Int {
-        return allPartialMoves.hashCode() xor nodeHashMap.hashCode() xor ballNode?.hashCode() as Int
+        return allPartialMoves.hashCode() xor nodeHashMap.hashCode() xor ballNode.hashCode()
     }
 
     init {
-        topGoalLines = Goal(IntegerLine(Point(gridSizeX / 2 - 1, 0), Point(gridSizeX / 2 + 1, 0)),
-                IntegerLine(Point(gridSizeX / 2 - 1, 0), Point(gridSizeX / 2 - 1, 1)),
-                IntegerLine(Point(gridSizeX / 2 + 1, 0), Point(gridSizeX / 2 + 1, 1)))
-        bottomGoalLines = Goal(IntegerLine(Point(gridSizeX / 2 - 1, gridSizeY), Point(gridSizeX / 2 + 1, gridSizeY)),
-                IntegerLine(Point(gridSizeX / 2 - 1, gridSizeY - 1), Point(gridSizeX / 2 - 1, gridSizeY)),
-                IntegerLine(Point(gridSizeX / 2 + 1, gridSizeY - 1), Point(gridSizeX / 2 + 1, gridSizeY)))
         makeNodes(gridSizeX, gridSizeY)
         ballNode = findNodeByCoords(Point(gridSizeX / 2, gridSizeY / 2)) as Node
     }
 
     private fun isEdgeNode(point: Point) : Boolean {
-        return (point.x == 0 || point.x == gridSizeX || point.y == 1 || point.y == gridSizeY - 1) && !topGoalLines!!.contains(point) && !bottomGoalLines!!.contains(point)
+        return (point.x == 0 || point.x == gridSizeX || point.y == 1 || point.y == gridSizeY - 1) && !topGoalLines.contains(point) && !bottomGoalLines.contains(point)
     }
 
     private fun makeNodes(gridSizeX: Int, gridSizeY: Int) {
@@ -57,13 +55,16 @@ class GameBoard(private val gridSizeX: Int, private val gridSizeY: Int) {
             }
         }
 
-        for (node in topGoalLines?.allNodes!!) {
+        for (node in topGoalLines.allNodes) {
             addNodeToNodeMap(node)
         }
 
-        for (node in bottomGoalLines?.allNodes!!) {
+        for (node in bottomGoalLines.allNodes) {
             addNodeToNodeMap(node)
         }
+
+        goalNode1 = bottomGoalLines.allNodes[bottomGoalLines.allNodes.size / 2]
+        goalNode2 = topGoalLines.allNodes[topGoalLines.allNodes.size / 2]
 
         GenerateAllNeighbors()
     }
@@ -76,7 +77,14 @@ class GameBoard(private val gridSizeX: Int, private val gridSizeY: Int) {
                 val euclideanDistance = MathHelper.euclideanDistance(node.coords, otherNode.coords)
                 if (euclideanDistance.toInt() === 1) node.AddCoordNeighborPair(otherNode)
 
-                if (node.nodeType == NodeTypeEnum.Wall && otherNode.nodeType == NodeTypeEnum.Wall) {
+                if (node.pairMatchesType(otherNode, NodeTypeEnum.Post, NodeTypeEnum.Wall) ||
+                        node.pairMatchesType(otherNode, NodeTypeEnum.Goal, NodeTypeEnum.Wall) ||
+                        node.pairMatchesType(otherNode, NodeTypeEnum.Post, NodeTypeEnum.Post)) {
+                    continue
+                }
+
+                if (node.pairMatchesType(otherNode, NodeTypeEnum.Wall, NodeTypeEnum.Wall) ||
+                        node.pairMatchesType(otherNode, NodeTypeEnum.Post, NodeTypeEnum.Goal)) {
                     if (node.isDiagonalNeighbor(otherNode) && euclideanDistance < 2) {
                         node.AddNeighborPair(otherNode)
                     } else {
@@ -89,12 +97,9 @@ class GameBoard(private val gridSizeX: Int, private val gridSizeY: Int) {
     }
 
     fun allPossibleMovesFromNode(node: Node): HashSet<PossibleMove> {
-        val possibleMoves = HashSet<PossibleMove>()
-
-        for (uuid in node.neighbors) {
-            val otherNode = nodeHashMap[uuid]
-            possibleMoves.add(PossibleMove(node, otherNode!!))
-        }
+        val possibleMoves = node.neighbors
+                .map { nodeHashMap[it] }
+                .mapTo(HashSet<PossibleMove>()) { PossibleMove(node, it!!) }
 
         return possibleMoves
     }

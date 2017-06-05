@@ -17,6 +17,7 @@ import com.ps.simplepapersoccer.GameObjects.Game.Geometry.Abstraction.IntegerLin
 import com.ps.simplepapersoccer.GameObjects.Game.Geometry.LinesToDraw
 
 import com.ps.simplepapersoccer.GameObjects.Game.Geometry.Node
+import com.ps.simplepapersoccer.Helpers.MathHelper
 import com.ps.simplepapersoccer.R
 
 class GameView : View {
@@ -183,6 +184,7 @@ class GameView : View {
 
     private fun DrawGoalLine(edge: Float, paint: Paint, color: Int, line: IntegerLine) {
         paint.color = color
+        paint.strokeWidth = sideLineStrokeWidth.toFloat()
         var startPoint = pointsCoordsToCoords(line.fromPoint)
         var endPoint = pointsCoordsToCoords(line.toPoint)
         canvas?.drawLine(startPoint[0], startPoint[1], endPoint[0], endPoint[1], paint)
@@ -200,6 +202,10 @@ class GameView : View {
     private fun DrawWalls(paint: Paint) {
         gameBoard?.nodeHashMap?.values!!.stream().filter({ otherNode -> otherNode.nodeType == NodeTypeEnum.Wall }).forEach{
             it.coordNeighbors.stream().filter({ otherNode -> otherNode.nodeType == NodeTypeEnum.Wall }).forEach{
+                otherNode -> if (!it.isDiagonalNeighbor(otherNode)) canvas?.drawLine(nodeToCoords(it)[0], nodeToCoords(it)[1], nodeToCoords(otherNode)[0], nodeToCoords(otherNode)[1], paint) } }
+
+        gameBoard?.nodeHashMap?.values!!.stream().filter({ otherNode -> otherNode.nodeType == NodeTypeEnum.Wall }).forEach{
+            it.coordNeighbors.stream().filter({ otherNode -> otherNode.nodeType == NodeTypeEnum.Post }).forEach{
                 otherNode -> if (!it.isDiagonalNeighbor(otherNode)) canvas?.drawLine(nodeToCoords(it)[0], nodeToCoords(it)[1], nodeToCoords(otherNode)[0], nodeToCoords(otherNode)[1], paint) } }
     }
 }

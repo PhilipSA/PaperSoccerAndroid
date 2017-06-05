@@ -44,8 +44,6 @@ class IntegerLine(var fromPoint: Point, var toPoint: Point) {
 
     fun contains(point: Point) : Boolean
     {
-        if (euclideanDistance(fromPoint, point) + euclideanDistance(toPoint, point) == euclideanDistance(fromPoint, toPoint))
-            return true; // C is on the line.
-        return false;    // C is not on the line.
+        return allPoints.find { x -> x.x == point.x && x.y == point.y } != null
     }
 }

@@ -1,5 +1,6 @@
 package com.ps.simplepapersoccer.GameObjects.Game
 
+import android.util.Log
 import com.ps.simplepapersoccer.AI.GameAIHandler
 import com.ps.simplepapersoccer.Activities.GameActivity
 import com.ps.simplepapersoccer.Enums.GameModeEnum
@@ -23,7 +24,7 @@ class GameHandler(private val gameActivity: GameActivity?, gridX: Int, gridY: In
     var ongoingTurn = false
 
     fun ballNode(): Node {
-        return gameBoard.ballNode as Node
+        return gameBoard.ballNode
     }
 
     override fun hashCode(): Int {
@@ -72,6 +73,7 @@ class GameHandler(private val gameActivity: GameActivity?, gridX: Int, gridY: In
 
     fun MakeMove(partialMove: PartialMove) {
         MakePartialMove(partialMove)
+        Log.d("MyTagGoesHere", partialMove.newNode.nodeType.toString());
         gameActivity?.DrawPartialMove(partialMove)
         ++numberOfTurns
         if (!waitForGameViewDraw) UpdateGameState()
@@ -91,7 +93,7 @@ class GameHandler(private val gameActivity: GameActivity?, gridX: Int, gridY: In
 
     val isGameOver: Boolean
         get() {
-            if (getWinner(gameBoard.ballNode!!) != null) {
+            if (getWinner(gameBoard.ballNode) != null) {
                 return true
             }
             return false

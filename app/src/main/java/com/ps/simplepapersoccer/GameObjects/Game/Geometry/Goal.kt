@@ -23,6 +23,9 @@ class Goal(var goalLine: IntegerLine, var leftPost: IntegerLine, var rightPost: 
         rightPost.allPoints.forEach {
             if (!goalLine.contains(it)) nodes.add(Node(it, NodeTypeEnum.Post))
         }
+        outerGoalLine.allPoints.forEach {
+            if (!leftPost.contains(it) && !rightPost.contains(it)) nodes.add(Node(it, NodeTypeEnum.Empty))
+        }
         return nodes
     }
 }

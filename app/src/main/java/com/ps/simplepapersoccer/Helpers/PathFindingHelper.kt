@@ -37,7 +37,7 @@ object PathFindingHelper {
             }
             explored.add(node)
             for (nextNode in node.node.neighbors) {
-                var next = allPathNode.find { x -> x.node.id === nextNode }!!
+                var next = allPathNode.find { x -> x.node.id === nextNode.id }!!
                 gScore = node.costSoFar + MathHelper.euclideanDistance(next!!.node.coords, node.node.coords).toInt()
 
                 if (explored.contains(next)) {

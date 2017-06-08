@@ -6,7 +6,6 @@ import com.ps.simplepapersoccer.Enums.SortOrderEnum
 import com.ps.simplepapersoccer.GameObjects.Game.GameHandler
 import com.ps.simplepapersoccer.GameObjects.Move.PartialMove
 import com.ps.simplepapersoccer.GameObjects.Player.Abstraction.IPlayer
-import com.ps.simplepapersoccer.GameObjects.Player.Player
 import com.ps.simplepapersoccer.Helpers.MathHelper
 import com.ps.simplepapersoccer.Helpers.PathFindingHelper
 import java.util.*
@@ -35,19 +34,10 @@ class MinimaxAI(timeLimitMilliSeconds: Int) : IGameAI {
         for (move in moves) {
 
             state.MakePartialMove(move.returnMove as PartialMove)
-
-            //
-            // Compute how long to spend looking at each move
-            //
             val searchTimeLimit = ((TIME_LIMIT_MILLIS - 1000) / moves.size).toLong()
-
             val score = iterativeDeepeningSearch(state, searchTimeLimit, maximPlayer)
-
             state.UndoLastMove()
 
-            //
-            // If the search finds a winning move
-            //
             if (score >= winCutoff) {
                 return move
             }
@@ -110,29 +100,8 @@ class MinimaxAI(timeLimitMilliSeconds: Int) : IGameAI {
         val storedAlpha = alpha
         val storedBeta = beta
 
-        val transpositionData = transpositionsMap[state.hashCode()]
-        if (transpositionData != null && transpositionData.depth >= currentDepth) {
-            if (transpositionData.scoreTypeEnum == ScoreTypeEnum.EXACT) {
-                return transpositionData.score
-            } else if (transpositionData.scoreTypeEnum == ScoreTypeEnum.UPPER) {
-                beta = Math.min(beta, transpositionData.score)
-            } else if (transpositionData.scoreTypeEnum == ScoreTypeEnum.LOWER) {
-                alpha = Math.max(alpha, transpositionData.score)
-            }
-            if (alpha >= beta) {
-                return transpositionData.score
-            }
-        }
-
         if (searchCutoff || currentDepth == 0 || state.getWinner(state.ballNode()) != null) {
             val value = minmaxEvaluation(state, maximizingPlayer)
-            if (value <= alpha) {
-                transpositionsMap.put(state.hashCode(), TranspositionData(currentDepth, value, ScoreTypeEnum.LOWER))
-            } else if (value >= beta) {
-                transpositionsMap.put(state.hashCode(), TranspositionData(currentDepth, value, ScoreTypeEnum.UPPER))
-            } else {
-                transpositionsMap.put(state.hashCode(), TranspositionData(currentDepth, value, ScoreTypeEnum.EXACT))
-            }
             return value
         }
 
@@ -142,9 +111,7 @@ class MinimaxAI(timeLimitMilliSeconds: Int) : IGameAI {
             val possibleMoves = sortPossibleMovesByScore(SortOrderEnum.Descending, state, maximizingPlayer)
             for (possibleMove in possibleMoves) {
                 state.MakePartialMove(possibleMove.returnMove!!)
-
                 alpha = Math.max(alpha, alphaBetaPruning(state, currentDepth - 1, maximizingPlayer, alpha, beta, startTime, timeLimit))
-
                 state.UndoLastMove()
 
                 if (beta <= alpha) {
@@ -156,9 +123,7 @@ class MinimaxAI(timeLimitMilliSeconds: Int) : IGameAI {
             val possibleMoves = sortPossibleMovesByScore(SortOrderEnum.Ascending, state, maximizingPlayer)
             for (possibleMove in possibleMoves) {
                 state.MakePartialMove(possibleMove.returnMove!!)
-
                 beta = Math.min(beta, alphaBetaPruning(state, currentDepth - 1, maximizingPlayer, alpha, beta, startTime, timeLimit))
-
                 state.UndoLastMove()
 
                 if (beta <= alpha) {
@@ -168,18 +133,6 @@ class MinimaxAI(timeLimitMilliSeconds: Int) : IGameAI {
 
             bestScore = beta
         }
-
-        val next = TranspositionData()
-        next.score = bestScore
-        next.depth = currentDepth
-        if (bestScore <= storedAlpha) {
-            next.scoreTypeEnum = ScoreTypeEnum.UPPER
-        } else if (bestScore >= storedBeta) {
-            next.scoreTypeEnum = ScoreTypeEnum.LOWER
-        } else {
-            next.scoreTypeEnum = ScoreTypeEnum.EXACT
-        }
-        transpositionsMap.put(state.hashCode(), next)
 
         return bestScore
     }
@@ -216,16 +169,15 @@ class MinimaxAI(timeLimitMilliSeconds: Int) : IGameAI {
         score += (-state.numberOfTurns).toDouble()
 
         val opponentsGoal = state.getOpponent(maximizingPlayer).goalNode
-        //score += -MathHelper.distance(opponentsGoal!!.coords, state.ballNode().coords)*2
         score += -PathFindingHelper.findPath(state.ballNode(), opponentsGoal!!, state.gameBoard.nodeHashMap.values.toList())?.size * 2
 
         val myGoal = maximizingPlayer.goalNode
 
         //Only one move from the goal
-        if (MathHelper.distance(opponentsGoal.coords, state.ballNode().coords) < 2.0 && state.currentPlayersTurn === maximizingPlayer)
+        if (MathHelper.euclideanDistance(opponentsGoal.coords, state.ballNode().coords) < 2.0 && state.currentPlayersTurn === maximizingPlayer)
             score = 1000.0
 
-        if (MathHelper.distance(myGoal!!.coords, state.ballNode().coords) < 2.0 && state.currentPlayersTurn !== maximizingPlayer)
+        if (MathHelper.euclideanDistance(myGoal!!.coords, state.ballNode().coords) < 2.0 && state.currentPlayersTurn !== maximizingPlayer)
             score = -1000.0
 
         //Neighbors are bounceable

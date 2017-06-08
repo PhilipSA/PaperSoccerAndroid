@@ -143,7 +143,6 @@ class GameView : View {
 
         for (node in gameBoard?.nodeHashMap?.values!!) {
             node.neighbors
-                    .map { gameBoard?.nodeHashMap!![it] }
                     .filterNot { node.coords.x != it!!.coords.x && node.coords.y != it.coords.y }
                     .forEach { canvas.drawLine(nodeToCoords(node)[0], nodeToCoords(node)[1], nodeToCoords(it!!)[0], nodeToCoords(it)[1], paint) }
         }

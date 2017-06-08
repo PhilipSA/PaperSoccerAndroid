@@ -150,8 +150,8 @@ class GameActivity : Activity() {
         }
     }
 
-    private fun getAllNodeNeighbors(node: Node): CopyOnWriteArrayList<Node> {
-        return node.neighbors.mapTo(CopyOnWriteArrayList<Node>()) { gameHandler?.gameBoard?.nodeHashMap?.get(it)!! }
+    private fun getAllNodeNeighbors(node: Node): MutableList<Node> {
+        return node.neighbors
     }
 
     private fun getNonAIPlayer(): IPlayer {

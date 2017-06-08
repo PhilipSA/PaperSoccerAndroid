@@ -11,8 +11,8 @@ class Node {
     var nodeType: NodeTypeEnum
 
     var id: UUID
-    var neighbors: CopyOnWriteArraySet<UUID>
-    var coordNeighbors: CopyOnWriteArraySet<Node>
+    var neighbors: MutableList<Node>
+    var coordNeighbors: MutableList<Node>
 
     override fun hashCode(): Int {
         return id.hashCode() xor nodeType.hashCode() xor neighbors.hashCode()
@@ -27,26 +27,24 @@ class Node {
     }
 
     fun RemoveNeighborPair(other: Node) {
-        neighbors.remove(other.id)
-        other.neighbors.remove(this.id)
+        neighbors.remove(other)
+        other.neighbors.remove(this)
     }
 
-    fun AddNeighborPair(other: Node) {
-        neighbors.add(other.id)
-        other.neighbors.add(this.id)
+    fun AddNeighbor(other: Node) {
+        neighbors.add(other)
     }
 
-    fun AddCoordNeighborPair(other: Node) {
+    fun AddCoordNeighbor(other: Node) {
         coordNeighbors.add(other)
-        other.coordNeighbors.add(this)
     }
 
     constructor(coords: Point, nodeType: NodeTypeEnum) {
         id = UUID.randomUUID()
         this.coords = coords
         this.nodeType = nodeType
-        this.neighbors = CopyOnWriteArraySet<UUID>()
-        this.coordNeighbors = CopyOnWriteArraySet<Node>()
+        this.neighbors = mutableListOf()
+        this.coordNeighbors = mutableListOf()
     }
 
     constructor(node: Node) {

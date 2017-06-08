@@ -10,9 +10,9 @@ class GameViewDrawData {
     var madeTheMove: IPlayer? = null
     var currentPlayerTurn: IPlayer? = null
     var ballNode: Node? = null
-    var nodeNeighbors: CopyOnWriteArrayList<Node> = CopyOnWriteArrayList()
+    var nodeNeighbors: MutableList<Node> = mutableListOf()
 
-    constructor(drawLine: LinesToDraw?, madeTheMove: IPlayer?, currentPlayerTurn: IPlayer?, ballNode: Node?, nodeNeighbors: CopyOnWriteArrayList<Node>) {
+    constructor(drawLine: LinesToDraw?, madeTheMove: IPlayer?, currentPlayerTurn: IPlayer?, ballNode: Node?, nodeNeighbors: MutableList<Node>) {
         this.drawLine = drawLine
         this.madeTheMove = madeTheMove
         this.currentPlayerTurn = currentPlayerTurn

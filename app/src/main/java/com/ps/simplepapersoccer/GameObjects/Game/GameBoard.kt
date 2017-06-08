@@ -7,6 +7,7 @@ import com.ps.simplepapersoccer.GameObjects.Game.Geometry.Goal
 import com.ps.simplepapersoccer.GameObjects.Game.Geometry.Node
 import com.ps.simplepapersoccer.GameObjects.Move.PartialMove
 import com.ps.simplepapersoccer.GameObjects.Move.PossibleMove
+import com.ps.simplepapersoccer.GameObjects.Move.StoredMove
 import com.ps.simplepapersoccer.Helpers.MathHelper
 
 import java.util.ArrayList
@@ -29,7 +30,7 @@ class GameBoard(private val gridSizeX: Int, private val gridSizeY: Int) {
             IntegerLine(Point(gridSizeX / 2 - 1, gridSizeY), Point(gridSizeX / 2 - 1, gridSizeY-1)),
             IntegerLine(Point(gridSizeX / 2 + 1, gridSizeY), Point(gridSizeX / 2 + 1, gridSizeY-1)))
 
-    private val allPartialMoves = ArrayList<PartialMove>()
+    private val allPartialMoves = ArrayList<StoredMove>()
 
     override fun hashCode(): Int {
         return allPartialMoves.hashCode() xor nodeHashMap.hashCode() xor ballNode.hashCode()
@@ -76,12 +77,12 @@ class GameBoard(private val gridSizeX: Int, private val gridSizeY: Int) {
                 if (node.id === otherNode.id) continue
 
                 val euclideanDistance = MathHelper.euclideanDistance(node.coords, otherNode.coords)
-                if (euclideanDistance.toInt() == 1) node.AddCoordNeighborPair(otherNode)
+                if (euclideanDistance.toInt() == 1) node.AddCoordNeighbor(otherNode)
 
                 if (node.pairMatchesType(otherNode, NodeTypeEnum.Wall, NodeTypeEnum.Wall) ||
                         node.pairMatchesType(otherNode, NodeTypeEnum.Post, NodeTypeEnum.Goal)) {
                     if (node.isDiagonalNeighbor(otherNode) && euclideanDistance < 2) {
-                        node.AddNeighborPair(otherNode)
+                        node.AddNeighbor(otherNode)
                     }
                     else continue
                 }
@@ -92,36 +93,30 @@ class GameBoard(private val gridSizeX: Int, private val gridSizeY: Int) {
                     continue
                 }
 
-                if (euclideanDistance < 2) node.AddNeighborPair(otherNode)
+                if (euclideanDistance < 2) node.AddNeighbor(otherNode)
             }
         }
     }
 
     fun allPossibleMovesFromNode(node: Node): HashSet<PossibleMove> {
         val possibleMoves = node.neighbors
-                .map { nodeHashMap[it] }
                 .mapTo(HashSet<PossibleMove>()) { PossibleMove(node, it!!) }
 
         return possibleMoves
     }
 
     fun UndoLastMove(): PartialMove {
-        val partialMove = allPartialMoves.last()
-
-        partialMove.newNode.AddNeighborPair(partialMove.oldNode)
-
-        nodeHashMap[partialMove.newNode.id]?.nodeType = partialMove.newNode.nodeType
-
-        ballNode = partialMove.oldNode
-
-        allPartialMoves.remove(partialMove)
-
-        return partialMove
+        val storedMove = allPartialMoves.last()
+        storedMove.partialMove.newNode.AddNeighbor(storedMove.partialMove.oldNode)
+        storedMove.partialMove.oldNode.AddNeighbor(storedMove.partialMove.newNode)
+        storedMove.partialMove.newNode.nodeType = storedMove.newNodeTypeEnum
+        ballNode = storedMove.partialMove.oldNode
+        allPartialMoves.remove(storedMove)
+        return storedMove.partialMove
     }
 
     fun MakePartialMove(partialMove: PartialMove) {
-        allPartialMoves.add(PartialMove(Node(partialMove.oldNode), Node(partialMove.newNode), partialMove.madeTheMove))
-
+        allPartialMoves.add(StoredMove(partialMove, partialMove.oldNode.nodeType, partialMove.newNode.nodeType))
         partialMove.newNode.RemoveNeighborPair(partialMove.oldNode)
 
         if (partialMove.oldNode.nodeType == NodeTypeEnum.Empty)

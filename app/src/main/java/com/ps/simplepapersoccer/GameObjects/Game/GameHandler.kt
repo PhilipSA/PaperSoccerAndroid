@@ -43,10 +43,6 @@ class GameHandler(private val gameActivity: GameActivity?, gridX: Int, gridY: In
         gameAIHandler = GameAIHandler(this, aiIsAsync)
     }
 
-    fun allPossibleMovesFromNode(node: Node): HashSet<PossibleMove> {
-        return gameBoard.allPossibleMovesFromNode(node)
-    }
-
     fun UpdateGameState() {
         ongoingTurn = false
         if (isGameOver) {
@@ -128,6 +124,7 @@ class GameHandler(private val gameActivity: GameActivity?, gridX: Int, gridY: In
     }
 
     fun isPartialMoveLegal(partialMove: PartialMove, player: IPlayer): Boolean {
-        return allPossibleMovesFromNode(ballNode()).contains(PossibleMove(partialMove.oldNode, partialMove.newNode)) && player === currentPlayersTurn
+        return gameBoard.allPossibleMovesFromNode(ballNode()).any { x -> x.newNode == partialMove.newNode }
+                && player == currentPlayersTurn
     }
 }

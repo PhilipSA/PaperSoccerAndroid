@@ -92,7 +92,7 @@ class GameBoard(private val gridSizeX: Int, private val gridSizeY: Int) {
 
     fun allPossibleMovesFromNode(node: Node): HashSet<PossibleMove> {
         val possibleMoves = node.neighbors
-                .mapTo(HashSet<PossibleMove>()) { PossibleMove(node, it!!) }
+                .mapTo(HashSet<PossibleMove>()) { PossibleMove(node, it) }
 
         return possibleMoves
     }

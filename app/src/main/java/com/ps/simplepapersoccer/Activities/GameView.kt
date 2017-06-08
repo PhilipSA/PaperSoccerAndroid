@@ -118,7 +118,7 @@ class GameView : View {
     }
 
     fun drawAsync(gameViewDrawData: GameViewDrawData){
-        drawLines?.add(gameViewDrawData.drawLine!!)
+        drawLines.add(gameViewDrawData.drawLine!!)
         this.gameViewDrawData = gameViewDrawData
         gameActivity?.setPlayerTurnTextViewText()
         this.invalidate()
@@ -142,8 +142,8 @@ class GameView : View {
 
         for (node in gameBoard?.nodeHashSet!!) {
             node.neighbors
-                    .filterNot { node.coords.x != it!!.coords.x && node.coords.y != it.coords.y }
-                    .forEach { canvas.drawLine(nodeToCoords(node)[0], nodeToCoords(node)[1], nodeToCoords(it!!)[0], nodeToCoords(it)[1], paint) }
+                    .filterNot { node.coords.x != it.coords.x && node.coords.y != it.coords.y }
+                    .forEach { canvas.drawLine(nodeToCoords(node)[0], nodeToCoords(node)[1], nodeToCoords(it)[0], nodeToCoords(it)[1], paint) }
         }
 
         DrawGoalLine(topEdge, paint, Color.RED, gameBoard!!.topGoalLines.goalLine)

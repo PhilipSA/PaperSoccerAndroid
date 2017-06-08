@@ -38,7 +38,7 @@ object PathFindingHelper {
             explored.add(node)
             for (nextNode in node.node.neighbors) {
                 var next = allPathNode.find { x -> x.node == nextNode }!!
-                gScore = node.costSoFar + MathHelper.euclideanDistance(next!!.node.coords, node.node.coords).toInt()
+                gScore = node.costSoFar + MathHelper.euclideanDistance(next.node.coords, node.node.coords).toInt()
 
                 if (explored.contains(next)) {
                     continue
@@ -50,7 +50,7 @@ object PathFindingHelper {
 
                 next.cameFrom = node
                 next.costSoFar = gScore
-                next.nodeValue = next.costSoFar + MathHelper.euclideanDistance(next!!.node.coords, goalNode.coords).toInt()
+                next.nodeValue = next.costSoFar + MathHelper.euclideanDistance(next.node.coords, goalNode.coords).toInt()
             }
         }
         return path

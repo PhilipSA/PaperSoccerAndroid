@@ -94,7 +94,7 @@ class MinimaxAI(timeLimitMilliSeconds: Int) : IGameAI {
 
         var bestScore = 0.0
 
-        if (maximizingPlayer === state.currentPlayersTurn) {
+        if (maximizingPlayer == state.currentPlayersTurn) {
             val possibleMoves = sortPossibleMovesByScore(SortOrderEnum.Descending, state, maximizingPlayer)
             for (possibleMove in possibleMoves) {
                 state.MakePartialMove(possibleMove.returnMove!!)
@@ -126,7 +126,7 @@ class MinimaxAI(timeLimitMilliSeconds: Int) : IGameAI {
 
     private fun sortPossibleMovesByScore(sortOrder: SortOrderEnum, state: GameHandler, maximzingPlayer: IPlayer): ArrayList<MoveData> {
         val newPossibleMoves = ArrayList<MoveData>()
-        for (possibleMove in state.allPossibleMovesFromNode(state.ballNode())) {
+        for (possibleMove in state.gameBoard.allPossibleMovesFromNode(state.ballNode())) {
             val partialMove = PartialMove(possibleMove.oldNode, possibleMove.newNode, state.currentPlayersTurn)
             partialMove.madeTheMove = state.currentPlayersTurn
             state.MakePartialMove(partialMove)
@@ -150,25 +150,25 @@ class MinimaxAI(timeLimitMilliSeconds: Int) : IGameAI {
     private fun minmaxEvaluation(state: GameHandler, maximizingPlayer: IPlayer): Double {
         var score = 0.0
 
-        if (state.getWinner(state.ballNode())?.winner === maximizingPlayer) score = 1000.0
-        if (state.getWinner(state.ballNode())?.winner !== maximizingPlayer) score = -1000.0
+        if (state.getWinner(state.ballNode())?.winner == maximizingPlayer) score = 1000.0
+        if (state.getWinner(state.ballNode())?.winner != maximizingPlayer) score = -1000.0
 
         score += (-state.numberOfTurns).toDouble()
 
         val opponentsGoal = state.getOpponent(maximizingPlayer).goalNode
-        score += -PathFindingHelper.findPath(state.ballNode(), opponentsGoal!!, state.gameBoard.nodeHashSet.toList())?.size * 2
+        score += -PathFindingHelper.findPath(state.ballNode(), opponentsGoal!!, state.gameBoard.nodeHashSet.toList()).size * 2
 
         val myGoal = maximizingPlayer.goalNode
 
         //Only one move from the goal
-        if (MathHelper.euclideanDistance(opponentsGoal.coords, state.ballNode().coords) < 2.0 && state.currentPlayersTurn === maximizingPlayer)
+        if (MathHelper.euclideanDistance(opponentsGoal.coords, state.ballNode().coords) < 2.0 && state.currentPlayersTurn == maximizingPlayer)
             score = 1000.0
 
-        if (MathHelper.euclideanDistance(myGoal!!.coords, state.ballNode().coords) < 2.0 && state.currentPlayersTurn !== maximizingPlayer)
+        if (MathHelper.euclideanDistance(myGoal!!.coords, state.ballNode().coords) < 2.0 && state.currentPlayersTurn != maximizingPlayer)
             score = -1000.0
 
         //Neighbors are bounceable
-        state.allPossibleMovesFromNode(state.ballNode()).forEach{
+        state.gameBoard.allPossibleMovesFromNode(state.ballNode()).forEach{
             if (it.newNode.nodeType == NodeTypeEnum.BounceAble && state.currentPlayersTurn === maximizingPlayer) ++score
             else if (it.newNode.nodeType == NodeTypeEnum.BounceAble) {
                 --score;

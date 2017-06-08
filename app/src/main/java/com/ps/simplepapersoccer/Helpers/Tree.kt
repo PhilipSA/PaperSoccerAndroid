@@ -3,10 +3,6 @@ package com.ps.simplepapersoccer.Helpers
 import java.util.ArrayList
 import java.util.HashMap
 
-/**
- * Created by Admin on 2017-04-23.
- */
-
 class Tree<T>(val head: T) {
 
     private val leafs = ArrayList<Tree<T>>()

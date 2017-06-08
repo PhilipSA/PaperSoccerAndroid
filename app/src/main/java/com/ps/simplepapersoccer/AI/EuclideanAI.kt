@@ -13,7 +13,7 @@ class EuclideanAI : IGameAI {
         var manhattanDistance = Integer.MAX_VALUE.toDouble()
         var tempManhattan = 0.0
 
-        for (possibleMove in gameHandler.allPossibleMovesFromNode(gameHandler.ballNode())) {
+        for (possibleMove in gameHandler.gameBoard.allPossibleMovesFromNode(gameHandler.ballNode())) {
             tempManhattan = MathHelper.euclideanDistance(possibleMove.newNode.coords, gameHandler.getOpponent(gameHandler.currentPlayersTurn).goalNode!!.coords)
             if (tempManhattan < manhattanDistance) {
                 manhattanDistance = tempManhattan

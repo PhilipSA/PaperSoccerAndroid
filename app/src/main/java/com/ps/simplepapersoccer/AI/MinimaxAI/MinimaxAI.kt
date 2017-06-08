@@ -156,7 +156,7 @@ class MinimaxAI(timeLimitMilliSeconds: Int) : IGameAI {
         score += (-state.numberOfTurns).toDouble()
 
         val opponentsGoal = state.getOpponent(maximizingPlayer).goalNode
-        score += -PathFindingHelper.findPath(state.ballNode(), opponentsGoal!!, state.gameBoard.nodeHashMap.values.toList())?.size * 2
+        score += -PathFindingHelper.findPath(state.ballNode(), opponentsGoal!!, state.gameBoard.nodeHashSet.toList())?.size * 2
 
         val myGoal = maximizingPlayer.goalNode
 

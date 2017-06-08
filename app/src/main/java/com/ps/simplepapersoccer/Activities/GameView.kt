@@ -17,7 +17,6 @@ import com.ps.simplepapersoccer.GameObjects.Game.Geometry.Abstraction.IntegerLin
 import com.ps.simplepapersoccer.GameObjects.Game.Geometry.LinesToDraw
 
 import com.ps.simplepapersoccer.GameObjects.Game.Geometry.Node
-import com.ps.simplepapersoccer.Helpers.MathHelper
 import com.ps.simplepapersoccer.R
 
 class GameView : View {
@@ -141,7 +140,7 @@ class GameView : View {
 
         paint.color = gridColor
 
-        for (node in gameBoard?.nodeHashMap?.values!!) {
+        for (node in gameBoard?.nodeHashSet!!) {
             node.neighbors
                     .filterNot { node.coords.x != it!!.coords.x && node.coords.y != it.coords.y }
                     .forEach { canvas.drawLine(nodeToCoords(node)[0], nodeToCoords(node)[1], nodeToCoords(it!!)[0], nodeToCoords(it)[1], paint) }
@@ -199,12 +198,12 @@ class GameView : View {
     }
 
     private fun DrawWalls(paint: Paint) {
-        gameBoard?.nodeHashMap?.values!!.stream().filter({ otherNode -> otherNode.nodeType == NodeTypeEnum.Wall }).forEach{
-            it.coordNeighbors.stream().filter({ otherNode -> otherNode.nodeType == NodeTypeEnum.Wall }).forEach{
+        gameBoard?.nodeHashSet?.filter({ otherNode -> otherNode.nodeType == NodeTypeEnum.Wall })?.forEach{
+            it.coordNeighbors.filter({ otherNode -> otherNode.nodeType == NodeTypeEnum.Wall }).forEach{
                 otherNode -> if (!it.isDiagonalNeighbor(otherNode)) canvas?.drawLine(nodeToCoords(it)[0], nodeToCoords(it)[1], nodeToCoords(otherNode)[0], nodeToCoords(otherNode)[1], paint) } }
 
-        gameBoard?.nodeHashMap?.values!!.stream().filter({ otherNode -> otherNode.nodeType == NodeTypeEnum.Wall }).forEach{
-            it.coordNeighbors.stream().filter({ otherNode -> otherNode.nodeType == NodeTypeEnum.Post }).forEach{
+        gameBoard?.nodeHashSet?.filter({ otherNode -> otherNode.nodeType == NodeTypeEnum.Wall })?.forEach{
+            it.coordNeighbors.filter({ otherNode -> otherNode.nodeType == NodeTypeEnum.Post }).forEach{
                 otherNode -> if (!it.isDiagonalNeighbor(otherNode)) canvas?.drawLine(nodeToCoords(it)[0], nodeToCoords(it)[1], nodeToCoords(otherNode)[0], nodeToCoords(otherNode)[1], paint) } }
     }
 }

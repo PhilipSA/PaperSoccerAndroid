@@ -11,11 +11,6 @@ class MoveData : Comparable<MoveData> {
         this.returnValue = returnValue
     }
 
-    constructor(returnMove: PartialMove, depth: Int) {
-        this.returnMove = returnMove
-        this.depth = depth
-    }
-
     override fun compareTo(item: MoveData): Int {
         if (this.returnValue < item.returnValue) {
             return -1
@@ -24,18 +19,5 @@ class MoveData : Comparable<MoveData> {
         }
 
         return 0
-    }
-
-    override fun equals(`object`: Any?): Boolean {
-        if (`object` == null) return false
-        if (`object`.javaClass != javaClass) return false
-        val other = `object` as MoveData?
-        if (returnMove != other!!.returnMove) return false
-        if (depth == other.depth) return false
-        return true
-    }
-
-    override fun hashCode(): Int {
-        return returnMove?.hashCode()?.xor(depth) as Int
     }
 }

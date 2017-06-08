@@ -7,13 +7,8 @@ import java.util.UUID
 import java.util.concurrent.CopyOnWriteArraySet
 
 class Node(val coords: Point, var nodeType: NodeTypeEnum) {
-    val id: UUID = UUID.randomUUID()
     val neighbors: MutableList<Node> = mutableListOf()
     val coordNeighbors: MutableList<Node> = mutableListOf()
-
-    override fun hashCode(): Int {
-        return id.hashCode() xor nodeType.hashCode() xor neighbors.hashCode()
-    }
 
     fun pairMatchesType(other: Node, firstNodeType: NodeTypeEnum, otherNodeType: NodeTypeEnum): Boolean {
         return (nodeType == firstNodeType && other.nodeType == otherNodeType) || (nodeType == otherNodeType && other.nodeType == firstNodeType)

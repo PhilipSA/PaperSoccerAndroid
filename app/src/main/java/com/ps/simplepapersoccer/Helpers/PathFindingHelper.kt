@@ -28,7 +28,7 @@ object PathFindingHelper {
 
             if (node.node.nodeType == NodeTypeEnum.Goal) {
                 var backTrack = node
-                while (backTrack.node.id != startNode.id) {
+                while (backTrack.node != startNode) {
                     path.add(backTrack)
                     backTrack = backTrack.cameFrom!!
                 }
@@ -37,7 +37,7 @@ object PathFindingHelper {
             }
             explored.add(node)
             for (nextNode in node.node.neighbors) {
-                var next = allPathNode.find { x -> x.node.id === nextNode.id }!!
+                var next = allPathNode.find { x -> x.node == nextNode }!!
                 gScore = node.costSoFar + MathHelper.euclideanDistance(next!!.node.coords, node.node.coords).toInt()
 
                 if (explored.contains(next)) {

@@ -9,14 +9,10 @@ import com.ps.simplepapersoccer.GameObjects.Move.PartialMove
 import com.ps.simplepapersoccer.GameObjects.Move.PossibleMove
 import com.ps.simplepapersoccer.GameObjects.Move.StoredMove
 import com.ps.simplepapersoccer.Helpers.MathHelper
-
 import java.util.ArrayList
-import java.util.HashMap
-import java.util.HashSet
-import java.util.UUID
 
 class GameBoard(private val gridSizeX: Int, private val gridSizeY: Int) {
-    var nodeHashMap = HashMap<UUID, Node>()
+    var nodeHashSet = HashSet<Node>()
 
     var ballNode: Node
 
@@ -31,10 +27,6 @@ class GameBoard(private val gridSizeX: Int, private val gridSizeY: Int) {
             IntegerLine(Point(gridSizeX / 2 + 1, gridSizeY), Point(gridSizeX / 2 + 1, gridSizeY-1)))
 
     private val allPartialMoves = ArrayList<StoredMove>()
-
-    override fun hashCode(): Int {
-        return allPartialMoves.hashCode() xor nodeHashMap.hashCode() xor ballNode.hashCode()
-    }
 
     init {
         makeNodes(gridSizeX, gridSizeY)
@@ -72,9 +64,9 @@ class GameBoard(private val gridSizeX: Int, private val gridSizeY: Int) {
     }
 
     fun GenerateAllNeighbors() {
-        for (node in nodeHashMap.values) {
-            for (otherNode in nodeHashMap.values) {
-                if (node.id === otherNode.id) continue
+        for (node in nodeHashSet) {
+            for (otherNode in nodeHashSet) {
+                if (node == otherNode) continue
 
                 val euclideanDistance = MathHelper.euclideanDistance(node.coords, otherNode.coords)
                 if (euclideanDistance.toInt() == 1) node.AddCoordNeighbor(otherNode)
@@ -127,10 +119,10 @@ class GameBoard(private val gridSizeX: Int, private val gridSizeY: Int) {
 
     //Returns the node with the XY coordinates
     fun findNodeByCoords(point: Point): Node? {
-        return nodeHashMap.values.firstOrNull { it.coords == point }
+        return nodeHashSet.firstOrNull { it.coords == point }
     }
 
     fun addNodeToNodeMap(node: Node) {
-        nodeHashMap.put(node.id, node)
+        nodeHashSet.add(node)
     }
 }

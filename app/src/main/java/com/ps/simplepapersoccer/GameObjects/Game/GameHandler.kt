@@ -101,7 +101,7 @@ class GameHandler(private val gameActivity: GameActivity?, gridX: Int, gridY: In
 
     fun getWinner(node: Node): Victory? {
         if (node.nodeType == NodeTypeEnum.Goal) {
-            if (node.id === currentPlayersTurn.goalNode?.id) {
+            if (node == currentPlayersTurn.goalNode) {
                 return Victory(getOpponent(currentPlayersTurn), VictoryConditionEnum.Goal)
             }
             return Victory(currentPlayersTurn, VictoryConditionEnum.Goal)

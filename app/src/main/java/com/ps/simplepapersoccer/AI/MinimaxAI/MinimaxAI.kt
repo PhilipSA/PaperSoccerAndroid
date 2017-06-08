@@ -11,9 +11,6 @@ import com.ps.simplepapersoccer.Helpers.PathFindingHelper
 import java.util.*
 
 class MinimaxAI(timeLimitMilliSeconds: Int) : IGameAI {
-
-    private val transpositionsMap = HashMap<Int, TranspositionData>()
-
     init {
         TIME_LIMIT_MILLIS = timeLimitMilliSeconds
     }
@@ -51,9 +48,6 @@ class MinimaxAI(timeLimitMilliSeconds: Int) : IGameAI {
         return bestMove
     }
 
-    //
-    // Run an iterative deepening search on a game state, taking no longer than the given time limit
-    //
     private fun iterativeDeepeningSearch(state: GameHandler, timeLimit: Long, maximPlayer: IPlayer): Double {
         val startTime = System.currentTimeMillis()
         val endTime = startTime + timeLimit
@@ -69,10 +63,6 @@ class MinimaxAI(timeLimitMilliSeconds: Int) : IGameAI {
             }
 
             val searchResult = alphaBetaPruning(state, depth, maximPlayer, Integer.MIN_VALUE.toDouble(), Integer.MAX_VALUE.toDouble(), currentTime, endTime - currentTime)
-
-            //
-            // If the search finds a winning move, stop searching
-            //
             if (searchResult >= winCutoff) {
                 return searchResult
             }
@@ -87,18 +77,15 @@ class MinimaxAI(timeLimitMilliSeconds: Int) : IGameAI {
         return score
     }
 
-    private fun alphaBetaPruning(state: GameHandler, currentDepth: Int, maximizingPlayer: IPlayer, alpha: Double, beta: Double, startTime: Long, timeLimit: Long): Double {
-        var alpha = alpha
-        var beta = beta
+    private fun alphaBetaPruning(state: GameHandler, currentDepth: Int, maximizingPlayer: IPlayer, paramAlpha: Double, paramBeta: Double, startTime: Long, timeLimit: Long): Double {
+        var alpha = paramAlpha
+        var beta = paramBeta
         val currentTime = System.currentTimeMillis()
         val elapsedTime = currentTime - startTime
 
         if (elapsedTime >= timeLimit) {
             searchCutoff = true
         }
-
-        val storedAlpha = alpha
-        val storedBeta = beta
 
         if (searchCutoff || currentDepth == 0 || state.getWinner(state.ballNode()) != null) {
             val value = minmaxEvaluation(state, maximizingPlayer)
@@ -163,8 +150,8 @@ class MinimaxAI(timeLimitMilliSeconds: Int) : IGameAI {
     private fun minmaxEvaluation(state: GameHandler, maximizingPlayer: IPlayer): Double {
         var score = 0.0
 
-        if (state.isGameOver && state.getWinner(state.ballNode())?.winner === maximizingPlayer) score = 1000.0
-        if (state.isGameOver && state.getWinner(state.ballNode())?.winner !== maximizingPlayer) score = -1000.0
+        if (state.getWinner(state.ballNode())?.winner === maximizingPlayer) score = 1000.0
+        if (state.getWinner(state.ballNode())?.winner !== maximizingPlayer) score = -1000.0
 
         score += (-state.numberOfTurns).toDouble()
 

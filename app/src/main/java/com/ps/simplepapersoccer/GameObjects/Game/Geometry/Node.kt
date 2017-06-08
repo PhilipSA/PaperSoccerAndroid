@@ -22,6 +22,7 @@ class Node {
         return (nodeType == firstNodeType && other.nodeType == otherNodeType) || (nodeType == otherNodeType && other.nodeType == firstNodeType)
     }
 
+    //test
     fun isDiagonalNeighbor(other: Node): Boolean {
         return coords.y != other.coords.y && other.coords.x != this.coords.x
     }

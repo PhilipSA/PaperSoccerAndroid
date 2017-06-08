@@ -65,8 +65,8 @@ class GameBoard(private val gridSizeX: Int, private val gridSizeY: Int) {
             addNodeToNodeMap(node)
         }
 
-        goalNode1 = bottomGoalLines.allNodes[bottomGoalLines.allNodes.size / 2]
-        goalNode2 = topGoalLines.allNodes[topGoalLines.allNodes.size / 2]
+        goalNode1 = bottomGoalLines.allNodes.first { x -> x.nodeType == NodeTypeEnum.Goal }
+        goalNode2 = topGoalLines.allNodes .first { x -> x.nodeType == NodeTypeEnum.Goal }
 
         GenerateAllNeighbors()
     }

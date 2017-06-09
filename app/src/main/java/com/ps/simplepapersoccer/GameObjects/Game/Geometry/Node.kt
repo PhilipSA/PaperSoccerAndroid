@@ -9,6 +9,9 @@ import java.util.concurrent.CopyOnWriteArraySet
 class Node(val coords: Point, var nodeType: NodeTypeEnum) {
     val neighbors: MutableList<Node> = mutableListOf()
     val coordNeighbors: MutableList<Node> = mutableListOf()
+    var cameFrom: Node? = null
+    var nodeValue: Double = 0.0
+    var costSoFar: Double = 0.0
 
     fun pairMatchesType(other: Node, firstNodeType: NodeTypeEnum, otherNodeType: NodeTypeEnum): Boolean {
         return (nodeType == firstNodeType && other.nodeType == otherNodeType) || (nodeType == otherNodeType && other.nodeType == firstNodeType)
@@ -30,5 +33,9 @@ class Node(val coords: Point, var nodeType: NodeTypeEnum) {
 
     fun AddCoordNeighbor(other: Node) {
         coordNeighbors.add(other)
+    }
+
+    override fun toString(): String {
+        return coords.toString() + nodeType.toString()
     }
 }

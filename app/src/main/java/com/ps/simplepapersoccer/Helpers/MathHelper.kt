@@ -15,7 +15,7 @@ object MathHelper {
 
     fun distance(point: Point, otherPoint: Point): Double {
         val dx = Math.abs(otherPoint.x - point.x)
-        val dy = Math.abs(otherPoint.x - point.y)
+        val dy = Math.abs(otherPoint.y - point.y)
 
         val min = Math.min(dx, dy)
         val max = Math.max(dx, dy)

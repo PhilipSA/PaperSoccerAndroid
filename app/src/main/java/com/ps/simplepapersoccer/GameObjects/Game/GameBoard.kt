@@ -1,6 +1,7 @@
 package com.ps.simplepapersoccer.GameObjects.Game
 
 import android.graphics.Point
+import android.util.Log
 import com.ps.simplepapersoccer.Enums.NodeTypeEnum
 import com.ps.simplepapersoccer.GameObjects.Game.Geometry.Abstraction.IntegerLine
 import com.ps.simplepapersoccer.GameObjects.Game.Geometry.Goal
@@ -42,19 +43,19 @@ class GameBoard(private val gridSizeX: Int, private val gridSizeY: Int) {
             (0..gridSizeX)
                     .filter { !topGoalLines.contains(Point(it, y)) && !bottomGoalLines.contains(Point(it, y)) }
                     .forEach {
-                        if (isEdgeNode(Point(it, y))) addNodeToNodeMap(Node(Point(it, y), NodeTypeEnum.Wall))
+                        if (isEdgeNode(Point(it, y))) nodeHashSet.add(Node(Point(it, y), NodeTypeEnum.Wall))
                         else {
-                            addNodeToNodeMap(Node(Point(it, y), NodeTypeEnum.Empty))
+                            nodeHashSet.add(Node(Point(it, y), NodeTypeEnum.Empty))
                         }
                     }
         }
 
-        for (node in topGoalLines.allNodes) {
-            addNodeToNodeMap(node)
+        topGoalLines.allNodes.forEach {
+            nodeHashSet.add(it)
         }
 
-        for (node in bottomGoalLines.allNodes) {
-            addNodeToNodeMap(node)
+        bottomGoalLines.allNodes.forEach {
+            nodeHashSet.add(it)
         }
 
         goalNode1 = bottomGoalLines.allNodes.first { x -> x.nodeType == NodeTypeEnum.Goal }
@@ -110,6 +111,7 @@ class GameBoard(private val gridSizeX: Int, private val gridSizeY: Int) {
     fun MakePartialMove(partialMove: PartialMove) {
         allPartialMoves.add(StoredMove(partialMove, partialMove.oldNode.nodeType, partialMove.newNode.nodeType))
         partialMove.newNode.RemoveNeighborPair(partialMove.oldNode)
+        partialMove.oldNode.RemoveNeighborPair(partialMove.newNode)
 
         if (partialMove.oldNode.nodeType == NodeTypeEnum.Empty)
             partialMove.oldNode.nodeType = NodeTypeEnum.BounceAble
@@ -120,9 +122,5 @@ class GameBoard(private val gridSizeX: Int, private val gridSizeY: Int) {
     //Returns the node with the XY coordinates
     fun findNodeByCoords(point: Point): Node? {
         return nodeHashSet.firstOrNull { it.coords == point }
-    }
-
-    fun addNodeToNodeMap(node: Node) {
-        nodeHashSet.add(node)
     }
 }

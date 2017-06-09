@@ -5,6 +5,7 @@ import com.ps.simplepapersoccer.GameObjects.Game.GameHandler
 import com.ps.simplepapersoccer.GameObjects.Move.PartialMove
 import com.ps.simplepapersoccer.GameObjects.Move.PossibleMove
 import com.ps.simplepapersoccer.Helpers.MathHelper
+import com.ps.simplepapersoccer.Helpers.PathFindingHelper
 
 class EuclideanAI : IGameAI {
 
@@ -14,7 +15,7 @@ class EuclideanAI : IGameAI {
         var tempManhattan = 0.0
 
         for (possibleMove in gameHandler.gameBoard.allPossibleMovesFromNode(gameHandler.ballNode())) {
-            tempManhattan = MathHelper.euclideanDistance(possibleMove.newNode.coords, gameHandler.getOpponent(gameHandler.currentPlayersTurn).goalNode!!.coords)
+            tempManhattan = PathFindingHelper.findPath(possibleMove.newNode, gameHandler.getOpponent(gameHandler.currentPlayersTurn).goalNode!!).size.toDouble()
             if (tempManhattan < manhattanDistance) {
                 manhattanDistance = tempManhattan
                 manhattanMove = PartialMove(possibleMove.oldNode, possibleMove.newNode, gameHandler.currentPlayersTurn)

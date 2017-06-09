@@ -124,6 +124,47 @@ class MinimaxAI(timeLimitMilliSeconds: Int) : IGameAI {
         return bestScore
     }
 
+    private fun alphaBetaPruningNoTimeLimit(state: GameHandler, currentDepth: Int, maximizingPlayer: IPlayer, paramAlpha: Double, paramBeta: Double): Double {
+        var alpha = paramAlpha
+        var beta = paramBeta
+
+        if (searchCutoff || currentDepth == 0 || state.getWinner(state.ballNode()) != null) {
+            val value = minmaxEvaluation(state, maximizingPlayer)
+            return value
+        }
+
+        var bestScore = 0.0
+
+        if (maximizingPlayer == state.currentPlayersTurn) {
+            val possibleMoves = sortPossibleMovesByScore(SortOrderEnum.Descending, state, maximizingPlayer)
+            for (possibleMove in possibleMoves) {
+                state.MakePartialMove(possibleMove.returnMove!!)
+                alpha = Math.max(alpha, alphaBetaPruningNoTimeLimit(state, currentDepth - 1, maximizingPlayer, alpha, beta))
+                state.UndoLastMove()
+
+                if (beta <= alpha) {
+                    break // pruning
+                }
+            }
+            bestScore = alpha
+        } else {
+            val possibleMoves = sortPossibleMovesByScore(SortOrderEnum.Ascending, state, maximizingPlayer)
+            for (possibleMove in possibleMoves) {
+                state.MakePartialMove(possibleMove.returnMove!!)
+                beta = Math.min(beta, alphaBetaPruningNoTimeLimit(state, currentDepth - 1, maximizingPlayer, alpha, beta))
+                state.UndoLastMove()
+
+                if (beta <= alpha) {
+                    break // pruning
+                }
+            }
+
+            bestScore = beta
+        }
+
+        return bestScore
+    }
+
     private fun sortPossibleMovesByScore(sortOrder: SortOrderEnum, state: GameHandler, maximzingPlayer: IPlayer): ArrayList<MoveData> {
         val newPossibleMoves = ArrayList<MoveData>()
         for (possibleMove in state.gameBoard.allPossibleMovesFromNode(state.ballNode())) {
@@ -156,7 +197,7 @@ class MinimaxAI(timeLimitMilliSeconds: Int) : IGameAI {
         score += (-state.numberOfTurns).toDouble()
 
         val opponentsGoal = state.getOpponent(maximizingPlayer).goalNode
-        score += -PathFindingHelper.findPath(state.ballNode(), opponentsGoal!!, state.gameBoard.nodeHashSet.toList()).size * 2
+        score += -PathFindingHelper.findPath(state.ballNode(), opponentsGoal!!).size * 2
 
         val myGoal = maximizingPlayer.goalNode
 

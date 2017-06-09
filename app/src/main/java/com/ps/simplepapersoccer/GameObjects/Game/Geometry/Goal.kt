@@ -12,7 +12,8 @@ class Goal(var goalLine: IntegerLine, var leftPost: IntegerLine, var rightPost: 
     val height : Int get() = leftPost.length
     val width : Int get() = goalLine.length
     val outerGoalLine: IntegerLine get() = IntegerLine(leftPost.toPoint, rightPost.toPoint)
-    val allNodes: MutableList<Node> get() {
+    val allNodes: MutableList<Node>
+    init {
         var nodes: MutableList<Node> = mutableListOf<Node>()
         goalLine.allPoints.forEach {
             nodes.add(Node(it, NodeTypeEnum.Goal))
@@ -26,6 +27,6 @@ class Goal(var goalLine: IntegerLine, var leftPost: IntegerLine, var rightPost: 
         outerGoalLine.allPoints.forEach {
             if (!leftPost.contains(it) && !rightPost.contains(it)) nodes.add(Node(it, NodeTypeEnum.Empty))
         }
-        return nodes
+        allNodes = nodes
     }
 }

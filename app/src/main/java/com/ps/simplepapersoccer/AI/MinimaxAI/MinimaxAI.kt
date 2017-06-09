@@ -32,7 +32,8 @@ class MinimaxAI(timeLimitMilliSeconds: Int) : IGameAI {
 
             state.MakePartialMove(move.returnMove as PartialMove)
             val searchTimeLimit = ((TIME_LIMIT_MILLIS - 1000) / moves.size).toLong()
-            val score = iterativeDeepeningSearch(state, searchTimeLimit, maximPlayer)
+            //val score = iterativeDeepeningSearch(state, searchTimeLimit, maximPlayer)
+            val score = alphaBetaPruningNoTimeLimit(state, 0, maximPlayer, Integer.MIN_VALUE.toDouble(), Integer.MAX_VALUE.toDouble())
             state.UndoLastMove()
 
             if (score >= winCutoff) {
@@ -192,21 +193,12 @@ class MinimaxAI(timeLimitMilliSeconds: Int) : IGameAI {
         var score = 0.0
 
         if (state.getWinner(state.ballNode())?.winner == maximizingPlayer) score = 1000.0
-        if (state.getWinner(state.ballNode())?.winner != maximizingPlayer) score = -1000.0
+        if (state.getWinner(state.ballNode())?.winner == state.getOpponent(maximizingPlayer)) score = -1000.0
 
         score += (-state.numberOfTurns).toDouble()
 
         val opponentsGoal = state.getOpponent(maximizingPlayer).goalNode
         score += -PathFindingHelper.findPath(state.ballNode(), opponentsGoal!!).size * 2
-
-        val myGoal = maximizingPlayer.goalNode
-
-        //Only one move from the goal
-        if (MathHelper.euclideanDistance(opponentsGoal.coords, state.ballNode().coords) < 2.0 && state.currentPlayersTurn == maximizingPlayer)
-            score = 1000.0
-
-        if (MathHelper.euclideanDistance(myGoal!!.coords, state.ballNode().coords) < 2.0 && state.currentPlayersTurn != maximizingPlayer)
-            score = -1000.0
 
         //Neighbors are bounceable
         state.gameBoard.allPossibleMovesFromNode(state.ballNode()).forEach{

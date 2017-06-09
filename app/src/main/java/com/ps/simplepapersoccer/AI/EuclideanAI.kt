@@ -3,8 +3,6 @@ package com.ps.simplepapersoccer.AI
 import com.ps.simplepapersoccer.AI.Abstraction.IGameAI
 import com.ps.simplepapersoccer.GameObjects.Game.GameHandler
 import com.ps.simplepapersoccer.GameObjects.Move.PartialMove
-import com.ps.simplepapersoccer.GameObjects.Move.PossibleMove
-import com.ps.simplepapersoccer.Helpers.MathHelper
 import com.ps.simplepapersoccer.Helpers.PathFindingHelper
 
 class EuclideanAI : IGameAI {
@@ -15,7 +13,7 @@ class EuclideanAI : IGameAI {
         var tempManhattan = 0.0
 
         for (possibleMove in gameHandler.gameBoard.allPossibleMovesFromNode(gameHandler.ballNode())) {
-            tempManhattan = PathFindingHelper.findPath(possibleMove.newNode, gameHandler.getOpponent(gameHandler.currentPlayersTurn).goalNode!!).size.toDouble()
+            tempManhattan = PathFindingHelper.findPath(possibleMove.newNode, gameHandler.getOpponent(gameHandler.currentPlayersTurn)?.goal!!.goalNode()).size.toDouble()
             if (tempManhattan < manhattanDistance) {
                 manhattanDistance = tempManhattan
                 manhattanMove = PartialMove(possibleMove.oldNode, possibleMove.newNode, gameHandler.currentPlayersTurn)

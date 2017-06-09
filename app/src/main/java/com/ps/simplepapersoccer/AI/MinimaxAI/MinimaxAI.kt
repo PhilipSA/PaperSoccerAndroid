@@ -6,7 +6,6 @@ import com.ps.simplepapersoccer.Enums.SortOrderEnum
 import com.ps.simplepapersoccer.GameObjects.Game.GameHandler
 import com.ps.simplepapersoccer.GameObjects.Move.PartialMove
 import com.ps.simplepapersoccer.GameObjects.Player.Abstraction.IPlayer
-import com.ps.simplepapersoccer.Helpers.MathHelper
 import com.ps.simplepapersoccer.Helpers.PathFindingHelper
 import java.util.*
 
@@ -32,8 +31,8 @@ class MinimaxAI(timeLimitMilliSeconds: Int) : IGameAI {
 
             state.MakePartialMove(move.returnMove as PartialMove)
             val searchTimeLimit = ((TIME_LIMIT_MILLIS - 1000) / moves.size).toLong()
-            //val score = iterativeDeepeningSearch(state, searchTimeLimit, maximPlayer)
-            val score = alphaBetaPruningNoTimeLimit(state, 0, maximPlayer, Integer.MIN_VALUE.toDouble(), Integer.MAX_VALUE.toDouble())
+            val score = iterativeDeepeningSearch(state, searchTimeLimit, maximPlayer)
+            //val score = alphaBetaPruningNoTimeLimit(state, 0, maximPlayer, Integer.MIN_VALUE.toDouble(), Integer.MAX_VALUE.toDouble())
             state.UndoLastMove()
 
             if (score >= winCutoff) {
@@ -197,7 +196,7 @@ class MinimaxAI(timeLimitMilliSeconds: Int) : IGameAI {
 
         score += (-state.numberOfTurns).toDouble()
 
-        val opponentsGoal = state.getOpponent(maximizingPlayer).goalNode
+        val opponentsGoal = state.getOpponent(maximizingPlayer)?.goal!!.goalNode()
         score += -PathFindingHelper.findPath(state.ballNode(), opponentsGoal!!).size * 2
 
         //Neighbors are bounceable

@@ -155,7 +155,7 @@ class GameActivity : Activity() {
     }
 
     private fun getNonAIPlayer(): IPlayer {
-        if (gameHandler?.currentPlayersTurn!!.isAi) return gameHandler!!.getOpponent(gameHandler!!.currentPlayersTurn) else return gameHandler!!.currentPlayersTurn
+        if (gameHandler?.currentPlayersTurn!!.isAi) return gameHandler!!.getOpponent(gameHandler!!.currentPlayersTurn)!! else return gameHandler!!.currentPlayersTurn
     }
 
     fun nodeCoordsToNode(x: Float, y: Float): Node? {

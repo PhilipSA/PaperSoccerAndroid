@@ -17,8 +17,8 @@ class GameBoard(private val gridSizeX: Int, private val gridSizeY: Int) {
 
     var ballNode: Node
 
-    lateinit var goalNode1: Node
-    lateinit var goalNode2: Node
+    lateinit var goal1: Goal
+    lateinit var goal2: Goal
 
     var topGoalLines: Goal = Goal(IntegerLine(Point(gridSizeX / 2 - 1, 0), Point(gridSizeX / 2 + 1, 0)),
             IntegerLine(Point(gridSizeX / 2 - 1, 0), Point(gridSizeX / 2 - 1, 1)),
@@ -58,8 +58,8 @@ class GameBoard(private val gridSizeX: Int, private val gridSizeY: Int) {
             nodeHashSet.add(it)
         }
 
-        goalNode1 = bottomGoalLines.allNodes.first { x -> x.nodeType == NodeTypeEnum.Goal }
-        goalNode2 = topGoalLines.allNodes.first { x -> x.nodeType == NodeTypeEnum.Goal }
+        goal1 = bottomGoalLines
+        goal2 = topGoalLines
 
         GenerateAllNeighbors()
     }

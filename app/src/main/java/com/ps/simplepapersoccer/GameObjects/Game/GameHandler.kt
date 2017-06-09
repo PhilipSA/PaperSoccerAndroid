@@ -8,7 +8,6 @@ import com.ps.simplepapersoccer.Enums.NodeTypeEnum
 import com.ps.simplepapersoccer.Enums.VictoryConditionEnum
 import com.ps.simplepapersoccer.GameObjects.Game.Geometry.Node
 import com.ps.simplepapersoccer.GameObjects.Move.PartialMove
-import com.ps.simplepapersoccer.GameObjects.Move.PossibleMove
 import com.ps.simplepapersoccer.GameObjects.Player.AIPlayer
 import com.ps.simplepapersoccer.GameObjects.Player.Abstraction.IPlayer
 
@@ -36,8 +35,8 @@ class GameHandler(private val gameActivity: GameActivity?, gridX: Int, gridY: In
         currentPlayersTurn = players[0]
 
         gameBoard = GameBoard(gridX, gridY)
-        player1.goalNode = gameBoard.goalNode1
-        player2.goalNode = gameBoard.goalNode2
+        player1.goal = gameBoard.goal1
+        player2.goal = gameBoard.goal2
         gameActivity?.reDraw()
 
         gameAIHandler = GameAIHandler(this, aiIsAsync)
@@ -97,12 +96,10 @@ class GameHandler(private val gameActivity: GameActivity?, gridX: Int, gridY: In
 
     fun getWinner(node: Node): Victory? {
         if (node.nodeType == NodeTypeEnum.Goal) {
-            if (node == player1.goalNode) {
-                return Victory(player2, VictoryConditionEnum.Goal)
-            }
-            return Victory(player1, VictoryConditionEnum.Goal)
+            if (player1.goal!!.isGoalNode(node)) return Victory(player2, VictoryConditionEnum.Goal)
+            else if (player2.goal!!.isGoalNode(node)) return Victory(player1, VictoryConditionEnum.Goal)
         } else if (node.neighbors.size == 0) {
-            return Victory(getOpponent(currentPlayersTurn), VictoryConditionEnum.OpponentOutOfMoves)
+            return Victory(getOpponent(currentPlayersTurn)!!, VictoryConditionEnum.OpponentOutOfMoves)
         }
         return null
     }
@@ -113,13 +110,14 @@ class GameHandler(private val gameActivity: GameActivity?, gridX: Int, gridY: In
         gameActivity?.Winner(victory)
     }
 
-    fun getOpponent(myPlayer: IPlayer): IPlayer {
-        if (myPlayer === player1) return player2
-        return player1
+    fun getOpponent(myPlayer: IPlayer): IPlayer? {
+        if (myPlayer == player1) return player2
+        else if(myPlayer == player2) return player1
+        else return null
     }
 
     fun changeTurn(): IPlayer {
-        currentPlayersTurn = getOpponent(currentPlayersTurn)
+        currentPlayersTurn = getOpponent(currentPlayersTurn)!!
         return currentPlayersTurn
     }
 

@@ -3,6 +3,7 @@
     <EditTextPreference
         android:key="pref_playerName"
         android:title="@string/player_name"
+        android:maxLength="15"
         android:defaultValue="@string/default_player_name"/>
     <ListPreference
         android:key="pref_difficultyLevel"

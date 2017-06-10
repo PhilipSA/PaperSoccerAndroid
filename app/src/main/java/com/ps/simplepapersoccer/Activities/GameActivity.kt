@@ -167,11 +167,11 @@ class GameActivity : Activity() {
         val players = ArrayList<IPlayer>()
         val random = Random()
         if (random.nextBoolean()) {
-            players.add(AIPlayer(difficultyEnum, "Calculatos Maximus", 1, player1Color, true))
+            players.add(AIPlayer(difficultyEnum, "OtherAI", 1, player1Color, true))
             players.add(AIPlayer(difficultyEnum, "Ai" + difficulty, 2, player2Color, true))
         } else {
             players.add(AIPlayer(difficultyEnum, "Ai" + difficulty, 1, player1Color, true))
-            players.add(AIPlayer(difficultyEnum, "Calculatos Maximus", 2, player2Color, true))
+            players.add(AIPlayer(difficultyEnum, "OtherAI", 2, player2Color, true))
         }
         return players
     }

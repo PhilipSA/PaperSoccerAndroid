@@ -8,8 +8,8 @@ android {
         applicationId "com.ps.simplepapersoccer"
         minSdkVersion 15
         targetSdkVersion 25
-        versionCode 12
-        versionName "1.09"
+        versionCode 13
+        versionName "1.10"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {

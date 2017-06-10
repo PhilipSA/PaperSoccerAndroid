@@ -1,10 +1,11 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:autofit="http://schemas.android.com/apk/res-auto"
     android:animateLayoutChanges="true"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/drawable_background"
-    tools:context="${relativePackage}.${activityClass}" >
+    tools:context="${relativePackage}.${activityClass}">
 
     <com.ps.simplepapersoccer.Activities.GameView
         android:layout_width="fill_parent"
@@ -36,6 +37,8 @@
 
     <me.grantland.widget.AutofitTextView
         android:id="@+id/player2TextView"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
         android:text="Player2"
         style="@style/PlayerNameTextView"
         android:layout_alignParentTop="true" />
@@ -43,12 +46,11 @@
     <me.grantland.widget.AutofitTextView
         android:id="@+id/player2ScoreTextView"
         android:layout_width="wrap_content"
-        android:maxLines="2"
-        android:maxWidth="140dp"
         android:layout_height="wrap_content"
+        android:textSize="15sp"
+        android:layout_marginRight="5dp"
         android:text="Player2: 0"
         android:textColor="@color/primary_text_color"
-        android:textSize="20dp"
         android:layout_below="@+id/player2TextView"
         android:layout_alignParentRight="true"
         android:layout_marginTop="9dp" />
@@ -56,12 +58,11 @@
     <me.grantland.widget.AutofitTextView
         android:id="@+id/player1ScoreTextView"
         android:layout_width="wrap_content"
-        android:maxLines="2"
-        android:maxWidth="140dp"
         android:layout_height="wrap_content"
+        android:textSize="15sp"
+        android:layout_marginLeft="5dp"
         android:text="Player1: 0"
         android:textColor="@color/primary_text_color"
-        android:textSize="20dp"
         android:layout_below="@+id/player2TextView"
         android:layout_marginTop="9dp" />
 
@@ -84,17 +85,22 @@
 
     <me.grantland.widget.AutofitTextView
         android:id="@+id/player1TextView"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:text="Player1"
         style="@style/PlayerNameTextView"/>
 
-    <TextView
+    <me.grantland.widget.AutofitTextView
         android:id="@+id/playerTurnTextView"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="25dp"
         android:text="Player1"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:background="@drawable/drawable_tooltip_back"
-        android:layout_above="@+id/player1TextView" />
+        android:layout_above="@+id/player1TextView"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginBottom="5dp" />
 
 </RelativeLayout>

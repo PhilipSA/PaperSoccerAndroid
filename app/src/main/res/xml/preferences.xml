@@ -3,7 +3,7 @@
     <EditTextPreference
         android:key="pref_playerName"
         android:title="@string/player_name"
-        android:maxLength="15"
+        android:maxLength="10"
         android:defaultValue="@string/default_player_name"/>
     <ListPreference
         android:key="pref_difficultyLevel"
@@ -12,4 +12,18 @@
         android:entries="@array/pref_difficulty_level_names"
         android:entryValues="@array/pref_difficulty_level_values"
         android:defaultValue="@string/pref_difficultyLevelTypes_default" />
+    <EditTextPreference
+        android:key="gridsize_x"
+        android:title="Grid size X"
+        android:maxLength="2"
+        android:inputType="number"
+        android:numeric="integer"
+        android:defaultValue="8"/>
+    <EditTextPreference
+        android:key="gridsize_y"
+        android:title="Grid size Y"
+        android:maxLength="2"
+        android:inputType="number"
+        android:numeric="integer"
+        android:defaultValue="10"/>
 </PreferenceScreen>

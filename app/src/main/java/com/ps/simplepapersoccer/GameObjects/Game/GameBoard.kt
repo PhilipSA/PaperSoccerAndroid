@@ -19,13 +19,15 @@ class GameBoard(private val gridSizeX: Int, private val gridSizeY: Int) {
 
     lateinit var goal1: Goal
     lateinit var goal2: Goal
+    val goalScalingX = Math.round((gridSizeX / 6).toDouble()).toInt()
+    val goalScalingY = Math.round((gridSizeX / 6).toDouble()).toInt()
 
-    var topGoalLines: Goal = Goal(IntegerLine(Point(gridSizeX / 2 - 1, 0), Point(gridSizeX / 2 + 1, 0)),
-            IntegerLine(Point(gridSizeX / 2 - 1, 0), Point(gridSizeX / 2 - 1, 1)),
-            IntegerLine(Point(gridSizeX / 2 + 1, 0), Point(gridSizeX / 2 + 1, 1)))
-    var bottomGoalLines: Goal = Goal(IntegerLine(Point(gridSizeX / 2 - 1, gridSizeY), Point(gridSizeX / 2 + 1, gridSizeY)),
-            IntegerLine(Point(gridSizeX / 2 - 1, gridSizeY), Point(gridSizeX / 2 - 1, gridSizeY-1)),
-            IntegerLine(Point(gridSizeX / 2 + 1, gridSizeY), Point(gridSizeX / 2 + 1, gridSizeY-1)))
+    var topGoalLines: Goal = Goal(IntegerLine(Point(gridSizeX / 2 - goalScalingX, 0), Point(gridSizeX / 2 + goalScalingX, 0)),
+            IntegerLine(Point(gridSizeX / 2 - goalScalingX, 0), Point(gridSizeX / 2 - goalScalingX, 1)),
+            IntegerLine(Point(gridSizeX / 2 + goalScalingX, 0), Point(gridSizeX / 2 + goalScalingX, 1)))
+    var bottomGoalLines: Goal = Goal(IntegerLine(Point(gridSizeX / 2 - goalScalingX, gridSizeY), Point(gridSizeX / 2 + goalScalingX, gridSizeY)),
+            IntegerLine(Point(gridSizeX / 2 - goalScalingX, gridSizeY), Point(gridSizeX / 2 - goalScalingX, gridSizeY-1)),
+            IntegerLine(Point(gridSizeX / 2 + goalScalingX, gridSizeY), Point(gridSizeX / 2 + goalScalingX, gridSizeY-1)))
 
     private val allPartialMoves = ArrayList<StoredMove>()
 

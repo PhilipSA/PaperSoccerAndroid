@@ -78,8 +78,8 @@ class GameActivity : Activity() {
         val difficulty = sharedPreferences.getString("pref_difficultyLevel", "Medium")
         val playerName = sharedPreferences.getString("pref_playerName", "Player")
 
-        var gridSizeX = 8
-        var gridSizeY = 10
+        var gridSizeX = sharedPreferences.getString("gridsize_x", "8").toInt()
+        var gridSizeY = sharedPreferences.getString("gridsize_y", "10").toInt()
 
         val gameMode = intent.getIntExtra("MULTIPLAYER_MODE", GameModeEnum.PLAYER_VS_AI)
 

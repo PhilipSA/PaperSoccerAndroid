@@ -2,18 +2,14 @@ package com.ps.simplepapersoccer.Activities
 
 import android.app.Activity
 import android.app.AlertDialog
-import android.app.Dialog
-import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
-import android.text.method.CharacterPickerDialog
 import android.view.View
 import android.view.Window
-
-import com.ps.simplepapersoccer.Enums.GameModeEnum
-import com.ps.simplepapersoccer.R
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdView
+import com.ps.simplepapersoccer.Enums.GameModeEnum
+import com.ps.simplepapersoccer.R
 
 class MainActivity : Activity() {
 
@@ -21,12 +17,13 @@ class MainActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         this.requestWindowFeature(Window.FEATURE_NO_TITLE)
         setContentView(R.layout.activity_main)
 
-        mAdView = findViewById(R.id.adView) as AdView
+/*        mAdView = findViewById(R.id.adView) as AdView
         val adRequest = AdRequest.Builder().build()
-        mAdView?.loadAd(adRequest)
+        mAdView?.loadAd(adRequest)*/
     }
 
     fun SingleplayerClick(view: View) {

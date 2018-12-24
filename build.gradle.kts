@@ -1,17 +1,16 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
-    ext.kotlin_version = '1.1.2-3'
     repositories {
         jcenter()
         google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.0.0-beta7'
+        classpath("com.android.tools.build:gradle:3.3.0-rc03")
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
-        classpath 'com.google.gms:google-services:3.0.0'
+        classpath("com.google.gms:google-services:3.0.0")
     }
 }
 
@@ -22,6 +21,6 @@ allprojects {
     }
 }
 
-task clean(type: Delete) {
-    delete rootProject.buildDir
+tasks.create<Delete>("clean") {
+    delete = setOf(rootProject.buildDir)
 }

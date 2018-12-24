@@ -16,9 +16,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.ps.simplepapersoccer.Activities.GameActivity"></activity>
-        <activity android:name="com.ps.simplepapersoccer.Activities.SettingsActivity"></activity>
-        <activity android:name="com.ps.simplepapersoccer.Activities.HowToPlayActivity"></activity>
+        <activity android:name="com.ps.simplepapersoccer.Activities.GameActivity" />
+        <activity android:name="com.ps.simplepapersoccer.Activities.SettingsActivity" />
+        <activity android:name="com.ps.simplepapersoccer.Activities.HowToPlayActivity" />
     </application>
 
 </manifest>

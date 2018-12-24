@@ -68,7 +68,7 @@ class GameHandler(private val gameActivity: GameActivity?, gridX: Int, gridY: In
 
     fun MakeMove(partialMove: PartialMove) {
         MakePartialMove(partialMove)
-        Log.d("MyTagGoesHere", partialMove.newNode.nodeType.toString());
+        Log.d("MyTagGoesHere", partialMove.newNode.nodeType.toString())
         gameActivity?.DrawPartialMove(partialMove)
         ++numberOfTurns
         if (!waitForGameViewDraw) UpdateGameState()

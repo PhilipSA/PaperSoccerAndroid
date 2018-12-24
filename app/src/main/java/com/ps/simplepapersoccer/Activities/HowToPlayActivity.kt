@@ -1,8 +1,8 @@
 package com.ps.simplepapersoccer.Activities
 
 import android.os.Bundle
-import android.support.v4.view.ViewPager
-import android.support.v7.app.AppCompatActivity
+import androidx.viewpager.widget.ViewPager
+import androidx.appcompat.app.AppCompatActivity
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
@@ -23,14 +23,14 @@ class HowToPlayActivity : AppCompatActivity() {
         supportActionBar!!.setDisplayShowHomeEnabled(true)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
-        leftArrow = findViewById(R.id.left_nav) as ImageView
-        rightArrow = findViewById(R.id.right_nav) as ImageView
+        leftArrow = findViewById<ImageView>(R.id.left_nav)
+        rightArrow = findViewById<ImageView>(R.id.right_nav)
 
-        viewPagerText = findViewById(R.id.viewpagerText) as TextView
+        viewPagerText = findViewById<TextView>(R.id.viewpagerText)
 
         leftArrow?.visibility = View.INVISIBLE
 
-        val mViewPager = findViewById(R.id.viewpager) as ViewPager
+        val mViewPager = findViewById<ViewPager>(R.id.viewpager)
         val adapterView = TutorialPagerAdapter(this, this)
         mViewPager.adapter = adapterView
 

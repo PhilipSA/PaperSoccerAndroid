@@ -57,11 +57,11 @@ class GameView : View {
     protected var middlePointX: Float = 0.toFloat()
     protected var middlePointY: Float = 0.toFloat()
 
-    constructor(context: Context) : super(context) {}
+    constructor(context: Context) : super(context)
 
-    constructor(context: Context, attrs: AttributeSet) : super(context, attrs) {}
+    constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
 
-    constructor(context: Context, attrs: AttributeSet, defStyle: Int) : super(context, attrs, defStyle) {}
+    constructor(context: Context, attrs: AttributeSet, defStyle: Int) : super(context, attrs, defStyle)
 
     fun SetValues(screenWidth: Int, screenHeight: Int, gridSizeX: Int, gridSizeY: Int, gameActivity: GameActivity, gameBoard: GameBoard) {
         topEdge = (screenHeight / 9).toFloat()

@@ -85,15 +85,15 @@ class GameActivity : Activity() {
 
         myName = playerName
 
-        gameView = findViewById(R.id.gameview) as GameView
+        gameView = findViewById<GameView>(R.id.gameview)
 
-        player1NameTextView = findViewById(R.id.player1TextView) as TextView
-        player2NameTextView = findViewById(R.id.player2TextView) as TextView
-        playerTurnTextView = findViewById(R.id.playerTurnTextView) as TextView
-        playerWinnerTextView = findViewById(R.id.playerWinnerTextview) as TextView
+        player1NameTextView = findViewById<TextView>(R.id.player1TextView)
+        player2NameTextView = findViewById<TextView>(R.id.player2TextView)
+        playerTurnTextView = findViewById<TextView>(R.id.playerTurnTextView)
+        playerWinnerTextView = findViewById<TextView>(R.id.playerWinnerTextview)
 
-        player1ScoreTextView = findViewById(R.id.player1ScoreTextView) as TextView
-        player2ScoreTextView = findViewById(R.id.player2ScoreTextView) as TextView
+        player1ScoreTextView = findViewById<TextView>(R.id.player1ScoreTextView)
+        player2ScoreTextView = findViewById<TextView>(R.id.player2ScoreTextView)
 
         player1NameTextView!!.setTextColor(player1Color)
         player2NameTextView!!.setTextColor(player2Color)
@@ -128,7 +128,7 @@ class GameActivity : Activity() {
 
         gameHandler = GameHandler(this, gridSizeX, gridSizeY, players, gameMode, true, gameView != null)
 
-        playAgain = findViewById(R.id.playagainButton) as Button
+        playAgain = findViewById<Button>(R.id.playagainButton)
 
         gameHandler?.UpdateGameState()
 

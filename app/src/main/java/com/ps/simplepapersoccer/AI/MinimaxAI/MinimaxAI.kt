@@ -197,13 +197,13 @@ class MinimaxAI(timeLimitMilliSeconds: Int) : IGameAI {
         score += (-state.numberOfTurns).toDouble()
 
         val opponentsGoal = state.getOpponent(maximizingPlayer)?.goal!!.goalNode()
-        score += -PathFindingHelper.findPath(state.ballNode(), opponentsGoal!!).size * 2
+        score += -PathFindingHelper.findPath(state.ballNode(), opponentsGoal).size * 2
 
         //Neighbors are bounceable
         state.gameBoard.allPossibleMovesFromNode(state.ballNode()).forEach{
             if (it.newNode.nodeType == NodeTypeEnum.BounceAble && state.currentPlayersTurn === maximizingPlayer) ++score
             else if (it.newNode.nodeType == NodeTypeEnum.BounceAble) {
-                --score;
+                --score
             }
         }
         return score

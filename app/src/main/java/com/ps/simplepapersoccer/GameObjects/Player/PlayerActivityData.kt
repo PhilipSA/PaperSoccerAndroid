@@ -1,6 +1,4 @@
-package com.ps.simplepapersoccer.GameObjects.Player
-
-import android.widget.TextView
+package com.ps.simplepapersoccer.gameObjects.Player
 
 /**
  * Created by Admin on 2017-04-25.

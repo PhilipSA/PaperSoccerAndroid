@@ -1,10 +1,7 @@
-package com.ps.simplepapersoccer.GameObjects.Game.Geometry
+package com.ps.simplepapersoccer.gameObjects.Game.Geometry
 
 import android.graphics.Point
-import com.ps.simplepapersoccer.Enums.NodeTypeEnum
-
-import java.util.UUID
-import java.util.concurrent.CopyOnWriteArraySet
+import com.ps.simplepapersoccer.enums.NodeTypeEnum
 
 class Node(val coords: Point, var nodeType: NodeTypeEnum) {
     val neighbors: MutableList<Node> = mutableListOf()

@@ -1,8 +1,6 @@
-package com.ps.simplepapersoccer.Helpers
+package com.ps.simplepapersoccer.helpers
 
 import android.graphics.Point
-import com.ps.simplepapersoccer.GameObjects.Game.Geometry.Node
-import java.util.*
 
 
 object MathHelper {

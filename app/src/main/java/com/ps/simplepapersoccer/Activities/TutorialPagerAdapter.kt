@@ -1,18 +1,13 @@
-package com.ps.simplepapersoccer.Activities
+package com.ps.simplepapersoccer.activities
 
 import android.app.Activity
 import android.content.Context
-import android.media.MediaPlayer
-import android.net.Uri
 import androidx.core.content.ContextCompat
 import androidx.viewpager.widget.PagerAdapter
 import androidx.viewpager.widget.ViewPager
-import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import android.widget.TextView
-import android.widget.VideoView
 
 import com.ps.simplepapersoccer.R
 

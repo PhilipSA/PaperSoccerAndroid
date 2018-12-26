@@ -1,6 +1,6 @@
-package com.ps.simplepapersoccer.GameObjects.Move
+package com.ps.simplepapersoccer.gameObjects.Move
 
-import com.ps.simplepapersoccer.GameObjects.Game.Geometry.Node
-import com.ps.simplepapersoccer.GameObjects.Player.Abstraction.IPlayer
+import com.ps.simplepapersoccer.gameObjects.Game.Geometry.Node
+import com.ps.simplepapersoccer.gameObjects.Player.Abstraction.IPlayer
 
 class PartialMove(var oldNode: Node, var newNode: Node, var madeTheMove: IPlayer)

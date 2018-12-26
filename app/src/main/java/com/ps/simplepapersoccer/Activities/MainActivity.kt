@@ -1,17 +1,16 @@
-package com.ps.simplepapersoccer.Activities
+package com.ps.simplepapersoccer.activities
 
-import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.view.Window
-import com.google.android.gms.ads.AdRequest
+import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.ads.AdView
-import com.ps.simplepapersoccer.Enums.GameModeEnum
+import com.ps.simplepapersoccer.enums.GameModeEnum
 import com.ps.simplepapersoccer.R
 
-class MainActivity : Activity() {
+class MainActivity : AppCompatActivity() {
 
     internal var mAdView: AdView? = null
 

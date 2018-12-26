@@ -1,4 +1,4 @@
-package com.ps.simplepapersoccer.GameObjects.Game.Geometry.Abstraction
+package com.ps.simplepapersoccer.gameObjects.Game.Geometry.Abstraction
 
 import android.graphics.Point
 

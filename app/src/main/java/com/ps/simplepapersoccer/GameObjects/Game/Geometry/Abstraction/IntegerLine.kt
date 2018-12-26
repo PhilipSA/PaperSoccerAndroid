@@ -1,7 +1,7 @@
-package com.ps.simplepapersoccer.GameObjects.Game.Geometry.Abstraction
+package com.ps.simplepapersoccer.gameObjects.Game.Geometry.Abstraction
 
 import android.graphics.Point
-import com.ps.simplepapersoccer.Helpers.MathHelper.euclideanDistance
+import com.ps.simplepapersoccer.helpers.MathHelper.euclideanDistance
 
 class IntegerLine(var fromPoint: Point, var toPoint: Point) {
     var allPoints: MutableList<Point> = mutableListOf()

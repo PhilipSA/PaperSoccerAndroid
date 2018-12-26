@@ -1,4 +1,4 @@
-package com.ps.simplepapersoccer.Helpers
+package com.ps.simplepapersoccer.helpers
 
 import java.util.ArrayList
 import java.util.HashMap
@@ -68,8 +68,8 @@ class Tree<T>(val head: T) {
     private fun printTree(increment: Int): String {
         var s = ""
         var inc = ""
-        for (i in 0..increment - 1) {
-            inc = inc + " "
+        for (i in 0 until increment) {
+            inc += " "
         }
         s = inc + head
         for (child in leafs) {

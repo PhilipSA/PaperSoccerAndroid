@@ -1,5 +1,5 @@
-package com.ps.simplepapersoccer.GameObjects.Move
+package com.ps.simplepapersoccer.gameObjects.Move
 
-import com.ps.simplepapersoccer.GameObjects.Game.Geometry.Node
+import com.ps.simplepapersoccer.gameObjects.Game.Geometry.Node
 
 class PossibleMove(var oldNode: Node, var newNode: Node)

@@ -1,6 +1,6 @@
-package com.ps.simplepapersoccer.GameObjects.Player.Abstraction
+package com.ps.simplepapersoccer.gameObjects.Player.Abstraction
 
-import com.ps.simplepapersoccer.GameObjects.Game.Geometry.Goal
+import com.ps.simplepapersoccer.gameObjects.Game.Geometry.Goal
 
 
 abstract class IPlayer(var playerName: String, var playerNumber: Int, var playerColor: Int, var isAi: Boolean) {

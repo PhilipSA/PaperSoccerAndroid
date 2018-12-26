@@ -1,4 +1,4 @@
-package com.ps.simplepapersoccer.Enums
+package com.ps.simplepapersoccer.enums
 
 /**
  * Created by Admin on 2017-05-09.

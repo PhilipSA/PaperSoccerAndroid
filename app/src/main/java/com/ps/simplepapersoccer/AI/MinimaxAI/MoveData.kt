@@ -1,20 +1,15 @@
-package com.ps.simplepapersoccer.AI.MinimaxAI
+package com.ps.simplepapersoccer.ai.MinimaxAI
 
-import com.ps.simplepapersoccer.GameObjects.Move.PartialMove
+import com.ps.simplepapersoccer.gameObjects.Move.PartialMove
 
-class MoveData : Comparable<MoveData> {
-    var returnValue: Double = 0.toDouble()
+class MoveData(var returnValue: Double) : Comparable<MoveData> {
     var returnMove: PartialMove? = null
     var depth: Int = 0
 
-    constructor(returnValue: Double) {
-        this.returnValue = returnValue
-    }
-
-    override fun compareTo(item: MoveData): Int {
-        if (this.returnValue < item.returnValue) {
+    override fun compareTo(other: MoveData): Int {
+        if (this.returnValue < other.returnValue) {
             return -1
-        } else if (this.returnValue > item.returnValue) {
+        } else if (this.returnValue > other.returnValue) {
             return 1
         }
 

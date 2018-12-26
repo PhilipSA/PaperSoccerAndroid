@@ -1,7 +1,7 @@
-package com.ps.simplepapersoccer.AI.Abstraction
+package com.ps.simplepapersoccer.ai.Abstraction
 
-import com.ps.simplepapersoccer.GameObjects.Game.GameHandler
-import com.ps.simplepapersoccer.GameObjects.Move.PartialMove
+import com.ps.simplepapersoccer.gameObjects.Game.GameHandler
+import com.ps.simplepapersoccer.gameObjects.Move.PartialMove
 
 interface IGameAI {
     fun MakeMove(gameHandler: GameHandler): PartialMove

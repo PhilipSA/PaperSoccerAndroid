@@ -1,7 +1,6 @@
-package com.ps.simplepapersoccer.Helpers
+package com.ps.simplepapersoccer.helpers
 
-import com.ps.simplepapersoccer.Enums.NodeTypeEnum
-import com.ps.simplepapersoccer.GameObjects.Game.Geometry.Node
+import com.ps.simplepapersoccer.gameObjects.Game.Geometry.Node
 
 object PathFindingHelper {
     fun findPath(startNode: Node, goalNode: Node): HashSet<Node> {

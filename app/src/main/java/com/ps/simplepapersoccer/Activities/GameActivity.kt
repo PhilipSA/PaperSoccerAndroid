@@ -1,11 +1,8 @@
-package com.ps.simplepapersoccer.Activities
+package com.ps.simplepapersoccer.activities
 
-import android.app.Activity
 import android.content.Context
-import android.graphics.Color
 import android.graphics.Point
 import android.graphics.PointF
-import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -16,205 +13,140 @@ import android.view.Window
 import android.view.WindowManager
 import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
-import android.widget.Button
 import android.widget.TextView
-import co.metalab.asyncawait.async
-
-import com.ps.simplepapersoccer.Enums.DifficultyEnum
-import com.ps.simplepapersoccer.Enums.GameModeEnum
-import com.ps.simplepapersoccer.Enums.NodeTypeEnum
-import com.ps.simplepapersoccer.Enums.VictoryConditionEnum
-import com.ps.simplepapersoccer.GameObjects.Game.*
-import com.ps.simplepapersoccer.GameObjects.Game.Geometry.LinesToDraw
-import com.ps.simplepapersoccer.GameObjects.Game.Geometry.Node
-import com.ps.simplepapersoccer.GameObjects.Move.PartialMove
-import com.ps.simplepapersoccer.GameObjects.Player.AIPlayer
-import com.ps.simplepapersoccer.GameObjects.Player.Abstraction.IPlayer
-import com.ps.simplepapersoccer.GameObjects.Player.Player
-import com.ps.simplepapersoccer.GameObjects.Player.PlayerActivityData
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProviders
 import com.ps.simplepapersoccer.R
-import com.ps.simplepapersoccer.Sound.FXPlayer
+import com.ps.simplepapersoccer.enums.GameModeEnum
+import com.ps.simplepapersoccer.enums.NodeTypeEnum
+import com.ps.simplepapersoccer.enums.VictoryConditionEnum
+import com.ps.simplepapersoccer.gameObjects.Game.GameHandler
+import com.ps.simplepapersoccer.gameObjects.Game.GameViewDrawData
+import com.ps.simplepapersoccer.gameObjects.Game.Geometry.LinesToDraw
+import com.ps.simplepapersoccer.gameObjects.Game.Geometry.Node
+import com.ps.simplepapersoccer.gameObjects.Game.Victory
+import com.ps.simplepapersoccer.gameObjects.Move.PartialMove
+import com.ps.simplepapersoccer.gameObjects.Player.Abstraction.IPlayer
+import com.ps.simplepapersoccer.gameObjects.Player.PlayerActivityData
+import com.ps.simplepapersoccer.runOnBgThread
+import com.ps.simplepapersoccer.sound.FXPlayer
+import com.ps.simplepapersoccer.viewmodel.GameViewModel
+import kotlinx.android.synthetic.main.activity_game.*
 import java.util.*
-import java.util.concurrent.CopyOnWriteArrayList
 
-class GameActivity : Activity() {
+class GameActivity : AppCompatActivity() {
 
     var gameView: GameView? = null
 
-    private var player1NameTextView: TextView? = null
-    private var player2NameTextView: TextView? = null
-    private var playerTurnTextView: TextView? = null
+    private var fxPlayer: FXPlayer? = null
+    private var myName: String = ""
+    private var playerActivityDataMap: MutableMap<IPlayer, PlayerActivityData> = HashMap()
 
-    private var player1ScoreTextView: TextView? = null
-    private var player2ScoreTextView: TextView? = null
-
-    private var playerWinnerTextView: TextView? = null
-
-    private val player1Color = Color.BLUE
-    private val player2Color = Color.RED
-
-    var fxPlayer: FXPlayer? = null
-
-    var gameHandler: GameHandler? = null
-
-    var myName: String = ""
-
-    var playerActivityDataMap: MutableMap<IPlayer, PlayerActivityData> = HashMap()
-
-    private var playAgain: Button? = null
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putInt(gameHandler?.player1?.playerName, gameHandler?.player1!!.score)
-        outState.putInt(gameHandler?.player2?.playerName, gameHandler?.player2!!.score)
-    }
+    private lateinit var gameViewModel: GameViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         this.requestWindowFeature(Window.FEATURE_NO_TITLE)
         setContentView(R.layout.activity_game)
 
+        gameViewModel = ViewModelProviders.of(this).get(GameViewModel::class.java)
+
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
-        val difficulty = sharedPreferences.getString("pref_difficultyLevel", "Medium")
+        gameViewModel.difficulty = sharedPreferences.getString("pref_difficultyLevel", "Medium")
         val playerName = sharedPreferences.getString("pref_playerName", "Player")
 
-        var gridSizeX = sharedPreferences.getString("gridsize_x", "8").toInt()
-        var gridSizeY = sharedPreferences.getString("gridsize_y", "10").toInt()
+        val gridSizeX = sharedPreferences.getString("gridsize_x", "8").toInt()
+        val gridSizeY = sharedPreferences.getString("gridsize_y", "10").toInt()
 
         val gameMode = intent.getIntExtra("MULTIPLAYER_MODE", GameModeEnum.PLAYER_VS_AI)
 
         myName = playerName
 
-        gameView = findViewById<GameView>(R.id.gameview)
+        gameView = findViewById(R.id.gameview)
 
-        player1NameTextView = findViewById<TextView>(R.id.player1TextView)
-        player2NameTextView = findViewById<TextView>(R.id.player2TextView)
-        playerTurnTextView = findViewById<TextView>(R.id.playerTurnTextView)
-        playerWinnerTextView = findViewById<TextView>(R.id.playerWinnerTextview)
+        player1_name!!.setTextColor(gameViewModel.player1Color)
+        player2_name!!.setTextColor(gameViewModel.player2Color)
 
-        player1ScoreTextView = findViewById<TextView>(R.id.player1ScoreTextView)
-        player2ScoreTextView = findViewById<TextView>(R.id.player2ScoreTextView)
+        gameViewModel.setGameMode(gameMode, playerName)
 
-        player1NameTextView!!.setTextColor(player1Color)
-        player2NameTextView!!.setTextColor(player2Color)
+        player1_name!!.text = gameViewModel.players[0].playerName
+        player2_name!!.text = gameViewModel.players[1].playerName
 
-        var players = ArrayList<IPlayer>()
-        if (gameMode == GameModeEnum.PLAYER_VS_AI) {
-            players = assignPlayerAndAi(difficulty, DifficultyEnum.valueOf(difficulty) ,playerName)
-        } else if (gameMode == GameModeEnum.MULTIPLAYER_MODE) {
-            players.add(Player(playerName, 1, player1Color, false))
-            players.add(Player("Player2", 2, player2Color, false))
-        } else {
-            players = assignTwoAi(difficulty, DifficultyEnum.valueOf(difficulty))
-        }
+        val playerActivityData = PlayerActivityData(player1_name as TextView, player1_score as TextView)
+        playerActivityDataMap[gameViewModel.players[0]] = playerActivityData
+        val playerActivityData2 = PlayerActivityData(player2_name as TextView, player2_score as TextView)
+        playerActivityDataMap[gameViewModel.players[1]] = playerActivityData2
 
-        player1NameTextView!!.text = players[0].playerName
-        player2NameTextView!!.text = players[1].playerName
-
-        if (savedInstanceState != null) {
-            players[0].score = savedInstanceState.getInt(players[0].playerName)
-            players[1].score = savedInstanceState.getInt(players[1].playerName)
-        }
-
-        val playerActivityData = PlayerActivityData(player1NameTextView as TextView, player1ScoreTextView as TextView)
-        playerActivityDataMap.put(players[0], playerActivityData)
-        val playerActivityData2 = PlayerActivityData(player2NameTextView as TextView, player2ScoreTextView as TextView)
-        playerActivityDataMap.put(players[1], playerActivityData2)
-
-        SetScoreText(players[0])
-        SetScoreText(players[1])
+        setScoreText(gameViewModel.players[0])
+        setScoreText(gameViewModel.players[1])
 
         fxPlayer = FXPlayer(this)
 
-        gameHandler = GameHandler(this, gridSizeX, gridSizeY, players, gameMode, true, gameView != null)
+        gameViewModel.gameHandler = GameHandler(this, gridSizeX, gridSizeY, gameViewModel.players, gameMode, true, gameView != null)
 
-        playAgain = findViewById<Button>(R.id.playagainButton)
-
-        gameHandler?.UpdateGameState()
+        gameViewModel.gameHandler.UpdateGameState()
 
         setPlayerTurnTextViewText()
 
-        gameView?.SetValues(GameActivity.getWidth(this), GameActivity.getHeight(this), gridSizeX, gridSizeY, this, gameHandler?.gameBoard!!)
-        gameView?.gameViewDrawData = GameViewDrawData(null, gameHandler?.currentPlayersTurn, gameHandler?.currentPlayersTurn, gameHandler?.ballNode(), getAllNodeNeighbors(gameHandler?.ballNode()!!))
+        gameView?.init(GameActivity.getWidth(this), GameActivity.getHeight(this), gridSizeX, gridSizeY, gameViewModel, gameViewModel.gameHandler.gameBoard)
+        gameView?.gameViewDrawData = GameViewDrawData(null, gameViewModel.gameHandler.currentPlayersTurn, gameViewModel.gameHandler.currentPlayersTurn,
+                gameViewModel.gameHandler.ballNode(),
+                gameViewModel.getAllNodeNeighbors(gameViewModel.gameHandler.ballNode()))
 
         if (gameMode != GameModeEnum.AI_VS_AI) {
             gameView?.setOnTouchListener { view, motionEvent ->
                 if (motionEvent.action == MotionEvent.ACTION_DOWN) {
                     val touchedNode = nodeCoordsToNode(Math.round(motionEvent.x).toFloat(), Math.round(motionEvent.y).toFloat())
                     if (touchedNode != null) {
-                        gameHandler?.PlayerMakeMove(touchedNode, getNonAIPlayer())
+                        gameViewModel.gameHandler?.PlayerMakeMove(touchedNode, getNonAIPlayer())
                     }
                 }
                 false
             }
         }
+
+        registerObservers()
     }
 
-    private fun getAllNodeNeighbors(node: Node): MutableList<Node> {
-        return node.neighbors
+    private fun registerObservers() {
+        gameViewModel.executeUpdateGameViewTaskLiveData.observe(this, androidx.lifecycle.Observer {
+            executeUpdateGameViewTask(it)
+        })
+
+        gameViewModel.playerTurnTextLiveData.observe(this, androidx.lifecycle.Observer {
+            setPlayerTurnTextViewText()
+        })
     }
 
     private fun getNonAIPlayer(): IPlayer {
-        if (gameHandler?.currentPlayersTurn!!.isAi) return gameHandler!!.getOpponent(gameHandler!!.currentPlayersTurn)!! else return gameHandler!!.currentPlayersTurn
+        return if (gameViewModel.gameHandler.currentPlayersTurn.isAi) gameViewModel.gameHandler.getOpponent(gameViewModel.gameHandler.currentPlayersTurn)!!
+        else gameViewModel.gameHandler.currentPlayersTurn
     }
 
-    fun nodeCoordsToNode(x: Float, y: Float): Node? {
+    private fun nodeCoordsToNode(x: Float, y: Float): Node? {
         val coordsArray = gameView?.coordsToNode(x, y)
-        return gameHandler?.gameBoard?.findNodeByCoords(Point(coordsArray!![0].toInt(), coordsArray[1].toInt()))
-    }
-
-    private fun assignTwoAi(difficulty: String, difficultyEnum: DifficultyEnum): ArrayList<IPlayer> {
-        val players = ArrayList<IPlayer>()
-        val random = Random()
-        if (random.nextBoolean()) {
-            players.add(AIPlayer(difficultyEnum, "OtherAI", 1, player1Color, true))
-            players.add(AIPlayer(difficultyEnum, "Ai" + difficulty, 2, player2Color, true))
-        } else {
-            players.add(AIPlayer(difficultyEnum, "Ai" + difficulty, 1, player1Color, true))
-            players.add(AIPlayer(difficultyEnum, "OtherAI", 2, player2Color, true))
-        }
-        return players
-    }
-
-    private fun assignPlayerAndAi(difficulty: String, difficultyEnum: DifficultyEnum, playerName: String): ArrayList<IPlayer> {
-        val players = ArrayList<IPlayer>()
-        val random = Random()
-        if (random.nextBoolean()) {
-            players.add(Player(playerName, 1, player1Color, false))
-            players.add(AIPlayer(difficultyEnum, "Ai" + difficulty, 2, player2Color, true))
-        } else {
-            players.add(AIPlayer(difficultyEnum, "Ai" + difficulty, 1, player1Color, true))
-            players.add(Player(playerName, 2, player2Color, false))
-        }
-        return players
+        return gameViewModel.gameHandler.gameBoard.findNodeByCoords(Point(coordsArray!![0].toInt(), coordsArray[1].toInt()))
     }
 
     fun setPlayerTurnTextViewText() {
-        playerTurnTextView?.text = String.format("%s %s%s", getString(R.string.game_partial_its), gameHandler?.currentPlayersTurn?.playerName, getString(R.string.game_partial_turn))
-        playerTurnTextView?.setTextColor(gameHandler!!.currentPlayersTurn.playerColor)
+        player_turn?.text = String.format("%s %s%s", getString(R.string.game_partial_its), gameViewModel.gameHandler.currentPlayersTurn.playerName, getString(R.string.game_partial_turn))
+        player_turn?.setTextColor(gameViewModel.gameHandler.currentPlayersTurn.playerColor)
     }
 
-    private fun SetScoreText(player: IPlayer) {
+    private fun setScoreText(player: IPlayer) {
         playerActivityDataMap[player]?.playerScoreTextView?.text = String.format("%s: %d", player.playerName, player.score)
     }
 
-    fun AddDrawDataToQueue(linesToDraw: LinesToDraw, ballNode: Node, madeTheMove: IPlayer) = async {
-        await { executeUpdateGameViewTask(GameViewDrawData(linesToDraw, madeTheMove, gameHandler?.currentPlayersTurn, ballNode, getAllNodeNeighbors(ballNode))) }
-    }
-
     fun executeUpdateGameViewTask(gameViewDrawData: GameViewDrawData) {
-        runOnUiThread({
-            playBallSound(gameViewDrawData)
-            gameView?.drawAsync(gameViewDrawData)
-        })
-        Thread.sleep(200)
-        runOnUiThread({
-            gameHandler?.UpdateGameState()
-        })
+        playBallSound(gameViewDrawData)
+        gameView?.drawAsync(gameViewDrawData)
+        Handler().post {
+            gameViewModel.gameHandler.UpdateGameState()
+        }
     }
 
     fun playBallSound(gameViewDrawData: GameViewDrawData) {
-        if (gameHandler?.isGameOver!!) return
+        if (gameViewModel.gameHandler.isGameOver) return
         if (gameViewDrawData.ballNode?.nodeType != NodeTypeEnum.Empty) {
             fxPlayer?.playSound(R.raw.bounce)
         } else {
@@ -222,24 +154,24 @@ class GameActivity : Activity() {
         }
     }
 
-    fun DrawPartialMove(move: PartialMove) {
+    fun drawPartialMove(move: PartialMove) {
         val newLineCoords = gameView?.nodeToCoords(move.newNode)
         val oldNodeCoords = gameView?.nodeToCoords(move.oldNode)
 
         val linesToDraw = LinesToDraw(PointF(oldNodeCoords?.get(0)!!, oldNodeCoords[1]), PointF(newLineCoords?.get(0)!!, newLineCoords[1]), move.madeTheMove.playerColor)
-        AddDrawDataToQueue(linesToDraw, move.newNode, move.madeTheMove)
+        gameViewModel.addDrawDataToQueue(linesToDraw, move.newNode, move.madeTheMove)
     }
 
-    fun Winner(victory: Victory) {
-        SetScoreText(victory.winner)
+    fun winner(victory: Victory) {
+        setScoreText(victory.winner)
 
         if (victory.victoryConditionEnum == VictoryConditionEnum.Goal) {
-            playerWinnerTextView?.text = String.format("%s %s", victory.winner.playerName, getString(R.string.game_victory_scored_goal))
+            player_winner?.text = String.format("%s %s", victory.winner.playerName, getString(R.string.game_victory_scored_goal))
         } else {
-            playerWinnerTextView?.text = String.format("%s %s", victory.winner.playerName, getString(R.string.game_victory_out_of_moves))
+            player_winner?.text = String.format("%s %s", victory.winner.playerName, getString(R.string.game_victory_out_of_moves))
         }
 
-        if (victory.winner.isAi && gameHandler?.gameMode == GameModeEnum.PLAYER_VS_AI) {
+        if (victory.winner.isAi && gameViewModel.gameHandler.gameMode == GameModeEnum.PLAYER_VS_AI) {
             fxPlayer?.playSound(R.raw.failure)
         } else {
             fxPlayer?.playSound(R.raw.goodresult)
@@ -250,20 +182,20 @@ class GameActivity : Activity() {
         anim.repeatMode = Animation.REVERSE
         gameView?.animation = anim
 
-        playerWinnerTextView!!.visibility = View.VISIBLE
-        playAgain!!.visibility = View.VISIBLE
+        player_winner.visibility = View.VISIBLE
+        play_again_button.visibility = View.VISIBLE
         gameView?.isEnabled = false
     }
 
-    fun ResetGame(view: View) {
+    fun resetGame(view: View) {
         val handler = Handler(Looper.getMainLooper())
         handler.post {
-            playAgain!!.visibility = View.INVISIBLE
+            play_again_button.visibility = View.INVISIBLE
             recreate()
         }
     }
 
-    fun Quit(view: View) {
+    fun quit(view: View) {
         fxPlayer?.cleanUpIfEnd()
         finish()
     }
@@ -275,30 +207,22 @@ class GameActivity : Activity() {
     companion object {
 
         fun getWidth(mContext: Context): Int {
-            var width = 0
+            val width: Int
             val wm = mContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager
             val display = wm.defaultDisplay
-            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.HONEYCOMB) {
-                val size = Point()
-                display.getSize(size)
-                width = size.x
-            } else {
-                width = display.width  // deprecated
-            }
+            val size = Point()
+            display.getSize(size)
+            width = size.x
             return width
         }
 
         fun getHeight(mContext: Context): Int {
-            var height = 0
+            val height: Int
             val wm = mContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager
             val display = wm.defaultDisplay
-            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.HONEYCOMB) {
-                val size = Point()
-                display.getSize(size)
-                height = size.y
-            } else {
-                height = display.height  // deprecated
-            }
+            val size = Point()
+            display.getSize(size)
+            height = size.y
             return height
         }
     }

@@ -1,10 +1,10 @@
-package com.ps.simplepapersoccer.GameObjects.Player
+package com.ps.simplepapersoccer.gameObjects.Player
 
-import com.ps.simplepapersoccer.AI.Abstraction.IGameAI
-import com.ps.simplepapersoccer.AI.EuclideanAI
-import com.ps.simplepapersoccer.AI.MinimaxAI.MinimaxAI
-import com.ps.simplepapersoccer.Enums.DifficultyEnum
-import com.ps.simplepapersoccer.GameObjects.Player.Abstraction.IPlayer
+import com.ps.simplepapersoccer.ai.Abstraction.IGameAI
+import com.ps.simplepapersoccer.ai.EuclideanAI
+import com.ps.simplepapersoccer.ai.MinimaxAI.MinimaxAI
+import com.ps.simplepapersoccer.enums.DifficultyEnum
+import com.ps.simplepapersoccer.gameObjects.Player.Abstraction.IPlayer
 
 class AIPlayer(val difficulty: DifficultyEnum, playerName: String, playerNumber: Int, playerColor: Int, isAi: Boolean) : IPlayer(playerName, playerNumber, playerColor, isAi) {
     var gameAI: IGameAI? = null

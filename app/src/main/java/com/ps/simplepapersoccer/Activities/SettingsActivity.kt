@@ -1,8 +1,9 @@
-package com.ps.simplepapersoccer.Activities
+package com.ps.simplepapersoccer.activities
 
 import android.os.Bundle
 import android.preference.PreferenceFragment
 import androidx.appcompat.app.AppCompatActivity
+import androidx.preference.PreferenceFragmentCompat
 
 import com.ps.simplepapersoccer.R
 
@@ -10,7 +11,7 @@ class SettingsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        fragmentManager.beginTransaction().replace(android.R.id.content, MyPreferenceFragment()).commit()
+        supportFragmentManager.beginTransaction().replace(android.R.id.content, MyPreferenceFragment()).commit()
         supportActionBar!!.setDisplayShowHomeEnabled(true)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
     }
@@ -20,9 +21,8 @@ class SettingsActivity : AppCompatActivity() {
         return true
     }
 
-    class MyPreferenceFragment : PreferenceFragment() {
-        override fun onCreate(savedInstanceState: Bundle?) {
-            super.onCreate(savedInstanceState)
+    class MyPreferenceFragment : PreferenceFragmentCompat() {
+        override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             addPreferencesFromResource(R.xml.preferences)
         }
     }

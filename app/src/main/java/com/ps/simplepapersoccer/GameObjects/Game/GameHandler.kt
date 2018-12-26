@@ -1,17 +1,19 @@
-package com.ps.simplepapersoccer.GameObjects.Game
+package com.ps.simplepapersoccer.gameObjects.Game
 
 import android.util.Log
-import com.ps.simplepapersoccer.AI.GameAIHandler
-import com.ps.simplepapersoccer.Activities.GameActivity
-import com.ps.simplepapersoccer.Enums.GameModeEnum
-import com.ps.simplepapersoccer.Enums.NodeTypeEnum
-import com.ps.simplepapersoccer.Enums.VictoryConditionEnum
-import com.ps.simplepapersoccer.GameObjects.Game.Geometry.Node
-import com.ps.simplepapersoccer.GameObjects.Move.PartialMove
-import com.ps.simplepapersoccer.GameObjects.Player.AIPlayer
-import com.ps.simplepapersoccer.GameObjects.Player.Abstraction.IPlayer
+import com.ps.simplepapersoccer.ai.GameAIHandler
+import com.ps.simplepapersoccer.activities.GameActivity
+import com.ps.simplepapersoccer.enums.GameModeEnum
+import com.ps.simplepapersoccer.enums.NodeTypeEnum
+import com.ps.simplepapersoccer.enums.VictoryConditionEnum
+import com.ps.simplepapersoccer.gameObjects.Game.Geometry.Node
+import com.ps.simplepapersoccer.gameObjects.Move.PartialMove
+import com.ps.simplepapersoccer.gameObjects.Player.AIPlayer
+import com.ps.simplepapersoccer.gameObjects.Player.Abstraction.IPlayer
 
-class GameHandler(private val gameActivity: GameActivity?, gridX: Int, gridY: Int, players: ArrayList<IPlayer>, val gameMode: Int, aiIsAsync: Boolean, private val waitForGameViewDraw: Boolean) {
+class GameHandler(private val gameActivity: GameActivity?, gridX: Int, gridY: Int, players: ArrayList<IPlayer>, val gameMode: Int, aiIsAsync: Boolean,
+                  private val waitForGameViewDraw: Boolean) {
+
     var player1: IPlayer = players[0]
     var player2: IPlayer = players[1]
 
@@ -28,6 +30,10 @@ class GameHandler(private val gameActivity: GameActivity?, gridX: Int, gridY: In
 
     override fun hashCode(): Int {
         return currentPlayersTurn.hashCode() xor gameBoard.hashCode()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        return super.equals(other)
     }
 
     init {
@@ -69,7 +75,7 @@ class GameHandler(private val gameActivity: GameActivity?, gridX: Int, gridY: In
     fun MakeMove(partialMove: PartialMove) {
         MakePartialMove(partialMove)
         Log.d("MyTagGoesHere", partialMove.newNode.nodeType.toString())
-        gameActivity?.DrawPartialMove(partialMove)
+        gameActivity?.drawPartialMove(partialMove)
         ++numberOfTurns
         if (!waitForGameViewDraw) UpdateGameState()
     }
@@ -107,7 +113,7 @@ class GameHandler(private val gameActivity: GameActivity?, gridX: Int, gridY: In
     //Let the activity know we have a winner
     fun winner(victory: Victory) {
         victory.winner.score += 1
-        gameActivity?.Winner(victory)
+        gameActivity?.winner(victory)
     }
 
     fun getOpponent(myPlayer: IPlayer): IPlayer? {

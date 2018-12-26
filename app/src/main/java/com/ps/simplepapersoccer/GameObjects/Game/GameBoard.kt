@@ -1,15 +1,14 @@
-package com.ps.simplepapersoccer.GameObjects.Game
+package com.ps.simplepapersoccer.gameObjects.Game
 
 import android.graphics.Point
-import android.util.Log
-import com.ps.simplepapersoccer.Enums.NodeTypeEnum
-import com.ps.simplepapersoccer.GameObjects.Game.Geometry.Abstraction.IntegerLine
-import com.ps.simplepapersoccer.GameObjects.Game.Geometry.Goal
-import com.ps.simplepapersoccer.GameObjects.Game.Geometry.Node
-import com.ps.simplepapersoccer.GameObjects.Move.PartialMove
-import com.ps.simplepapersoccer.GameObjects.Move.PossibleMove
-import com.ps.simplepapersoccer.GameObjects.Move.StoredMove
-import com.ps.simplepapersoccer.Helpers.MathHelper
+import com.ps.simplepapersoccer.enums.NodeTypeEnum
+import com.ps.simplepapersoccer.gameObjects.Game.Geometry.Abstraction.IntegerLine
+import com.ps.simplepapersoccer.gameObjects.Game.Geometry.Goal
+import com.ps.simplepapersoccer.gameObjects.Game.Geometry.Node
+import com.ps.simplepapersoccer.gameObjects.Move.PartialMove
+import com.ps.simplepapersoccer.gameObjects.Move.PossibleMove
+import com.ps.simplepapersoccer.gameObjects.Move.StoredMove
+import com.ps.simplepapersoccer.helpers.MathHelper
 import java.util.ArrayList
 
 class GameBoard(private val gridSizeX: Int, private val gridSizeY: Int) {

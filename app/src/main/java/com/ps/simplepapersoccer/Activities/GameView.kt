@@ -1,4 +1,4 @@
-package com.ps.simplepapersoccer.Activities
+package com.ps.simplepapersoccer.activities
 
 import java.util.ArrayList
 
@@ -10,14 +10,14 @@ import android.graphics.Point
 import android.graphics.drawable.ScaleDrawable
 import android.util.AttributeSet
 import android.view.View
-import com.ps.simplepapersoccer.Enums.NodeTypeEnum
-import com.ps.simplepapersoccer.GameObjects.Game.GameBoard
-import com.ps.simplepapersoccer.GameObjects.Game.GameViewDrawData
-import com.ps.simplepapersoccer.GameObjects.Game.Geometry.Abstraction.IntegerLine
-import com.ps.simplepapersoccer.GameObjects.Game.Geometry.LinesToDraw
-
-import com.ps.simplepapersoccer.GameObjects.Game.Geometry.Node
+import com.ps.simplepapersoccer.enums.NodeTypeEnum
+import com.ps.simplepapersoccer.gameObjects.Game.GameBoard
+import com.ps.simplepapersoccer.gameObjects.Game.GameViewDrawData
+import com.ps.simplepapersoccer.gameObjects.Game.Geometry.Abstraction.IntegerLine
+import com.ps.simplepapersoccer.gameObjects.Game.Geometry.LinesToDraw
+import com.ps.simplepapersoccer.gameObjects.Game.Geometry.Node
 import com.ps.simplepapersoccer.R
+import com.ps.simplepapersoccer.viewmodel.GameViewModel
 
 class GameView : View {
 
@@ -25,7 +25,7 @@ class GameView : View {
 
     var gameViewDrawData: GameViewDrawData? = null
 
-    private var gameActivity: GameActivity? = null
+    private var gameViewModel: GameViewModel? = null
     private var gameBoard: GameBoard? = null
 
     private var canvas: Canvas? = null
@@ -33,11 +33,11 @@ class GameView : View {
 
     private val nodeSize = 20
 
-    var leftEdge = 50f
-    var topEdge = 100f
+    private var leftEdge = 50f
+    private var topEdge = 100f
 
-    var gridXdraw: Float = 0.toFloat()
-    var gridYdraw: Float = 0.toFloat()
+    private var gridXdraw: Float = 0.toFloat()
+    private var gridYdraw: Float = 0.toFloat()
 
     var gridSizeX = 0
     var gridSizeY = 0
@@ -45,17 +45,17 @@ class GameView : View {
     private val gridStrokeWidth = 4
     private val gridColor = Color.rgb(242, 244, 247)
 
-    var leftEdgeMargin = 30f
-    var rightEdgeMargin = 1.027f
+    private var leftEdgeMargin = 30f
+    private var rightEdgeMargin = 1.027f
 
     private val ballSize = 100
     private val sideLineStrokeWidth = 8
 
-    var rightEdge: Float = 0.toFloat()
-    var bottomEdge: Float = 0.toFloat()
+    private var rightEdge: Float = 0.toFloat()
+    private var bottomEdge: Float = 0.toFloat()
 
-    protected var middlePointX: Float = 0.toFloat()
-    protected var middlePointY: Float = 0.toFloat()
+    private var middlePointX: Float = 0.toFloat()
+    private var middlePointY: Float = 0.toFloat()
 
     constructor(context: Context) : super(context)
 
@@ -63,7 +63,7 @@ class GameView : View {
 
     constructor(context: Context, attrs: AttributeSet, defStyle: Int) : super(context, attrs, defStyle)
 
-    fun SetValues(screenWidth: Int, screenHeight: Int, gridSizeX: Int, gridSizeY: Int, gameActivity: GameActivity, gameBoard: GameBoard) {
+    fun init(screenWidth: Int, screenHeight: Int, gridSizeX: Int, gridSizeY: Int, gameViewModel: GameViewModel, gameBoard: GameBoard) {
         topEdge = (screenHeight / 9).toFloat()
         leftEdge = screenWidth / leftEdgeMargin
 
@@ -79,7 +79,7 @@ class GameView : View {
         this.middlePointX = (rightEdge + leftEdge) / 2
         this.middlePointY = (bottomEdge + topEdge) / 2
 
-        this.gameActivity = gameActivity
+        this.gameViewModel = gameViewModel
         this.gameBoard = gameBoard
 
         this.invalidate()
@@ -93,7 +93,7 @@ class GameView : View {
         return coords
     }
 
-    fun pointsCoordsToCoords(point: Point): FloatArray {
+    private fun pointsCoordsToCoords(point: Point): FloatArray {
         val newCoords = FloatArray(2)
         newCoords[0] = point.x * gridXdraw + leftEdge
         newCoords[1] = point.y * gridYdraw + topEdge
@@ -101,9 +101,9 @@ class GameView : View {
     }
 
     //Converts screen coordinates to node coordinates
-    fun coordsToNode(x: Float, y: Float): FloatArray {
-        var x = (x + gridXdraw.div(2)) / gridXdraw * gridXdraw
-        var y = (y + gridYdraw.div(2)) / gridYdraw * gridYdraw - topEdge
+    fun coordsToNode(argX: Float, argY: Float): FloatArray {
+        val x = (argX + gridXdraw.div(2)) / gridXdraw * gridXdraw
+        val y = (argY + gridYdraw.div(2)) / gridYdraw * gridYdraw - topEdge
 
         val coords = FloatArray(2)
         coords[0] = x / gridXdraw
@@ -114,24 +114,24 @@ class GameView : View {
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         this.canvas = canvas
-        RedrawMap()
+        redrawMap()
     }
 
     fun drawAsync(gameViewDrawData: GameViewDrawData){
         drawLines.add(gameViewDrawData.drawLine!!)
         this.gameViewDrawData = gameViewDrawData
-        gameActivity?.setPlayerTurnTextViewText()
+        gameViewModel?.updatePlayerTurnText()
         this.invalidate()
     }
 
-    fun RedrawMap() {
+    private fun redrawMap() {
         paint = Paint()
         paint?.textSize = 40f
         paint?.strokeWidth = gridStrokeWidth.toFloat()
         paintComponent(canvas!!, paint!!)
     }
 
-    fun paintComponent(canvas: Canvas, paint: Paint) {
+    private fun paintComponent(canvas: Canvas, paint: Paint) {
         //Clear before repaint
         canvas.clipRect(0, 0, width, height)
 
@@ -146,13 +146,13 @@ class GameView : View {
                     .forEach { canvas.drawLine(nodeToCoords(node)[0], nodeToCoords(node)[1], nodeToCoords(it)[0], nodeToCoords(it)[1], paint) }
         }
 
-        DrawGoalLine(topEdge, paint, Color.RED, gameBoard!!.topGoalLines.goalLine)
-        DrawGoalLine(bottomEdge, paint, Color.BLUE, gameBoard!!.bottomGoalLines.goalLine)
+        drawGoalLine(topEdge, paint, Color.RED, gameBoard!!.topGoalLines.goalLine)
+        drawGoalLine(bottomEdge, paint, Color.BLUE, gameBoard!!.bottomGoalLines.goalLine)
 
         paint.color = Color.BLACK
         paint.strokeWidth = sideLineStrokeWidth.toFloat()
 
-        DrawWalls(paint)
+        drawWalls(paint)
         drawGoalPosts(paint, gameBoard!!.topGoalLines.leftPost, gameBoard!!.topGoalLines.rightPost)
         drawGoalPosts(paint, gameBoard!!.bottomGoalLines.leftPost, gameBoard!!.bottomGoalLines.rightPost)
 
@@ -163,7 +163,7 @@ class GameView : View {
             canvas.drawLine(drawLines[i].fromPoint.x, drawLines[i].fromPoint.y, drawLines[i].toPoint.x, drawLines[i].toPoint.y, paint)
         }
 
-        DrawPossibleMoves()
+        drawPossibleMoves()
 
         var image = resources.getDrawable(R.drawable.football)
         image = ScaleDrawable(image, 0, ballSize.toFloat(), ballSize.toFloat()).drawable
@@ -172,7 +172,7 @@ class GameView : View {
         image.draw(canvas)
     }
 
-    private fun DrawPossibleMoves() {
+    private fun drawPossibleMoves() {
         paint?.color = gameViewDrawData?.currentPlayerTurn?.playerColor as Int
         if (gameViewDrawData?.currentPlayerTurn?.isAi!!) return
         gameViewDrawData?.nodeNeighbors!!
@@ -180,11 +180,11 @@ class GameView : View {
                 .forEach { canvas?.drawCircle(it[0], it[1], 20f, paint) }
     }
 
-    private fun DrawGoalLine(edge: Float, paint: Paint, color: Int, line: IntegerLine) {
+    private fun drawGoalLine(edge: Float, paint: Paint, color: Int, line: IntegerLine) {
         paint.color = color
         paint.strokeWidth = sideLineStrokeWidth.toFloat()
-        var startPoint = pointsCoordsToCoords(line.fromPoint)
-        var endPoint = pointsCoordsToCoords(line.toPoint)
+        val startPoint = pointsCoordsToCoords(line.fromPoint)
+        val endPoint = pointsCoordsToCoords(line.toPoint)
         canvas?.drawLine(startPoint[0], startPoint[1], endPoint[0], endPoint[1], paint)
     }
 
@@ -197,13 +197,13 @@ class GameView : View {
         canvas?.drawLine(startPoint[0], startPoint[1], endPoint[0], endPoint[1], paint)
     }
 
-    private fun DrawWalls(paint: Paint) {
-        gameBoard?.nodeHashSet?.filter({ otherNode -> otherNode.nodeType == NodeTypeEnum.Wall })?.forEach{
-            it.coordNeighbors.filter({ otherNode -> otherNode.nodeType == NodeTypeEnum.Wall }).forEach{
+    private fun drawWalls(paint: Paint) {
+        gameBoard?.nodeHashSet?.filter { otherNode -> otherNode.nodeType == NodeTypeEnum.Wall }?.forEach{
+            it.coordNeighbors.filter { otherNode -> otherNode.nodeType == NodeTypeEnum.Wall }.forEach{
                 otherNode -> if (!it.isDiagonalNeighbor(otherNode)) canvas?.drawLine(nodeToCoords(it)[0], nodeToCoords(it)[1], nodeToCoords(otherNode)[0], nodeToCoords(otherNode)[1], paint) } }
 
-        gameBoard?.nodeHashSet?.filter({ otherNode -> otherNode.nodeType == NodeTypeEnum.Wall })?.forEach{
-            it.coordNeighbors.filter({ otherNode -> otherNode.nodeType == NodeTypeEnum.Post }).forEach{
+        gameBoard?.nodeHashSet?.filter { otherNode -> otherNode.nodeType == NodeTypeEnum.Wall }?.forEach{
+            it.coordNeighbors.filter { otherNode -> otherNode.nodeType == NodeTypeEnum.Post }.forEach{
                 otherNode -> if (!it.isDiagonalNeighbor(otherNode)) canvas?.drawLine(nodeToCoords(it)[0], nodeToCoords(it)[1], nodeToCoords(otherNode)[0], nodeToCoords(otherNode)[1], paint) } }
     }
 }

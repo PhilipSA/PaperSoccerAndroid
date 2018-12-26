@@ -1,12 +1,12 @@
-package com.ps.simplepapersoccer.AI.MinimaxAI
+package com.ps.simplepapersoccer.ai.MinimaxAI
 
-import com.ps.simplepapersoccer.AI.Abstraction.IGameAI
-import com.ps.simplepapersoccer.Enums.NodeTypeEnum
-import com.ps.simplepapersoccer.Enums.SortOrderEnum
-import com.ps.simplepapersoccer.GameObjects.Game.GameHandler
-import com.ps.simplepapersoccer.GameObjects.Move.PartialMove
-import com.ps.simplepapersoccer.GameObjects.Player.Abstraction.IPlayer
-import com.ps.simplepapersoccer.Helpers.PathFindingHelper
+import com.ps.simplepapersoccer.ai.Abstraction.IGameAI
+import com.ps.simplepapersoccer.enums.NodeTypeEnum
+import com.ps.simplepapersoccer.enums.SortOrderEnum
+import com.ps.simplepapersoccer.gameObjects.Game.GameHandler
+import com.ps.simplepapersoccer.gameObjects.Move.PartialMove
+import com.ps.simplepapersoccer.gameObjects.Player.Abstraction.IPlayer
+import com.ps.simplepapersoccer.helpers.PathFindingHelper
 import java.util.*
 
 class MinimaxAI(timeLimitMilliSeconds: Int) : IGameAI {
@@ -133,7 +133,7 @@ class MinimaxAI(timeLimitMilliSeconds: Int) : IGameAI {
             return value
         }
 
-        var bestScore = 0.0
+        val bestScore: Double
 
         if (maximizingPlayer == state.currentPlayersTurn) {
             val possibleMoves = sortPossibleMovesByScore(SortOrderEnum.Descending, state, maximizingPlayer)
@@ -181,7 +181,7 @@ class MinimaxAI(timeLimitMilliSeconds: Int) : IGameAI {
         }
 
         if (sortOrder == SortOrderEnum.Ascending) {
-            Collections.sort(newPossibleMoves)
+            newPossibleMoves.sort()
         } else {
             Collections.sort(newPossibleMoves, Collections.reverseOrder<Any>())
         }

@@ -1,5 +1,5 @@
-package com.ps.simplepapersoccer.GameObjects.Move
+package com.ps.simplepapersoccer.gameObjects.Move
 
-import com.ps.simplepapersoccer.Enums.NodeTypeEnum
+import com.ps.simplepapersoccer.enums.NodeTypeEnum
 
 class StoredMove(val partialMove: PartialMove, val oldNodeTypeEnum: NodeTypeEnum, val newNodeTypeEnum: NodeTypeEnum)

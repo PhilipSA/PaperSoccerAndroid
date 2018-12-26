@@ -1,4 +1,4 @@
-package com.ps.simplepapersoccer.Activities
+package com.ps.simplepapersoccer.activities
 
 import android.os.Bundle
 import androidx.viewpager.widget.ViewPager
@@ -44,7 +44,7 @@ class HowToPlayActivity : AppCompatActivity() {
                 if (position == 0) {
                     leftArrow?.visibility = View.INVISIBLE
                     rightArrow?.visibility = View.VISIBLE
-                } else if (mViewPager.adapter.count - 1 == position) {
+                } else if (mViewPager.adapter?.count ?: 0 - 1 == position) {
                     leftArrow?.visibility = View.VISIBLE
                     rightArrow?.visibility = View.INVISIBLE
                 } else {

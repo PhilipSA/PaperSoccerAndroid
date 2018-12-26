@@ -1,4 +1,4 @@
-package com.ps.simplepapersoccer.GameObjects.Game.Geometry
+package com.ps.simplepapersoccer.gameObjects.Game.Geometry
 
 import android.graphics.PointF
 

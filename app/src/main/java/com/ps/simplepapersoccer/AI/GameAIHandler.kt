@@ -1,8 +1,7 @@
-package com.ps.simplepapersoccer.AI
+package com.ps.simplepapersoccer.ai
 
-import co.metalab.asyncawait.async
-import com.ps.simplepapersoccer.GameObjects.Game.GameHandler
-import com.ps.simplepapersoccer.GameObjects.Player.AIPlayer
+import com.ps.simplepapersoccer.gameObjects.Game.GameHandler
+import com.ps.simplepapersoccer.gameObjects.Player.AIPlayer
 
 class GameAIHandler(private val gameHandler: GameHandler, private val calculateAsync: Boolean) {
 
@@ -16,8 +15,8 @@ class GameAIHandler(private val gameHandler: GameHandler, private val calculateA
         }
     }
 
-    fun MakeAIMoveAsync(aiPlayer : AIPlayer) = async {
-        var aiMove = await { aiPlayer.gameAI?.MakeMove(gameHandler) }
+    fun MakeAIMoveAsync(aiPlayer : AIPlayer)  {
+        val aiMove = aiPlayer.gameAI?.MakeMove(gameHandler)
         gameHandler.AIMakeMove(aiMove!!)
     }
 }

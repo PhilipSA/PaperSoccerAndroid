@@ -1,4 +1,4 @@
-package com.ps.simplepapersoccer.Enums
+package com.ps.simplepapersoccer.enums
 
 enum class NodeTypeEnum {
     Empty,

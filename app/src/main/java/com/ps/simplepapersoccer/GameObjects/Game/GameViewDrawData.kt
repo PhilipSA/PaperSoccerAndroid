@@ -1,9 +1,8 @@
-package com.ps.simplepapersoccer.GameObjects.Game
+package com.ps.simplepapersoccer.gameObjects.Game
 
-import com.ps.simplepapersoccer.GameObjects.Game.Geometry.LinesToDraw
-import com.ps.simplepapersoccer.GameObjects.Game.Geometry.Node
-import com.ps.simplepapersoccer.GameObjects.Player.Abstraction.IPlayer
-import java.util.concurrent.CopyOnWriteArrayList
+import com.ps.simplepapersoccer.gameObjects.Game.Geometry.LinesToDraw
+import com.ps.simplepapersoccer.gameObjects.Game.Geometry.Node
+import com.ps.simplepapersoccer.gameObjects.Player.Abstraction.IPlayer
 
 class GameViewDrawData {
     var drawLine: LinesToDraw? = null

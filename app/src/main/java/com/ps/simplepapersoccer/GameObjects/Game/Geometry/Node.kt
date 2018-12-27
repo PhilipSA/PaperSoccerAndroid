@@ -1,11 +1,10 @@
-package com.ps.simplepapersoccer.gameObjects.Game.Geometry
+package com.ps.simplepapersoccer.gameObjects.game.geometry
 
-import android.graphics.Point
 import com.ps.simplepapersoccer.enums.NodeTypeEnum
 
-class Node(val coords: Point, var nodeType: NodeTypeEnum) {
-    val neighbors: MutableList<Node> = mutableListOf()
-    val coordNeighbors: MutableList<Node> = mutableListOf()
+class Node(val coords: TwoDimensionalPoint, var nodeType: NodeTypeEnum) {
+    val neighbors: HashSet<Node> = hashSetOf()
+    val coordNeighbors: HashSet<Node> = hashSetOf()
     var cameFrom: Node? = null
     var nodeValue: Double = 0.0
     var costSoFar: Double = 0.0
@@ -19,16 +18,16 @@ class Node(val coords: Point, var nodeType: NodeTypeEnum) {
         return coords.y != other.coords.y && other.coords.x != this.coords.x
     }
 
-    fun RemoveNeighborPair(other: Node) {
+    fun removeNeighborPair(other: Node) {
         neighbors.remove(other)
         other.neighbors.remove(this)
     }
 
-    fun AddNeighbor(other: Node) {
+    fun addNeighbor(other: Node) {
         neighbors.add(other)
     }
 
-    fun AddCoordNeighbor(other: Node) {
+    fun addCoordNeighbor(other: Node) {
         coordNeighbors.add(other)
     }
 

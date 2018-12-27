@@ -5,14 +5,15 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.ps.simplepapersoccer.enums.DifficultyEnum
 import com.ps.simplepapersoccer.enums.GameModeEnum
-import com.ps.simplepapersoccer.gameObjects.Game.GameHandler
-import com.ps.simplepapersoccer.gameObjects.Game.GameViewDrawData
-import com.ps.simplepapersoccer.gameObjects.Game.Geometry.LinesToDraw
-import com.ps.simplepapersoccer.gameObjects.Game.Geometry.Node
-import com.ps.simplepapersoccer.gameObjects.Player.AIPlayer
-import com.ps.simplepapersoccer.gameObjects.Player.Abstraction.IPlayer
-import com.ps.simplepapersoccer.gameObjects.Player.Player
+import com.ps.simplepapersoccer.gameObjects.game.GameHandler
+import com.ps.simplepapersoccer.gameObjects.game.GameViewDrawData
+import com.ps.simplepapersoccer.gameObjects.game.geometry.LinesToDraw
+import com.ps.simplepapersoccer.gameObjects.game.geometry.Node
+import com.ps.simplepapersoccer.gameObjects.player.AIPlayer
+import com.ps.simplepapersoccer.gameObjects.player.abstraction.IPlayer
+import com.ps.simplepapersoccer.gameObjects.player.Player
 import java.util.*
+import kotlin.collections.HashSet
 
 class GameViewModel: ViewModel() {
     lateinit var gameHandler: GameHandler
@@ -67,7 +68,7 @@ class GameViewModel: ViewModel() {
         executeUpdateGameViewTaskLiveData.value = GameViewDrawData(linesToDraw, madeTheMove, gameHandler.currentPlayersTurn, ballNode, getAllNodeNeighbors(ballNode))
     }
 
-    fun getAllNodeNeighbors(node: Node): MutableList<Node> {
+    fun getAllNodeNeighbors(node: Node): HashSet<Node> {
         return node.neighbors
     }
 

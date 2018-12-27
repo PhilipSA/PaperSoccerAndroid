@@ -8,17 +8,9 @@ import androidx.preference.PreferenceFragmentCompat
 import com.ps.simplepapersoccer.R
 
 class SettingsActivity : AppCompatActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         supportFragmentManager.beginTransaction().replace(android.R.id.content, MyPreferenceFragment()).commit()
-        supportActionBar!!.setDisplayShowHomeEnabled(true)
-        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
-    }
-
-    override fun onSupportNavigateUp(): Boolean {
-        finish()
-        return true
     }
 
     class MyPreferenceFragment : PreferenceFragmentCompat() {

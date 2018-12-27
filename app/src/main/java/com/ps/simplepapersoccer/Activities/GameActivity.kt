@@ -1,6 +1,7 @@
 package com.ps.simplepapersoccer.activities
 
 import android.content.Context
+import android.graphics.Point
 import android.os.Bundle
 import android.os.Handler
 import android.preference.PreferenceManager
@@ -206,8 +207,8 @@ class GameActivity : AppCompatActivity() {
             val width: Int
             val wm = mContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager
             val display = wm.defaultDisplay
-            val size = TwoDimensionalPoint()
-            display.getSize(size.toAndroidPoint())
+            val size = Point()
+            display.getSize(size)
             width = size.x
             return width
         }
@@ -216,8 +217,8 @@ class GameActivity : AppCompatActivity() {
             val height: Int
             val wm = mContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager
             val display = wm.defaultDisplay
-            val size = TwoDimensionalPoint()
-            display.getSize(size.toAndroidPoint())
+            val size = Point()
+            display.getSize(size)
             height = size.y
             return height
         }

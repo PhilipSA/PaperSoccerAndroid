@@ -28,7 +28,6 @@ import com.ps.simplepapersoccer.gameObjects.Game.Victory
 import com.ps.simplepapersoccer.gameObjects.Move.PartialMove
 import com.ps.simplepapersoccer.gameObjects.Player.Abstraction.IPlayer
 import com.ps.simplepapersoccer.gameObjects.Player.PlayerActivityData
-import com.ps.simplepapersoccer.runOnBgThread
 import com.ps.simplepapersoccer.sound.FXPlayer
 import com.ps.simplepapersoccer.viewmodel.GameViewModel
 import kotlinx.android.synthetic.main.activity_game.*
@@ -84,8 +83,6 @@ class GameActivity : AppCompatActivity() {
 
         gameViewModel.gameHandler = GameHandler(this, gridSizeX, gridSizeY, gameViewModel.players, gameMode, true, gameView != null)
 
-        gameViewModel.gameHandler.UpdateGameState()
-
         setPlayerTurnTextViewText()
 
         gameView?.init(GameActivity.getWidth(this), GameActivity.getHeight(this), gridSizeX, gridSizeY, gameViewModel, gameViewModel.gameHandler.gameBoard)
@@ -106,6 +103,8 @@ class GameActivity : AppCompatActivity() {
         }
 
         registerObservers()
+
+        gameViewModel.gameHandler.UpdateGameState()
     }
 
     private fun registerObservers() {
@@ -128,7 +127,7 @@ class GameActivity : AppCompatActivity() {
         return gameViewModel.gameHandler.gameBoard.findNodeByCoords(Point(coordsArray!![0].toInt(), coordsArray[1].toInt()))
     }
 
-    fun setPlayerTurnTextViewText() {
+    private fun setPlayerTurnTextViewText() {
         player_turn?.text = String.format("%s %s%s", getString(R.string.game_partial_its), gameViewModel.gameHandler.currentPlayersTurn.playerName, getString(R.string.game_partial_turn))
         player_turn?.setTextColor(gameViewModel.gameHandler.currentPlayersTurn.playerColor)
     }
@@ -137,7 +136,7 @@ class GameActivity : AppCompatActivity() {
         playerActivityDataMap[player]?.playerScoreTextView?.text = String.format("%s: %d", player.playerName, player.score)
     }
 
-    fun executeUpdateGameViewTask(gameViewDrawData: GameViewDrawData) {
+    private fun executeUpdateGameViewTask(gameViewDrawData: GameViewDrawData) {
         playBallSound(gameViewDrawData)
         gameView?.drawAsync(gameViewDrawData)
         Handler().post {
@@ -145,7 +144,7 @@ class GameActivity : AppCompatActivity() {
         }
     }
 
-    fun playBallSound(gameViewDrawData: GameViewDrawData) {
+    private fun playBallSound(gameViewDrawData: GameViewDrawData) {
         if (gameViewModel.gameHandler.isGameOver) return
         if (gameViewDrawData.ballNode?.nodeType != NodeTypeEnum.Empty) {
             fxPlayer?.playSound(R.raw.bounce)
@@ -188,11 +187,8 @@ class GameActivity : AppCompatActivity() {
     }
 
     fun resetGame(view: View) {
-        val handler = Handler(Looper.getMainLooper())
-        handler.post {
-            play_again_button.visibility = View.INVISIBLE
-            recreate()
-        }
+        play_again_button.visibility = View.INVISIBLE
+        recreate()
     }
 
     fun quit(view: View) {

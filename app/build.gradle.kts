@@ -35,8 +35,10 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.0.2")
     implementation("androidx.preference:preference:1.0.0")
     implementation("androidx.constraintlayout:constraintlayout:1.1.3")
+    implementation("com.google.android.material:material:1.0.0")
+
     implementation("com.google.android.gms:play-services-ads:17.1.2")
-    androidTestImplementation("junit:junit:4.12")
+    testImplementation("junit:junit:4.12")
     androidTestImplementation("org.mockito:mockito-core:2.19.0")
     //Life cycles
     implementation("androidx.lifecycle:lifecycle-extensions:2.0.0")

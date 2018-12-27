@@ -5,10 +5,9 @@ import com.ps.simplepapersoccer.enums.GameModeEnum
 import com.ps.simplepapersoccer.gameObjects.Game.GameHandler
 import com.ps.simplepapersoccer.gameObjects.Player.AIPlayer
 import com.ps.simplepapersoccer.gameObjects.Player.Abstraction.IPlayer
-import org.junit.Assert.assertEquals
-
-import org.junit.Test
+import junit.framework.TestCase.assertEquals
 import org.junit.Before
+import org.junit.Test
 
 class MinimaxAIUnitTests {
     var gameHandler: GameHandler? = null

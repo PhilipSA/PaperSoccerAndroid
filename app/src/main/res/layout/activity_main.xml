@@ -27,7 +27,6 @@
         android:id="@+id/settings_button"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:layout_marginTop="32dp"
         android:onClick="SettingsClick"
         android:text="@string/settings_button_text" />
 
@@ -37,8 +36,7 @@
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:text="@string/howToPlayButtonText"
-        android:onClick="HowToPlayClick"
-        android:layout_marginTop="34dp" />
+        android:onClick="HowToPlayClick" />
 
     <com.google.android.material.button.MaterialButton
         style="@style/MainMenuButton"

@@ -1,11 +1,10 @@
-package com.ps.simplepapersoccer.gameObjects.Game.Geometry
+package com.ps.simplepapersoccer.gameObjects.game.geometry
 
-import android.graphics.Point
 import com.ps.simplepapersoccer.enums.NodeTypeEnum
-import com.ps.simplepapersoccer.gameObjects.Game.Geometry.Abstraction.IntegerLine
+import com.ps.simplepapersoccer.gameObjects.game.geometry.Abstraction.IntegerLine
 
 class Goal(var goalLine: IntegerLine, var leftPost: IntegerLine, var rightPost: IntegerLine) {
-    fun contains(point: Point) : Boolean
+    fun contains(point: TwoDimensionalPoint) : Boolean
     {
         return goalLine.contains(point) || leftPost.contains(point) || rightPost.contains(point) || outerGoalLine.contains(point)
     }

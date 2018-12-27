@@ -1,10 +1,10 @@
-package com.ps.simplepapersoccer.gameObjects.Game.Geometry.Abstraction
+package com.ps.simplepapersoccer.gameObjects.game.geometry.Abstraction
 
-import android.graphics.Point
+import com.ps.simplepapersoccer.gameObjects.game.geometry.TwoDimensionalPoint
 import com.ps.simplepapersoccer.helpers.MathHelper.euclideanDistance
 
-class IntegerLine(var fromPoint: Point, var toPoint: Point) {
-    var allPoints: MutableList<Point> = mutableListOf()
+class IntegerLine(var fromPoint: TwoDimensionalPoint, var toPoint: TwoDimensionalPoint) {
+    var allPoints: MutableList<TwoDimensionalPoint> = mutableListOf()
     val length: Int get() = euclideanDistance(fromPoint, toPoint).toInt()
 
     init {
@@ -29,7 +29,7 @@ class IntegerLine(var fromPoint: Point, var toPoint: Point) {
         }
         var numerator = longest shr 1
         for (i in 0..longest) {
-            allPoints.add(Point(x, y))
+            allPoints.add(TwoDimensionalPoint(x, y))
             numerator += shortest
             if (numerator >= longest) {
                 numerator -= longest
@@ -42,7 +42,7 @@ class IntegerLine(var fromPoint: Point, var toPoint: Point) {
         }
     }
 
-    fun contains(point: Point) : Boolean
+    fun contains(point: TwoDimensionalPoint) : Boolean
     {
         return allPoints.find { x -> x.x == point.x && x.y == point.y } != null
     }

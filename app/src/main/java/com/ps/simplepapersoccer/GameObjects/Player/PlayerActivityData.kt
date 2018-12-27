@@ -1,4 +1,4 @@
-package com.ps.simplepapersoccer.gameObjects.Player
+package com.ps.simplepapersoccer.gameObjects.player
 
 /**
  * Created by Admin on 2017-04-25.

@@ -1,22 +1,21 @@
 package com.ps.simplepapersoccer.ai
 
-import com.ps.simplepapersoccer.gameObjects.Game.GameHandler
-import com.ps.simplepapersoccer.gameObjects.Player.AIPlayer
+import com.ps.simplepapersoccer.gameObjects.game.GameHandler
+import com.ps.simplepapersoccer.gameObjects.player.AIPlayer
 
 class GameAIHandler(private val gameHandler: GameHandler, private val calculateAsync: Boolean) {
-
-    fun MakeAIMove(aiPlayer : AIPlayer) {
+    fun makeAIMove(aiPlayer : AIPlayer) {
         if(calculateAsync) {
-            MakeAIMoveAsync(aiPlayer)
+            makeAIMoveAsync(aiPlayer)
             return
         }
         else {
-            gameHandler.AIMakeMove(aiPlayer.gameAI?.MakeMove(gameHandler)!!)
+            gameHandler.aiMakeMove(aiPlayer.gameAI?.makeMove(gameHandler)!!)
         }
     }
 
-    fun MakeAIMoveAsync(aiPlayer : AIPlayer)  {
-        val aiMove = aiPlayer.gameAI?.MakeMove(gameHandler)
-        gameHandler.AIMakeMove(aiMove!!)
+    fun makeAIMoveAsync(aiPlayer : AIPlayer)  {
+        val aiMove = aiPlayer.gameAI?.makeMove(gameHandler)
+        gameHandler.aiMakeMove(aiMove!!)
     }
 }

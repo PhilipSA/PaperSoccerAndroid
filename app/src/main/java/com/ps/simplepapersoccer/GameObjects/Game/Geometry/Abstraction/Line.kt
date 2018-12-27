@@ -1,5 +1,5 @@
-package com.ps.simplepapersoccer.gameObjects.Game.Geometry.Abstraction
+package com.ps.simplepapersoccer.gameObjects.game.geometry.Abstraction
 
-import android.graphics.Point
+import com.ps.simplepapersoccer.gameObjects.game.geometry.TwoDimensionalPoint
 
-open class Line(var fromPoint: Point, var toPoint: Point)
+open class Line(var fromPoint: TwoDimensionalPoint, var toPoint: TwoDimensionalPoint)

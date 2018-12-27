@@ -1,11 +1,8 @@
 package com.ps.simplepapersoccer.activities
 
 import android.content.Context
-import android.graphics.Point
-import android.graphics.PointF
 import android.os.Bundle
 import android.os.Handler
-import android.os.Looper
 import android.preference.PreferenceManager
 import android.view.MotionEvent
 import android.view.View
@@ -20,14 +17,16 @@ import com.ps.simplepapersoccer.R
 import com.ps.simplepapersoccer.enums.GameModeEnum
 import com.ps.simplepapersoccer.enums.NodeTypeEnum
 import com.ps.simplepapersoccer.enums.VictoryConditionEnum
-import com.ps.simplepapersoccer.gameObjects.Game.GameHandler
-import com.ps.simplepapersoccer.gameObjects.Game.GameViewDrawData
-import com.ps.simplepapersoccer.gameObjects.Game.Geometry.LinesToDraw
-import com.ps.simplepapersoccer.gameObjects.Game.Geometry.Node
-import com.ps.simplepapersoccer.gameObjects.Game.Victory
-import com.ps.simplepapersoccer.gameObjects.Move.PartialMove
-import com.ps.simplepapersoccer.gameObjects.Player.Abstraction.IPlayer
-import com.ps.simplepapersoccer.gameObjects.Player.PlayerActivityData
+import com.ps.simplepapersoccer.gameObjects.game.GameHandler
+import com.ps.simplepapersoccer.gameObjects.game.GameViewDrawData
+import com.ps.simplepapersoccer.gameObjects.game.geometry.LinesToDraw
+import com.ps.simplepapersoccer.gameObjects.game.geometry.Node
+import com.ps.simplepapersoccer.gameObjects.game.Victory
+import com.ps.simplepapersoccer.gameObjects.game.geometry.TwoDimensionalPoint
+import com.ps.simplepapersoccer.gameObjects.game.geometry.TwoDimensionalPointF
+import com.ps.simplepapersoccer.gameObjects.move.PartialMove
+import com.ps.simplepapersoccer.gameObjects.player.abstraction.IPlayer
+import com.ps.simplepapersoccer.gameObjects.player.PlayerActivityData
 import com.ps.simplepapersoccer.sound.FXPlayer
 import com.ps.simplepapersoccer.viewmodel.GameViewModel
 import kotlinx.android.synthetic.main.activity_game.*
@@ -87,15 +86,15 @@ class GameActivity : AppCompatActivity() {
 
         gameView?.init(GameActivity.getWidth(this), GameActivity.getHeight(this), gridSizeX, gridSizeY, gameViewModel, gameViewModel.gameHandler.gameBoard)
         gameView?.gameViewDrawData = GameViewDrawData(null, gameViewModel.gameHandler.currentPlayersTurn, gameViewModel.gameHandler.currentPlayersTurn,
-                gameViewModel.gameHandler.ballNode(),
-                gameViewModel.getAllNodeNeighbors(gameViewModel.gameHandler.ballNode()))
+                gameViewModel.gameHandler.ballNode,
+                gameViewModel.getAllNodeNeighbors(gameViewModel.gameHandler.ballNode))
 
         if (gameMode != GameModeEnum.AI_VS_AI) {
             gameView?.setOnTouchListener { view, motionEvent ->
                 if (motionEvent.action == MotionEvent.ACTION_DOWN) {
                     val touchedNode = nodeCoordsToNode(Math.round(motionEvent.x).toFloat(), Math.round(motionEvent.y).toFloat())
                     if (touchedNode != null) {
-                        gameViewModel.gameHandler?.PlayerMakeMove(touchedNode, getNonAIPlayer())
+                        gameViewModel.gameHandler?.playerMakeMove(touchedNode, getNonAIPlayer())
                     }
                 }
                 false
@@ -104,7 +103,7 @@ class GameActivity : AppCompatActivity() {
 
         registerObservers()
 
-        gameViewModel.gameHandler.UpdateGameState()
+        gameViewModel.gameHandler.updateGameState()
     }
 
     private fun registerObservers() {
@@ -124,7 +123,7 @@ class GameActivity : AppCompatActivity() {
 
     private fun nodeCoordsToNode(x: Float, y: Float): Node? {
         val coordsArray = gameView?.coordsToNode(x, y)
-        return gameViewModel.gameHandler.gameBoard.findNodeByCoords(Point(coordsArray!![0].toInt(), coordsArray[1].toInt()))
+        return gameViewModel.gameHandler.gameBoard.findNodeByCoords(TwoDimensionalPoint(coordsArray!![0].toInt(), coordsArray[1].toInt()))
     }
 
     private fun setPlayerTurnTextViewText() {
@@ -140,7 +139,7 @@ class GameActivity : AppCompatActivity() {
         playBallSound(gameViewDrawData)
         gameView?.drawAsync(gameViewDrawData)
         Handler().post {
-            gameViewModel.gameHandler.UpdateGameState()
+            gameViewModel.gameHandler.updateGameState()
         }
     }
 
@@ -157,7 +156,8 @@ class GameActivity : AppCompatActivity() {
         val newLineCoords = gameView?.nodeToCoords(move.newNode)
         val oldNodeCoords = gameView?.nodeToCoords(move.oldNode)
 
-        val linesToDraw = LinesToDraw(PointF(oldNodeCoords?.get(0)!!, oldNodeCoords[1]), PointF(newLineCoords?.get(0)!!, newLineCoords[1]), move.madeTheMove.playerColor)
+        val linesToDraw = LinesToDraw(TwoDimensionalPointF(oldNodeCoords?.get(0)!!, oldNodeCoords[1]), TwoDimensionalPointF(newLineCoords?.get(0)!!, newLineCoords[1]),
+                move.madeTheMove.playerColor)
         gameViewModel.addDrawDataToQueue(linesToDraw, move.newNode, move.madeTheMove)
     }
 
@@ -206,8 +206,8 @@ class GameActivity : AppCompatActivity() {
             val width: Int
             val wm = mContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager
             val display = wm.defaultDisplay
-            val size = Point()
-            display.getSize(size)
+            val size = TwoDimensionalPoint()
+            display.getSize(size.toAndroidPoint())
             width = size.x
             return width
         }
@@ -216,8 +216,8 @@ class GameActivity : AppCompatActivity() {
             val height: Int
             val wm = mContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager
             val display = wm.defaultDisplay
-            val size = Point()
-            display.getSize(size)
+            val size = TwoDimensionalPoint()
+            display.getSize(size.toAndroidPoint())
             height = size.y
             return height
         }

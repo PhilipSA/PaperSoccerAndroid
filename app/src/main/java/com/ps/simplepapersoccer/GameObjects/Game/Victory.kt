@@ -1,6 +1,6 @@
-package com.ps.simplepapersoccer.gameObjects.Game
+package com.ps.simplepapersoccer.gameObjects.game
 
 import com.ps.simplepapersoccer.enums.VictoryConditionEnum
-import com.ps.simplepapersoccer.gameObjects.Player.Abstraction.IPlayer
+import com.ps.simplepapersoccer.gameObjects.player.abstraction.IPlayer
 
-class Victory(var winner: IPlayer, var victoryConditionEnum: VictoryConditionEnum)
+data class Victory(var winner: IPlayer, var victoryConditionEnum: VictoryConditionEnum)

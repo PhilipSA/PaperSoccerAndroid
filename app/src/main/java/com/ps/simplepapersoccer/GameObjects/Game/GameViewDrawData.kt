@@ -1,21 +1,7 @@
-package com.ps.simplepapersoccer.gameObjects.Game
+package com.ps.simplepapersoccer.gameObjects.game
 
-import com.ps.simplepapersoccer.gameObjects.Game.Geometry.LinesToDraw
-import com.ps.simplepapersoccer.gameObjects.Game.Geometry.Node
-import com.ps.simplepapersoccer.gameObjects.Player.Abstraction.IPlayer
+import com.ps.simplepapersoccer.gameObjects.game.geometry.LinesToDraw
+import com.ps.simplepapersoccer.gameObjects.game.geometry.Node
+import com.ps.simplepapersoccer.gameObjects.player.abstraction.IPlayer
 
-class GameViewDrawData {
-    var drawLine: LinesToDraw? = null
-    var madeTheMove: IPlayer? = null
-    var currentPlayerTurn: IPlayer? = null
-    var ballNode: Node? = null
-    var nodeNeighbors: MutableList<Node> = mutableListOf()
-
-    constructor(drawLine: LinesToDraw?, madeTheMove: IPlayer?, currentPlayerTurn: IPlayer?, ballNode: Node?, nodeNeighbors: MutableList<Node>) {
-        this.drawLine = drawLine
-        this.madeTheMove = madeTheMove
-        this.currentPlayerTurn = currentPlayerTurn
-        this.ballNode = ballNode
-        this.nodeNeighbors = nodeNeighbors
-    }
-}
+data class GameViewDrawData(var drawLine: LinesToDraw?, var madeTheMove: IPlayer, var currentPlayerTurn: IPlayer, var ballNode: Node, var nodeNeighbors: HashSet<Node>)

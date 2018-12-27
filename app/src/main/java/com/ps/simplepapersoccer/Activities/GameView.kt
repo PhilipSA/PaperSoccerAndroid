@@ -6,16 +6,16 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import android.graphics.Point
+import com.ps.simplepapersoccer.gameObjects.game.geometry.TwoDimensionalPoint
 import android.graphics.drawable.ScaleDrawable
 import android.util.AttributeSet
 import android.view.View
 import com.ps.simplepapersoccer.enums.NodeTypeEnum
-import com.ps.simplepapersoccer.gameObjects.Game.GameBoard
-import com.ps.simplepapersoccer.gameObjects.Game.GameViewDrawData
-import com.ps.simplepapersoccer.gameObjects.Game.Geometry.Abstraction.IntegerLine
-import com.ps.simplepapersoccer.gameObjects.Game.Geometry.LinesToDraw
-import com.ps.simplepapersoccer.gameObjects.Game.Geometry.Node
+import com.ps.simplepapersoccer.gameObjects.game.GameBoard
+import com.ps.simplepapersoccer.gameObjects.game.GameViewDrawData
+import com.ps.simplepapersoccer.gameObjects.game.geometry.Abstraction.IntegerLine
+import com.ps.simplepapersoccer.gameObjects.game.geometry.LinesToDraw
+import com.ps.simplepapersoccer.gameObjects.game.geometry.Node
 import com.ps.simplepapersoccer.R
 import com.ps.simplepapersoccer.viewmodel.GameViewModel
 
@@ -93,7 +93,7 @@ class GameView : View {
         return coords
     }
 
-    private fun pointsCoordsToCoords(point: Point): FloatArray {
+    private fun pointsCoordsToCoords(point: TwoDimensionalPoint): FloatArray {
         val newCoords = FloatArray(2)
         newCoords[0] = point.x * gridXdraw + leftEdge
         newCoords[1] = point.y * gridYdraw + topEdge

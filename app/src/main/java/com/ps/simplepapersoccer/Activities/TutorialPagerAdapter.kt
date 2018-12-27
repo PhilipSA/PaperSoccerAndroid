@@ -11,7 +11,7 @@ import android.widget.ImageView
 
 import com.ps.simplepapersoccer.R
 
-class TutorialPagerAdapter internal constructor(internal var mContext: Context, internal var activity: Activity) : PagerAdapter() {
+class TutorialPagerAdapter internal constructor(private var context: Context) : PagerAdapter() {
 
     override fun getCount(): Int {
         return sliderImagesId.size
@@ -20,13 +20,13 @@ class TutorialPagerAdapter internal constructor(internal var mContext: Context, 
     private val sliderImagesId = intArrayOf(R.drawable.tutorial1, R.drawable.tutorial2, R.drawable.tutorial3, R.drawable.tutorial4)
 
     override fun isViewFromObject(v: View, obj: Any): Boolean {
-        return v === obj
+        return v == obj
     }
 
     override fun instantiateItem(container: ViewGroup, i: Int): Any {
-        val imageView = ImageView(mContext)
+        val imageView = ImageView(context)
 
-        imageView.setImageDrawable(ContextCompat.getDrawable(mContext, sliderImagesId[i]))
+        imageView.setImageDrawable(ContextCompat.getDrawable(context, sliderImagesId[i]))
 
         (container as ViewPager).addView(imageView)
         return imageView

@@ -1,13 +1,13 @@
-package com.ps.simplepapersoccer.gameObjects.Game
+package com.ps.simplepapersoccer.gameObjects.game
 
-import android.graphics.Point
 import com.ps.simplepapersoccer.enums.NodeTypeEnum
-import com.ps.simplepapersoccer.gameObjects.Game.Geometry.Abstraction.IntegerLine
-import com.ps.simplepapersoccer.gameObjects.Game.Geometry.Goal
-import com.ps.simplepapersoccer.gameObjects.Game.Geometry.Node
-import com.ps.simplepapersoccer.gameObjects.Move.PartialMove
-import com.ps.simplepapersoccer.gameObjects.Move.PossibleMove
-import com.ps.simplepapersoccer.gameObjects.Move.StoredMove
+import com.ps.simplepapersoccer.gameObjects.game.geometry.Abstraction.IntegerLine
+import com.ps.simplepapersoccer.gameObjects.game.geometry.Goal
+import com.ps.simplepapersoccer.gameObjects.game.geometry.Node
+import com.ps.simplepapersoccer.gameObjects.game.geometry.TwoDimensionalPoint
+import com.ps.simplepapersoccer.gameObjects.move.PartialMove
+import com.ps.simplepapersoccer.gameObjects.move.PossibleMove
+import com.ps.simplepapersoccer.gameObjects.move.StoredMove
 import com.ps.simplepapersoccer.helpers.MathHelper
 import java.util.ArrayList
 
@@ -18,35 +18,35 @@ class GameBoard(private val gridSizeX: Int, private val gridSizeY: Int) {
 
     lateinit var goal1: Goal
     lateinit var goal2: Goal
-    val goalScalingX = Math.round((gridSizeX / 6).toDouble()).toInt()
+    private val goalScalingX = Math.round((gridSizeX / 6).toDouble()).toInt()
     val goalScalingY = Math.round((gridSizeX / 6).toDouble()).toInt()
 
-    var topGoalLines: Goal = Goal(IntegerLine(Point(gridSizeX / 2 - goalScalingX, 0), Point(gridSizeX / 2 + goalScalingX, 0)),
-            IntegerLine(Point(gridSizeX / 2 - goalScalingX, 0), Point(gridSizeX / 2 - goalScalingX, 1)),
-            IntegerLine(Point(gridSizeX / 2 + goalScalingX, 0), Point(gridSizeX / 2 + goalScalingX, 1)))
-    var bottomGoalLines: Goal = Goal(IntegerLine(Point(gridSizeX / 2 - goalScalingX, gridSizeY), Point(gridSizeX / 2 + goalScalingX, gridSizeY)),
-            IntegerLine(Point(gridSizeX / 2 - goalScalingX, gridSizeY), Point(gridSizeX / 2 - goalScalingX, gridSizeY-1)),
-            IntegerLine(Point(gridSizeX / 2 + goalScalingX, gridSizeY), Point(gridSizeX / 2 + goalScalingX, gridSizeY-1)))
+    var topGoalLines: Goal = Goal(IntegerLine(TwoDimensionalPoint(gridSizeX / 2 - goalScalingX, 0), TwoDimensionalPoint(gridSizeX / 2 + goalScalingX, 0)),
+            IntegerLine(TwoDimensionalPoint(gridSizeX / 2 - goalScalingX, 0), TwoDimensionalPoint(gridSizeX / 2 - goalScalingX, 1)),
+            IntegerLine(TwoDimensionalPoint(gridSizeX / 2 + goalScalingX, 0), TwoDimensionalPoint(gridSizeX / 2 + goalScalingX, 1)))
+    var bottomGoalLines: Goal = Goal(IntegerLine(TwoDimensionalPoint(gridSizeX / 2 - goalScalingX, gridSizeY), TwoDimensionalPoint(gridSizeX / 2 + goalScalingX, gridSizeY)),
+            IntegerLine(TwoDimensionalPoint(gridSizeX / 2 - goalScalingX, gridSizeY), TwoDimensionalPoint(gridSizeX / 2 - goalScalingX, gridSizeY-1)),
+            IntegerLine(TwoDimensionalPoint(gridSizeX / 2 + goalScalingX, gridSizeY), TwoDimensionalPoint(gridSizeX / 2 + goalScalingX, gridSizeY-1)))
 
     private val allPartialMoves = ArrayList<StoredMove>()
 
     init {
         makeNodes(gridSizeX, gridSizeY)
-        ballNode = findNodeByCoords(Point(gridSizeX / 2, gridSizeY / 2)) as Node
+        ballNode = findNodeByCoords(TwoDimensionalPoint(gridSizeX / 2, gridSizeY / 2)) as Node
     }
 
-    private fun isEdgeNode(point: Point) : Boolean {
+    private fun isEdgeNode(point: TwoDimensionalPoint) : Boolean {
         return (point.x == 0 || point.x == gridSizeX || point.y == 1 || point.y == gridSizeY - 1)
     }
 
     private fun makeNodes(gridSizeX: Int, gridSizeY: Int) {
-        for (y in 1..gridSizeY - 1) {
+        for (y in 1 until gridSizeY) {
             (0..gridSizeX)
-                    .filter { !topGoalLines.contains(Point(it, y)) && !bottomGoalLines.contains(Point(it, y)) }
+                    .filter { !topGoalLines.contains(TwoDimensionalPoint(it, y)) && !bottomGoalLines.contains(TwoDimensionalPoint(it, y)) }
                     .forEach {
-                        if (isEdgeNode(Point(it, y))) nodeHashSet.add(Node(Point(it, y), NodeTypeEnum.Wall))
+                        if (isEdgeNode(TwoDimensionalPoint(it, y))) nodeHashSet.add(Node(TwoDimensionalPoint(it, y), NodeTypeEnum.Wall))
                         else {
-                            nodeHashSet.add(Node(Point(it, y), NodeTypeEnum.Empty))
+                            nodeHashSet.add(Node(TwoDimensionalPoint(it, y), NodeTypeEnum.Empty))
                         }
                     }
         }
@@ -62,21 +62,21 @@ class GameBoard(private val gridSizeX: Int, private val gridSizeY: Int) {
         goal1 = bottomGoalLines
         goal2 = topGoalLines
 
-        GenerateAllNeighbors()
+        generateAllNeighbors()
     }
 
-    fun GenerateAllNeighbors() {
+    private fun generateAllNeighbors() {
         for (node in nodeHashSet) {
             for (otherNode in nodeHashSet) {
                 if (node == otherNode) continue
 
                 val euclideanDistance = MathHelper.euclideanDistance(node.coords, otherNode.coords)
-                if (euclideanDistance.toInt() == 1) node.AddCoordNeighbor(otherNode)
+                if (euclideanDistance.toInt() == 1) node.addCoordNeighbor(otherNode)
 
                 if (node.pairMatchesType(otherNode, NodeTypeEnum.Wall, NodeTypeEnum.Wall) ||
                         node.pairMatchesType(otherNode, NodeTypeEnum.Post, NodeTypeEnum.Goal)) {
                     if (node.isDiagonalNeighbor(otherNode) && euclideanDistance < 2) {
-                        node.AddNeighbor(otherNode)
+                        node.addNeighbor(otherNode)
                     }
                     else continue
                 }
@@ -87,32 +87,29 @@ class GameBoard(private val gridSizeX: Int, private val gridSizeY: Int) {
                     continue
                 }
 
-                if (euclideanDistance < 2) node.AddNeighbor(otherNode)
+                if (euclideanDistance < 2) node.addNeighbor(otherNode)
             }
         }
     }
 
     fun allPossibleMovesFromNode(node: Node): HashSet<PossibleMove> {
-        val possibleMoves = node.neighbors
-                .mapTo(HashSet<PossibleMove>()) { PossibleMove(node, it) }
-
-        return possibleMoves
+        return node.neighbors.map { PossibleMove(node, it) }.toHashSet()
     }
 
-    fun UndoLastMove(): PartialMove {
+    fun undoLastMove(): PartialMove {
         val storedMove = allPartialMoves.last()
-        storedMove.partialMove.newNode.AddNeighbor(storedMove.partialMove.oldNode)
-        storedMove.partialMove.oldNode.AddNeighbor(storedMove.partialMove.newNode)
+        storedMove.partialMove.newNode.addNeighbor(storedMove.partialMove.oldNode)
+        storedMove.partialMove.oldNode.addNeighbor(storedMove.partialMove.newNode)
         storedMove.partialMove.newNode.nodeType = storedMove.newNodeTypeEnum
         ballNode = storedMove.partialMove.oldNode
         allPartialMoves.remove(storedMove)
         return storedMove.partialMove
     }
 
-    fun MakePartialMove(partialMove: PartialMove) {
+    fun makePartialMove(partialMove: PartialMove) {
         allPartialMoves.add(StoredMove(partialMove, partialMove.oldNode.nodeType, partialMove.newNode.nodeType))
-        partialMove.newNode.RemoveNeighborPair(partialMove.oldNode)
-        partialMove.oldNode.RemoveNeighborPair(partialMove.newNode)
+        partialMove.newNode.removeNeighborPair(partialMove.oldNode)
+        partialMove.oldNode.removeNeighborPair(partialMove.newNode)
 
         if (partialMove.oldNode.nodeType == NodeTypeEnum.Empty)
             partialMove.oldNode.nodeType = NodeTypeEnum.BounceAble
@@ -121,7 +118,7 @@ class GameBoard(private val gridSizeX: Int, private val gridSizeY: Int) {
     }
 
     //Returns the node with the XY coordinates
-    fun findNodeByCoords(point: Point): Node? {
+    fun findNodeByCoords(point: TwoDimensionalPoint): Node? {
         return nodeHashSet.firstOrNull { it.coords == point }
     }
 }

@@ -1,5 +1,3 @@
-package com.ps.simplepapersoccer.gameObjects.Game.Geometry
+package com.ps.simplepapersoccer.gameObjects.game.geometry
 
-import android.graphics.PointF
-
-class LinesToDraw(var fromPoint: PointF, var toPoint: PointF, var color: Int)
+data class LinesToDraw(var fromPoint: TwoDimensionalPointF, var toPoint: TwoDimensionalPointF, var color: Int)

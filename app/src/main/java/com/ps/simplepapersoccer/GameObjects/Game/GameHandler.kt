@@ -1,15 +1,15 @@
-package com.ps.simplepapersoccer.gameObjects.Game
+package com.ps.simplepapersoccer.gameObjects.game
 
-import android.util.Log
+import com.ps.simplepapersoccer.Log
 import com.ps.simplepapersoccer.ai.GameAIHandler
 import com.ps.simplepapersoccer.activities.GameActivity
 import com.ps.simplepapersoccer.enums.GameModeEnum
 import com.ps.simplepapersoccer.enums.NodeTypeEnum
 import com.ps.simplepapersoccer.enums.VictoryConditionEnum
-import com.ps.simplepapersoccer.gameObjects.Game.Geometry.Node
-import com.ps.simplepapersoccer.gameObjects.Move.PartialMove
-import com.ps.simplepapersoccer.gameObjects.Player.AIPlayer
-import com.ps.simplepapersoccer.gameObjects.Player.Abstraction.IPlayer
+import com.ps.simplepapersoccer.gameObjects.game.geometry.Node
+import com.ps.simplepapersoccer.gameObjects.move.PartialMove
+import com.ps.simplepapersoccer.gameObjects.player.AIPlayer
+import com.ps.simplepapersoccer.gameObjects.player.abstraction.IPlayer
 
 class GameHandler(private val gameActivity: GameActivity?, gridX: Int, gridY: Int, players: ArrayList<IPlayer>, val gameMode: Int, aiIsAsync: Boolean,
                   private val waitForGameViewDraw: Boolean) {
@@ -24,9 +24,7 @@ class GameHandler(private val gameActivity: GameActivity?, gridX: Int, gridY: In
     val gameBoard: GameBoard
     var ongoingTurn = false
 
-    fun ballNode(): Node {
-        return gameBoard.ballNode
-    }
+    val ballNode: Node get() = gameBoard.ballNode
 
     override fun hashCode(): Int {
         return currentPlayersTurn.hashCode() xor gameBoard.hashCode()
@@ -37,7 +35,6 @@ class GameHandler(private val gameActivity: GameActivity?, gridX: Int, gridY: In
     }
 
     init {
-
         currentPlayersTurn = players[0]
 
         gameBoard = GameBoard(gridX, gridY)
@@ -48,44 +45,44 @@ class GameHandler(private val gameActivity: GameActivity?, gridX: Int, gridY: In
         gameAIHandler = GameAIHandler(this, aiIsAsync)
     }
 
-    fun UpdateGameState() {
+    fun updateGameState() {
         ongoingTurn = false
         if (isGameOver) {
-            winner(getWinner(ballNode())!!)
+            winner(getWinner(ballNode)!!)
             return
         }
         if (currentPlayersTurn.isAi && gameMode != GameModeEnum.MULTIPLAYER_MODE) {
-            gameAIHandler.MakeAIMove(currentPlayersTurn as AIPlayer)
+            gameAIHandler.makeAIMove(currentPlayersTurn as AIPlayer)
         }
     }
 
-    fun PlayerMakeMove(node: Node, player: IPlayer) {
-        val partialMove = PartialMove(ballNode(), node, player)
+    fun playerMakeMove(node: Node, player: IPlayer) {
+        val partialMove = PartialMove(ballNode, node, player)
         if (isPartialMoveLegal(partialMove, player) && currentPlayersTurn == player && !ongoingTurn) {
             ongoingTurn = true
-            MakeMove(partialMove)
+            makeMove(partialMove)
         }
     }
 
-    fun AIMakeMove(move: PartialMove) {
+    fun aiMakeMove(move: PartialMove) {
         ongoingTurn = true
-        MakeMove(move)
+        makeMove(move)
     }
 
-    fun MakeMove(partialMove: PartialMove) {
-        MakePartialMove(partialMove)
-        Log.d("MyTagGoesHere", partialMove.newNode.nodeType.toString())
+    private fun makeMove(partialMove: PartialMove) {
+        makePartialMove(partialMove)
+        Log.d(TAG, "$partialMove")
         gameActivity?.drawPartialMove(partialMove)
         ++numberOfTurns
-        if (!waitForGameViewDraw) UpdateGameState()
+        if (!waitForGameViewDraw) updateGameState()
     }
 
-    fun UndoLastMove() {
-        currentPlayersTurn = gameBoard.UndoLastMove().madeTheMove
+    fun undoLastMove() {
+        currentPlayersTurn = gameBoard.undoLastMove().madeTheMove
     }
 
-    fun MakePartialMove(partialMove: PartialMove) {
-        gameBoard.MakePartialMove(partialMove)
+    fun makePartialMove(partialMove: PartialMove) {
+        gameBoard.makePartialMove(partialMove)
 
         if (partialMove.newNode.nodeType == NodeTypeEnum.Empty) {
             changeTurn()
@@ -110,25 +107,31 @@ class GameHandler(private val gameActivity: GameActivity?, gridX: Int, gridY: In
         return null
     }
 
-    //Let the activity know we have a winner
-    fun winner(victory: Victory) {
+    private fun winner(victory: Victory) {
+        Log.d(TAG, "$victory")
         victory.winner.score += 1
         gameActivity?.winner(victory)
     }
 
     fun getOpponent(myPlayer: IPlayer): IPlayer? {
-        if (myPlayer == player1) return player2
-        else if(myPlayer == player2) return player1
-        else return null
+        return when (myPlayer) {
+            player1 -> player2
+            player2 -> player1
+            else -> null
+        }
     }
 
-    fun changeTurn(): IPlayer {
+    private fun changeTurn(): IPlayer {
         currentPlayersTurn = getOpponent(currentPlayersTurn)!!
         return currentPlayersTurn
     }
 
-    fun isPartialMoveLegal(partialMove: PartialMove, player: IPlayer): Boolean {
-        return gameBoard.allPossibleMovesFromNode(ballNode()).any { x -> x.newNode == partialMove.newNode }
+    private fun isPartialMoveLegal(partialMove: PartialMove, player: IPlayer): Boolean {
+        return gameBoard.allPossibleMovesFromNode(ballNode).any { x -> x.newNode == partialMove.newNode }
                 && player == currentPlayersTurn
+    }
+
+    companion object {
+        private val TAG = GameHandler::class.java.canonicalName
     }
 }

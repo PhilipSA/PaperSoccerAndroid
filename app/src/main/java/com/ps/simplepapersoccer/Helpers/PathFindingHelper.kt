@@ -1,6 +1,6 @@
 package com.ps.simplepapersoccer.helpers
 
-import com.ps.simplepapersoccer.gameObjects.Game.Geometry.Node
+import com.ps.simplepapersoccer.gameObjects.game.geometry.Node
 
 object PathFindingHelper {
     fun findPath(startNode: Node, goalNode: Node): HashSet<Node> {

@@ -2,7 +2,6 @@ package com.ps.simplepapersoccer.gameObjects.game
 
 import com.ps.simplepapersoccer.Log
 import com.ps.simplepapersoccer.ai.GameAIHandler
-import com.ps.simplepapersoccer.activities.GameActivity
 import com.ps.simplepapersoccer.enums.GameModeEnum
 import com.ps.simplepapersoccer.enums.NodeTypeEnum
 import com.ps.simplepapersoccer.enums.VictoryConditionEnum
@@ -10,9 +9,9 @@ import com.ps.simplepapersoccer.gameObjects.game.geometry.Node
 import com.ps.simplepapersoccer.gameObjects.move.PartialMove
 import com.ps.simplepapersoccer.gameObjects.player.AIPlayer
 import com.ps.simplepapersoccer.gameObjects.player.abstraction.IPlayer
+import com.ps.simplepapersoccer.viewmodel.GameViewModel
 
-class GameHandler(private val gameActivity: GameActivity?, gridX: Int, gridY: Int, players: ArrayList<IPlayer>, val gameMode: Int, aiIsAsync: Boolean,
-                  private val waitForGameViewDraw: Boolean) {
+class GameHandler(private val gameViewModel: GameViewModel?, gridX: Int, gridY: Int, players: ArrayList<IPlayer>, val gameMode: Int, aiIsAsync: Boolean) {
 
     var player1: IPlayer = players[0]
     var player2: IPlayer = players[1]
@@ -40,7 +39,7 @@ class GameHandler(private val gameActivity: GameActivity?, gridX: Int, gridY: In
         gameBoard = GameBoard(gridX, gridY)
         player1.goal = gameBoard.goal1
         player2.goal = gameBoard.goal2
-        gameActivity?.reDraw()
+        gameViewModel?.reDrawLiveData?.setWrappedValue(true)
 
         gameAIHandler = GameAIHandler(this, aiIsAsync)
     }
@@ -72,9 +71,9 @@ class GameHandler(private val gameActivity: GameActivity?, gridX: Int, gridY: In
     private fun makeMove(partialMove: PartialMove) {
         makePartialMove(partialMove)
         Log.d(TAG, "$partialMove")
-        gameActivity?.drawPartialMove(partialMove)
+        gameViewModel?.drawPartialMoveLiveData?.postWrappedValue(partialMove)
         ++numberOfTurns
-        if (!waitForGameViewDraw) updateGameState()
+        updateGameState()
     }
 
     fun undoLastMove() {
@@ -110,7 +109,7 @@ class GameHandler(private val gameActivity: GameActivity?, gridX: Int, gridY: In
     private fun winner(victory: Victory) {
         Log.d(TAG, "$victory")
         victory.winner.score += 1
-        gameActivity?.winner(victory)
+        gameViewModel?.winnerLiveData?.postWrappedValue(victory)
     }
 
     fun getOpponent(myPlayer: IPlayer): IPlayer? {

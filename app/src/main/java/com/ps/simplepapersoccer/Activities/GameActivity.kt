@@ -3,7 +3,6 @@ package com.ps.simplepapersoccer.activities
 import android.content.Context
 import android.graphics.Point
 import android.os.Bundle
-import android.os.Handler
 import android.preference.PreferenceManager
 import android.view.MotionEvent
 import android.view.View
@@ -30,13 +29,11 @@ import com.ps.simplepapersoccer.gameObjects.player.abstraction.IPlayer
 import com.ps.simplepapersoccer.gameObjects.player.PlayerActivityData
 import com.ps.simplepapersoccer.sound.FXPlayer
 import com.ps.simplepapersoccer.viewmodel.GameViewModel
+import com.ps.simplepapersoccer.event.EventObserver
 import kotlinx.android.synthetic.main.activity_game.*
 import java.util.*
 
 class GameActivity : AppCompatActivity() {
-
-    var gameView: GameView? = null
-
     private var fxPlayer: FXPlayer? = null
     private var myName: String = ""
     private var playerActivityDataMap: MutableMap<IPlayer, PlayerActivityData> = HashMap()
@@ -61,8 +58,6 @@ class GameActivity : AppCompatActivity() {
 
         myName = playerName
 
-        gameView = findViewById(R.id.gameview)
-
         player1_name!!.setTextColor(gameViewModel.player1Color)
         player2_name!!.setTextColor(gameViewModel.player2Color)
 
@@ -81,21 +76,21 @@ class GameActivity : AppCompatActivity() {
 
         fxPlayer = FXPlayer(this)
 
-        gameViewModel.gameHandler = GameHandler(this, gridSizeX, gridSizeY, gameViewModel.players, gameMode, true, gameView != null)
+        gameViewModel.gameHandler = GameHandler(gameViewModel, gridSizeX, gridSizeY, gameViewModel.players, gameMode, true)
 
         setPlayerTurnTextViewText()
 
-        gameView?.init(GameActivity.getWidth(this), GameActivity.getHeight(this), gridSizeX, gridSizeY, gameViewModel, gameViewModel.gameHandler.gameBoard)
-        gameView?.gameViewDrawData = GameViewDrawData(null, gameViewModel.gameHandler.currentPlayersTurn, gameViewModel.gameHandler.currentPlayersTurn,
+        game_view?.init(GameActivity.getWidth(this), GameActivity.getHeight(this), gridSizeX, gridSizeY, gameViewModel, gameViewModel.gameHandler.gameBoard)
+        game_view?.gameViewDrawData = GameViewDrawData(null, gameViewModel.gameHandler.currentPlayersTurn, gameViewModel.gameHandler.currentPlayersTurn,
                 gameViewModel.gameHandler.ballNode,
                 gameViewModel.getAllNodeNeighbors(gameViewModel.gameHandler.ballNode))
 
         if (gameMode != GameModeEnum.AI_VS_AI) {
-            gameView?.setOnTouchListener { view, motionEvent ->
+            game_view?.setOnTouchListener { view, motionEvent ->
                 if (motionEvent.action == MotionEvent.ACTION_DOWN) {
                     val touchedNode = nodeCoordsToNode(Math.round(motionEvent.x).toFloat(), Math.round(motionEvent.y).toFloat())
                     if (touchedNode != null) {
-                        gameViewModel.gameHandler?.playerMakeMove(touchedNode, getNonAIPlayer())
+                        gameViewModel.gameHandler.playerMakeMove(touchedNode, getNonAIPlayer())
                     }
                 }
                 false
@@ -108,12 +103,30 @@ class GameActivity : AppCompatActivity() {
     }
 
     private fun registerObservers() {
-        gameViewModel.executeUpdateGameViewTaskLiveData.observe(this, androidx.lifecycle.Observer {
-            executeUpdateGameViewTask(it)
+        gameViewModel.executeUpdateGameViewTaskLiveData.observe(this, EventObserver {
+            if (it != null) {
+                executeUpdateGameViewTask(it)
+            }
         })
 
-        gameViewModel.playerTurnTextLiveData.observe(this, androidx.lifecycle.Observer {
+        gameViewModel.playerTurnTextLiveData.observe(this, EventObserver {
             setPlayerTurnTextViewText()
+        })
+
+        gameViewModel.winnerLiveData.observe(this, EventObserver {
+            if (it != null) {
+                winner(it)
+            }
+        })
+
+        gameViewModel.reDrawLiveData.observe(this, EventObserver {
+            reDraw()
+        })
+
+        gameViewModel.drawPartialMoveLiveData.observe(this, EventObserver {
+            if (it != null) {
+                drawPartialMove(it)
+            }
         })
     }
 
@@ -123,7 +136,7 @@ class GameActivity : AppCompatActivity() {
     }
 
     private fun nodeCoordsToNode(x: Float, y: Float): Node? {
-        val coordsArray = gameView?.coordsToNode(x, y)
+        val coordsArray = game_view?.coordsToNode(x, y)
         return gameViewModel.gameHandler.gameBoard.findNodeByCoords(TwoDimensionalPoint(coordsArray!![0].toInt(), coordsArray[1].toInt()))
     }
 
@@ -138,15 +151,12 @@ class GameActivity : AppCompatActivity() {
 
     private fun executeUpdateGameViewTask(gameViewDrawData: GameViewDrawData) {
         playBallSound(gameViewDrawData)
-        gameView?.drawAsync(gameViewDrawData)
-        Handler().post {
-            gameViewModel.gameHandler.updateGameState()
-        }
+        game_view?.drawAsync(gameViewDrawData)
     }
 
     private fun playBallSound(gameViewDrawData: GameViewDrawData) {
         if (gameViewModel.gameHandler.isGameOver) return
-        if (gameViewDrawData.ballNode?.nodeType != NodeTypeEnum.Empty) {
+        if (gameViewDrawData.ballNode.nodeType != NodeTypeEnum.Empty) {
             fxPlayer?.playSound(R.raw.bounce)
         } else {
             fxPlayer?.playSound(R.raw.soccerkick)
@@ -154,8 +164,8 @@ class GameActivity : AppCompatActivity() {
     }
 
     fun drawPartialMove(move: PartialMove) {
-        val newLineCoords = gameView?.nodeToCoords(move.newNode)
-        val oldNodeCoords = gameView?.nodeToCoords(move.oldNode)
+        val newLineCoords = game_view?.nodeToCoords(move.newNode)
+        val oldNodeCoords = game_view?.nodeToCoords(move.oldNode)
 
         val linesToDraw = LinesToDraw(TwoDimensionalPointF(oldNodeCoords?.get(0)!!, oldNodeCoords[1]), TwoDimensionalPointF(newLineCoords?.get(0)!!, newLineCoords[1]),
                 move.madeTheMove.playerColor)
@@ -180,11 +190,11 @@ class GameActivity : AppCompatActivity() {
         val anim = AlphaAnimation(0.5f, 0.0f)
         anim.duration = Integer.MAX_VALUE.toLong()
         anim.repeatMode = Animation.REVERSE
-        gameView?.animation = anim
+        game_view?.animation = anim
 
         player_winner.visibility = View.VISIBLE
         play_again_button.visibility = View.VISIBLE
-        gameView?.isEnabled = false
+        game_view?.isEnabled = false
     }
 
     fun resetGame(view: View) {
@@ -198,7 +208,7 @@ class GameActivity : AppCompatActivity() {
     }
 
     fun reDraw() {
-        gameView?.invalidate()
+        game_view?.invalidate()
     }
 
     companion object {

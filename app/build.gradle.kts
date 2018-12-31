@@ -11,8 +11,8 @@ android {
         applicationId = "com.ps.simplepapersoccer"
         minSdkVersion(21)
         targetSdkVersion(28)
-        versionCode = 14
-        versionName = "1.10"
+        versionCode = 15
+        versionName = "1.2"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {

@@ -9,7 +9,7 @@
     <com.ps.simplepapersoccer.activities.GameView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/gameview" />
+        android:id="@+id/game_view" />
 
     <com.google.android.material.button.MaterialButton
         style="@style/MainMenuButton"

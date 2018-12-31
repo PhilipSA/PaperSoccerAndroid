@@ -1,17 +1,20 @@
 package com.ps.simplepapersoccer.viewmodel
 
 import android.graphics.Color
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.ps.simplepapersoccer.enums.DifficultyEnum
 import com.ps.simplepapersoccer.enums.GameModeEnum
 import com.ps.simplepapersoccer.gameObjects.game.GameHandler
 import com.ps.simplepapersoccer.gameObjects.game.GameViewDrawData
+import com.ps.simplepapersoccer.gameObjects.game.Victory
 import com.ps.simplepapersoccer.gameObjects.game.geometry.LinesToDraw
 import com.ps.simplepapersoccer.gameObjects.game.geometry.Node
+import com.ps.simplepapersoccer.gameObjects.move.PartialMove
 import com.ps.simplepapersoccer.gameObjects.player.AIPlayer
 import com.ps.simplepapersoccer.gameObjects.player.abstraction.IPlayer
 import com.ps.simplepapersoccer.gameObjects.player.Player
+import com.ps.simplepapersoccer.event.CompletableLiveEventLiveData
+import com.ps.simplepapersoccer.event.LiveEventLiveData
 import java.util.*
 import kotlin.collections.HashSet
 
@@ -24,10 +27,18 @@ class GameViewModel: ViewModel() {
     val player1Color = Color.BLUE
     val player2Color = Color.RED
 
-    val executeUpdateGameViewTaskLiveData = MutableLiveData<GameViewDrawData>()
-    val playerTurnTextLiveData = MutableLiveData<Boolean>()
+    val executeUpdateGameViewTaskLiveData = LiveEventLiveData<GameViewDrawData>()
+    val playerTurnTextLiveData = CompletableLiveEventLiveData()
+    val winnerLiveData = LiveEventLiveData<Victory>()
+    val reDrawLiveData = CompletableLiveEventLiveData()
+    val drawPartialMoveLiveData = LiveEventLiveData<PartialMove>()
 
     fun setGameMode(gameMode: Int, playerName: String) {
+        if (players.isNotEmpty()) {
+            players.shuffle()
+            return
+        }
+
         when (gameMode) {
             GameModeEnum.PLAYER_VS_AI -> players = assignPlayerAndAi(difficulty, DifficultyEnum.valueOf(difficulty), playerName)
             GameModeEnum.MULTIPLAYER_MODE -> {
@@ -65,7 +76,7 @@ class GameViewModel: ViewModel() {
     }
 
     fun addDrawDataToQueue(linesToDraw: LinesToDraw, ballNode: Node, madeTheMove: IPlayer) {
-        executeUpdateGameViewTaskLiveData.value = GameViewDrawData(linesToDraw, madeTheMove, gameHandler.currentPlayersTurn, ballNode, getAllNodeNeighbors(ballNode))
+        executeUpdateGameViewTaskLiveData.postWrappedValue(GameViewDrawData(linesToDraw, madeTheMove, gameHandler.currentPlayersTurn, ballNode, getAllNodeNeighbors(ballNode)))
     }
 
     fun getAllNodeNeighbors(node: Node): HashSet<Node> {
@@ -73,6 +84,6 @@ class GameViewModel: ViewModel() {
     }
 
     fun updatePlayerTurnText() {
-        playerTurnTextLiveData.postValue(true)
+        playerTurnTextLiveData.postWrappedValue(true)
     }
 }

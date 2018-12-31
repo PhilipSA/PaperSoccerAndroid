@@ -1,7 +1,5 @@
 package com.ps.simplepapersoccer.activities
 
-import java.util.ArrayList
-
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
@@ -18,6 +16,7 @@ import com.ps.simplepapersoccer.gameObjects.game.geometry.LinesToDraw
 import com.ps.simplepapersoccer.gameObjects.game.geometry.Node
 import com.ps.simplepapersoccer.R
 import com.ps.simplepapersoccer.viewmodel.GameViewModel
+import java.util.*
 
 class GameView : View {
 
@@ -141,7 +140,7 @@ class GameView : View {
         paint.color = gridColor
 
         for (node in gameBoard?.nodeHashSet!!) {
-            node.neighbors
+            node.coordNeighbors
                     .filterNot { node.coords.x != it.coords.x && node.coords.y != it.coords.y }
                     .forEach { canvas.drawLine(nodeToCoords(node)[0], nodeToCoords(node)[1], nodeToCoords(it)[0], nodeToCoords(it)[1], paint) }
         }

@@ -4,11 +4,11 @@ import com.ps.simplepapersoccer.gameObjects.game.geometry.Node
 
 object PathFindingHelper {
     fun findPath(startNode: Node, goalNode: Node): HashSet<Node> {
-        var path = HashSet<Node>()
-        var frontier = hashSetOf(startNode)
-        var explored = HashSet<Node>()
+        val path = HashSet<Node>()
+        val frontier = hashSetOf(startNode)
+        val explored = HashSet<Node>()
         while (frontier.isNotEmpty()) {
-            var node = frontier.sortedBy { x -> x.nodeValue }.first()
+            val node = frontier.sortedBy { x -> x.nodeValue }.first()
             frontier.remove(node)
 
             if (node == goalNode) {

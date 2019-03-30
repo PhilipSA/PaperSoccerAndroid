@@ -12,6 +12,7 @@ import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.ps.simplepapersoccer.R
 import com.ps.simplepapersoccer.enums.GameModeEnum
@@ -29,9 +30,7 @@ import com.ps.simplepapersoccer.gameObjects.player.abstraction.IPlayer
 import com.ps.simplepapersoccer.gameObjects.player.PlayerActivityData
 import com.ps.simplepapersoccer.sound.FXPlayer
 import com.ps.simplepapersoccer.viewmodel.GameViewModel
-import com.ps.simplepapersoccer.event.EventObserver
 import kotlinx.android.synthetic.main.activity_game.*
-import java.util.*
 
 class GameActivity : AppCompatActivity() {
     private var fxPlayer: FXPlayer? = null
@@ -76,7 +75,7 @@ class GameActivity : AppCompatActivity() {
 
         fxPlayer = FXPlayer(this)
 
-        gameViewModel.gameHandler = GameHandler(gameViewModel, gridSizeX, gridSizeY, gameViewModel.players, gameMode, true)
+        gameViewModel.gameHandler = GameHandler(gameViewModel, gridSizeX, gridSizeY, gameViewModel.players, gameMode)
 
         setPlayerTurnTextViewText()
 
@@ -103,27 +102,27 @@ class GameActivity : AppCompatActivity() {
     }
 
     private fun registerObservers() {
-        gameViewModel.executeUpdateGameViewTaskLiveData.observe(this, EventObserver {
+        gameViewModel.executeUpdateGameViewTaskLiveData.observe(this, Observer {
             if (it != null) {
                 executeUpdateGameViewTask(it)
             }
         })
 
-        gameViewModel.playerTurnTextLiveData.observe(this, EventObserver {
+        gameViewModel.playerTurnTextLiveData.observe(this, Observer {
             setPlayerTurnTextViewText()
         })
 
-        gameViewModel.winnerLiveData.observe(this, EventObserver {
+        gameViewModel.winnerLiveData.observe(this, Observer {
             if (it != null) {
                 winner(it)
             }
         })
 
-        gameViewModel.reDrawLiveData.observe(this, EventObserver {
+        gameViewModel.reDrawLiveData.observe(this, Observer {
             reDraw()
         })
 
-        gameViewModel.drawPartialMoveLiveData.observe(this, EventObserver {
+        gameViewModel.drawPartialMoveLiveData.observe(this, Observer {
             if (it != null) {
                 drawPartialMove(it)
             }

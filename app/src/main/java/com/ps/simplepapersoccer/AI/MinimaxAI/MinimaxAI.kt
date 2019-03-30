@@ -14,7 +14,7 @@ class MinimaxAI(timeLimitMilliSeconds: Int) : IGameAI {
         TIME_LIMIT_MILLIS = timeLimitMilliSeconds
     }
 
-    override fun makeMove(gameHandler: GameHandler): PartialMove {
+    override suspend fun makeMove(gameHandler: GameHandler): PartialMove {
         val bestMove = chooseMove(gameHandler)
         return bestMove?.returnMove as PartialMove
     }

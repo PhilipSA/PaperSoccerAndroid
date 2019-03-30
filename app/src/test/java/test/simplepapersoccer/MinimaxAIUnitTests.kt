@@ -24,14 +24,14 @@ class MinimaxAIUnitTests {
     }
 
     private fun createGameHandler(players: ArrayList<IPlayer>) {
-        gameHandler = GameHandler(null, 10, 12, players, GameModeEnum.AI_VS_AI, false, false)
+        gameHandler = GameHandler(null, 10, 12, players, GameModeEnum.AI_VS_AI)
     }
 
     @Test
     fun higher_difficulty_win_vs_lower_difficulty() {
         for (i in 0 until 3) {
-            gameHandler?.updateGameState()
             createGameHandler(players)
+            gameHandler?.updateGameState()
         }
 
         assertEquals(3, player1.score)

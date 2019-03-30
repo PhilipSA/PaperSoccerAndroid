@@ -11,7 +11,7 @@ import com.ps.simplepapersoccer.gameObjects.player.AIPlayer
 import com.ps.simplepapersoccer.gameObjects.player.abstraction.IPlayer
 import com.ps.simplepapersoccer.viewmodel.GameViewModel
 
-class GameHandler(private val gameViewModel: GameViewModel?, gridX: Int, gridY: Int, players: ArrayList<IPlayer>, val gameMode: Int, aiIsAsync: Boolean) {
+class GameHandler(private val gameViewModel: GameViewModel?, gridX: Int, gridY: Int, players: ArrayList<IPlayer>, val gameMode: Int) {
 
     var player1: IPlayer = players[0]
     var player2: IPlayer = players[1]
@@ -29,19 +29,15 @@ class GameHandler(private val gameViewModel: GameViewModel?, gridX: Int, gridY: 
         return currentPlayersTurn.hashCode() xor gameBoard.hashCode()
     }
 
-    override fun equals(other: Any?): Boolean {
-        return super.equals(other)
-    }
-
     init {
         currentPlayersTurn = players[0]
 
         gameBoard = GameBoard(gridX, gridY)
         player1.goal = gameBoard.goal1
         player2.goal = gameBoard.goal2
-        gameViewModel?.reDrawLiveData?.setWrappedValue(true)
+        gameViewModel?.reDrawLiveData?.postValue(true)
 
-        gameAIHandler = GameAIHandler(this, aiIsAsync)
+        gameAIHandler = GameAIHandler(this)
     }
 
     fun updateGameState() {
@@ -71,7 +67,7 @@ class GameHandler(private val gameViewModel: GameViewModel?, gridX: Int, gridY: 
     private fun makeMove(partialMove: PartialMove) {
         makePartialMove(partialMove)
         Log.d(TAG, "$partialMove")
-        gameViewModel?.drawPartialMoveLiveData?.postWrappedValue(partialMove)
+        gameViewModel?.drawPartialMoveLiveData?.postValue(partialMove)
         ++numberOfTurns
         updateGameState()
     }
@@ -109,7 +105,7 @@ class GameHandler(private val gameViewModel: GameViewModel?, gridX: Int, gridY: 
     private fun winner(victory: Victory) {
         Log.d(TAG, "$victory")
         victory.winner.score += 1
-        gameViewModel?.winnerLiveData?.postWrappedValue(victory)
+        gameViewModel?.winnerLiveData?.postValue(victory)
     }
 
     fun getOpponent(myPlayer: IPlayer): IPlayer? {

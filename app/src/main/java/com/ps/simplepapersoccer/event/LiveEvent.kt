@@ -1,34 +1,74 @@
 package com.ps.simplepapersoccer.event
 
+import android.os.Looper
+import androidx.annotation.MainThread
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.Observer
+import java.util.*
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicBoolean
 
-open class LiveEvent<out T>(private val content: T) {
+open class LiveEvent<T> : MediatorLiveData<T>() {
 
-    var hasBeenHandled = false
-        private set
+    private val observers = ConcurrentHashMap<LifecycleOwner, MutableSet<ObserverWrapper<T>>>()
 
-    /**
-     * Returns the content and prevents its use again.
-     */
-    internal fun getContentIfNotHandled(): Boolean? {
-        return if (hasBeenHandled) {
-            true
-        } else {
-            hasBeenHandled = true
-            return false
+    @MainThread
+    override fun observe(owner: LifecycleOwner, observer: Observer<in T>) {
+        val wrapper = ObserverWrapper(observer)
+        val set = observers[owner]
+        set?.apply {
+            add(wrapper)
+        } ?: run {
+            val newSet = Collections.newSetFromMap(ConcurrentHashMap<ObserverWrapper<T>, Boolean>())
+            newSet.add(wrapper)
+            observers[owner] = newSet
         }
+        super.observe(owner, wrapper)
+    }
+
+    override fun removeObservers(owner: LifecycleOwner) {
+        observers.remove(owner)
+        super.removeObservers(owner)
+    }
+
+    override fun removeObserver(observer: Observer<in T>) {
+        observers.forEach {
+            if (it.value.remove(observer)) {
+                if (it.value.isEmpty()) {
+                    observers.remove(it.key)
+                }
+                return@forEach
+            }
+        }
+        super.removeObserver(observer)
+    }
+
+    @MainThread
+    override fun setValue(t: T?) {
+        observers.forEach { it.value.forEach { wrapper -> wrapper.newValue() } }
+        super.setValue(t)
     }
 
     /**
-     * Returns the content, even if it's already been handled.
+     * Used for cases where T is Void, to make calls cleaner.
      */
-    fun peekContent(): T? = content
-}
+    fun call() {
+        if (Looper.getMainLooper() == Looper.myLooper()) value = null else postValue(null)
+    }
 
-class EventObserver<T>(private val onEventUnhandledContent: (T?) -> Unit) : Observer<LiveEvent<T>> {
-    override fun onChanged(event: LiveEvent<T>?) {
-        if (event?.getContentIfNotHandled() == false) {
-            onEventUnhandledContent(event.peekContent())
+    private class ObserverWrapper<T>(private val observer: Observer<in T>) : Observer<T> {
+
+        private val pending = AtomicBoolean(false)
+
+        override fun onChanged(t: T?) {
+            if (pending.compareAndSet(true, false)) {
+                observer.onChanged(t)
+            }
+        }
+
+        fun newValue() {
+            pending.set(true)
         }
     }
 }

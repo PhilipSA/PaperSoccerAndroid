@@ -7,7 +7,7 @@ import com.ps.simplepapersoccer.helpers.PathFindingHelper
 
 class EuclideanAI : IGameAI {
 
-    override fun makeMove(gameHandler: GameHandler): PartialMove {
+    override suspend fun makeMove(gameHandler: GameHandler): PartialMove {
         var manhattanMove: PartialMove? = null
         var manhattanDistance = Integer.MAX_VALUE.toDouble()
         var tempManhattan: Double

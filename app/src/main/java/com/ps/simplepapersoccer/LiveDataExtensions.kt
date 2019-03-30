@@ -1,64 +1,25 @@
 package com.ps.simplepapersoccer
 
+import android.os.Looper
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
-import com.ps.simplepapersoccer.event.LiveEventMediatorLiveData
+import com.ps.simplepapersoccer.event.LiveEvent
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
-fun <T> LiveData<T>.observeOnce(observer: Observer<T>) {
-    observeForever(object : Observer<T> {
-        override fun onChanged(t: T?) {
-            observer.onChanged(t)
-            removeObserver(this)
-        }
-    })
+inline fun <T> withCoroutineScopeAsLiveData(scope: CoroutineScope, crossinline block: suspend CoroutineScope.() -> T): LiveData<T> {
+    val liveData = MutableLiveData<T>()
+    scope.launch {
+        liveData.postValue(block())
+    }
+    return liveData
 }
 
-fun <X, Y> switchToCompletableMap(trigger: LiveData<X>,
-                                  func: (value: X?) -> LiveData<Y>): LiveEventMediatorLiveData<Boolean> {
-    val liveDataReader = LiveEventMediatorLiveData<Boolean>()
-    liveDataReader.addSource(trigger, object : Observer<X> {
-        internal var mSource: LiveData<Y>? = null
-
-        override fun onChanged(x: X?) {
-            val newLiveData = func(x)
-            if (mSource === newLiveData) {
-                return
-            }
-            if (mSource != null) {
-                liveDataReader.removeSource(mSource!!)
-            }
-            mSource = newLiveData
-            if (mSource != null) {
-                liveDataReader.addSource(mSource!!) {
-                    y -> if (y is Boolean) liveDataReader.setWrappedValue(y) else liveDataReader.setWrappedValue(true)
-                }
-            }
-        }
-    })
-    return liveDataReader
-}
-
-fun <X, Y> switchToSingleEventMap(trigger: LiveData<X>,
-                                  func: (value: X) -> LiveData<Y>?): LiveEventMediatorLiveData<Y> {
-    val liveDataReader = LiveEventMediatorLiveData<Y>()
-    liveDataReader.addSource(trigger, object : Observer<X> {
-        internal var mSource: LiveData<Y>? = null
-
-        override fun onChanged(x: X) {
-            val newLiveData = func(x)
-            if (mSource === newLiveData) {
-                return
-            }
-            if (mSource != null) {
-                liveDataReader.removeSource(mSource!!)
-            }
-            mSource = newLiveData
-            if (mSource != null) {
-                liveDataReader.addSource(mSource!!) {
-                    y -> liveDataReader.setWrappedValue(y)
-                }
-            }
-        }
-    })
-    return liveDataReader
+fun <T> LiveData<T>.toSingleEvent(): LiveData<T> {
+    val result = LiveEvent<T>()
+    result.addSource(this) {
+        if (Looper.myLooper() == Looper.getMainLooper()) result.value = it else result.postValue(it)
+    }
+    return result
 }

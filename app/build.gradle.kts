@@ -11,7 +11,7 @@ android {
         applicationId = "com.ps.simplepapersoccer"
         minSdkVersion(21)
         targetSdkVersion(28)
-        versionCode = 15
+        versionCode = 16
         versionName = "1.2"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -29,7 +29,7 @@ android {
 
 dependencies {
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.3.11")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.3.21")
 
     androidTestImplementation("androidx.test.espresso:espresso-core:3.1.1")
     implementation("androidx.appcompat:appcompat:1.0.2")
@@ -37,11 +37,13 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:1.1.3")
     implementation("com.google.android.material:material:1.0.0")
 
-    implementation("com.google.android.gms:play-services-ads:17.1.2")
+    implementation("com.google.android.gms:play-services-ads:17.2.0")
     testImplementation("junit:junit:4.12")
     androidTestImplementation("org.mockito:mockito-core:2.19.0")
     //Life cycles
     implementation("androidx.lifecycle:lifecycle-extensions:2.0.0")
+
+    api("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.0.1")
 }
 
 repositories {

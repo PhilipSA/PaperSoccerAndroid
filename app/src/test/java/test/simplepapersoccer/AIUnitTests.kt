@@ -19,7 +19,7 @@ class AIUnitTests {
     fun init()
     {
         player1 = AIPlayer(DifficultyEnum.VeryHard, "TestSubject", 1, 0, true)
-        player2 = AIPlayer(DifficultyEnum.Medium, "TestOpponent", 2, 0, true)
+        player2 = AIPlayer(DifficultyEnum.Easy, "TestOpponent", 2, 0, true)
         createGameHandler(players)
     }
 

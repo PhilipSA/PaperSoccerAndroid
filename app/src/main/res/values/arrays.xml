@@ -2,14 +2,10 @@
 <resources>
     <string-array name="pref_difficulty_level_names">
         <item>@string/easy_difficulty</item>
-        <item>@string/medium_difficulty</item>
-        <item>@string/hard_difficulty</item>
         <item>@string/veryHard_difficulty</item>
     </string-array>
     <string-array name="pref_difficulty_level_values" translatable="false">
         <item>Easy</item>
-        <item>Medium</item>
-        <item>Hard</item>
         <item>VeryHard</item>
     </string-array>
 </resources>

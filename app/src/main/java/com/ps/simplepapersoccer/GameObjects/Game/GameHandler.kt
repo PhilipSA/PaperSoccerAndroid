@@ -2,6 +2,7 @@ package com.ps.simplepapersoccer.gameObjects.game
 
 import android.util.Log
 import com.ps.simplepapersoccer.ai.GameAIHandler
+import com.ps.simplepapersoccer.ai.abstraction.IGameAiHandlerListener
 import com.ps.simplepapersoccer.enums.GameModeEnum
 import com.ps.simplepapersoccer.enums.NodeTypeEnum
 import com.ps.simplepapersoccer.enums.VictoryConditionEnum
@@ -12,17 +13,16 @@ import com.ps.simplepapersoccer.gameObjects.player.abstraction.IPlayer
 import com.ps.simplepapersoccer.viewmodel.GameViewModel
 import java.io.Serializable
 
-class GameHandler(private val gameViewModel: GameViewModel?, gridX: Int, gridY: Int, players: ArrayList<IPlayer>, val gameMode: Int): Serializable {
+class GameHandler(private val listener: IGameHandlerListener, gridX: Int, gridY: Int, players: ArrayList<IPlayer>, val gameMode: Int): IGameAiHandlerListener {
 
-    var player1: IPlayer = players[0]
-    var player2: IPlayer = players[1]
+    private val player1: IPlayer = players[0]
+    private val player2: IPlayer = players[1]
 
-    var currentPlayersTurn: IPlayer
+    var currentPlayersTurn: IPlayer; private set
 
     var numberOfTurns = 0
-    private val gameAIHandler: GameAIHandler
     val gameBoard: GameBoard
-    var ongoingTurn = false
+    private var ongoingTurn = false
 
     val ballNode: Node get() = gameBoard.ballNode
 
@@ -36,9 +36,7 @@ class GameHandler(private val gameViewModel: GameViewModel?, gridX: Int, gridY: 
         gameBoard = GameBoard(gridX, gridY)
         player1.goal = gameBoard.goal1
         player2.goal = gameBoard.goal2
-        gameViewModel?.reDrawLiveData?.postValue(true)
-
-        gameAIHandler = GameAIHandler(this)
+        listener.reDrawLiveData.postValue(true)
     }
 
     fun updateGameState() {
@@ -48,7 +46,15 @@ class GameHandler(private val gameViewModel: GameViewModel?, gridX: Int, gridY: 
             return
         }
         if (currentPlayersTurn.isAi && gameMode != GameModeEnum.MULTIPLAYER_MODE) {
-            gameAIHandler.makeAIMove(currentPlayersTurn as AIPlayer)
+            GameAIHandler(this).makeAIMove(currentPlayersTurn as AIPlayer, this)
+        }
+    }
+
+    override fun aiMove(partialMove: PartialMove, timedOut: Boolean) {
+        if (timedOut) {
+            winner(Victory(getOpponent(currentPlayersTurn), VictoryConditionEnum.TimedOut))
+        } else {
+            aiMakeMove(partialMove)
         }
     }
 
@@ -68,7 +74,7 @@ class GameHandler(private val gameViewModel: GameViewModel?, gridX: Int, gridY: 
     private fun makeMove(partialMove: PartialMove) {
         makePartialMove(partialMove)
         Log.d(TAG, "$partialMove")
-        gameViewModel?.drawPartialMoveLiveData?.postValue(partialMove)
+        listener.drawPartialMoveLiveData.postValue(partialMove)
         ++numberOfTurns
         updateGameState()
     }
@@ -98,7 +104,7 @@ class GameHandler(private val gameViewModel: GameViewModel?, gridX: Int, gridY: 
             if (player1.goal!!.isGoalNode(node)) return Victory(player2, VictoryConditionEnum.Goal)
             else if (player2.goal!!.isGoalNode(node)) return Victory(player1, VictoryConditionEnum.Goal)
         } else if (node.neighbors.size == 0) {
-            return Victory(getOpponent(currentPlayersTurn)!!, VictoryConditionEnum.OpponentOutOfMoves)
+            return Victory(getOpponent(currentPlayersTurn), VictoryConditionEnum.OpponentOutOfMoves)
         }
         return null
     }
@@ -106,19 +112,19 @@ class GameHandler(private val gameViewModel: GameViewModel?, gridX: Int, gridY: 
     private fun winner(victory: Victory) {
         Log.d(TAG, "$victory")
         victory.winner.score += 1
-        gameViewModel?.winnerLiveData?.postValue(victory)
+        listener.winnerLiveData.postValue(victory)
     }
 
-    fun getOpponent(myPlayer: IPlayer): IPlayer? {
+    fun getOpponent(myPlayer: IPlayer): IPlayer {
         return when (myPlayer) {
             player1 -> player2
             player2 -> player1
-            else -> null
+            else -> player2
         }
     }
 
     private fun changeTurn(): IPlayer {
-        currentPlayersTurn = getOpponent(currentPlayersTurn)!!
+        currentPlayersTurn = getOpponent(currentPlayersTurn)
         return currentPlayersTurn
     }
 

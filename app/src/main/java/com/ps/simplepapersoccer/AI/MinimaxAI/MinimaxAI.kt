@@ -8,11 +8,10 @@ import com.ps.simplepapersoccer.gameObjects.move.PartialMove
 import com.ps.simplepapersoccer.gameObjects.player.abstraction.IPlayer
 import com.ps.simplepapersoccer.helpers.PathFindingHelper
 import java.util.*
+import kotlin.math.max
+import kotlin.math.min
 
-class MinimaxAI(timeLimitMilliSeconds: Int) : IGameAI {
-    init {
-        TIME_LIMIT_MILLIS = timeLimitMilliSeconds
-    }
+class MinimaxAI(private val timeLimitMilliSeconds: Int) : IGameAI {
 
     override suspend fun makeMove(gameHandler: GameHandler): PartialMove {
         val bestMove = chooseMove(gameHandler)
@@ -30,7 +29,7 @@ class MinimaxAI(timeLimitMilliSeconds: Int) : IGameAI {
         for (move in moves) {
 
             state.makePartialMove(move.returnMove as PartialMove)
-            val searchTimeLimit = ((TIME_LIMIT_MILLIS - 1000) / moves.size).toLong()
+            val searchTimeLimit = ((timeLimitMilliSeconds - 1000) / moves.size).toLong()
             val score = iterativeDeepeningSearch(state, searchTimeLimit, maximPlayer)
             //val score = alphaBetaPruningNoTimeLimit(state, 0, maximPlayer, Integer.MIN_VALUE.toDouble(), Integer.MAX_VALUE.toDouble())
             state.undoLastMove()
@@ -88,49 +87,7 @@ class MinimaxAI(timeLimitMilliSeconds: Int) : IGameAI {
         }
 
         if (searchCutoff || currentDepth == 0 || state.getWinner(state.ballNode) != null) {
-            val value = minmaxEvaluation(state, maximizingPlayer)
-            return value
-        }
-
-        var bestScore = 0.0
-
-        if (maximizingPlayer == state.currentPlayersTurn) {
-            val possibleMoves = sortPossibleMovesByScore(SortOrderEnum.Descending, state, maximizingPlayer)
-            for (possibleMove in possibleMoves) {
-                state.makePartialMove(possibleMove.returnMove!!)
-                alpha = Math.max(alpha, alphaBetaPruning(state, currentDepth - 1, maximizingPlayer, alpha, beta, startTime, timeLimit))
-                state.undoLastMove()
-
-                if (beta <= alpha) {
-                    break // pruning
-                }
-            }
-            bestScore = alpha
-        } else {
-            val possibleMoves = sortPossibleMovesByScore(SortOrderEnum.Ascending, state, maximizingPlayer)
-            for (possibleMove in possibleMoves) {
-                state.makePartialMove(possibleMove.returnMove!!)
-                beta = Math.min(beta, alphaBetaPruning(state, currentDepth - 1, maximizingPlayer, alpha, beta, startTime, timeLimit))
-                state.undoLastMove()
-
-                if (beta <= alpha) {
-                    break // pruning
-                }
-            }
-
-            bestScore = beta
-        }
-
-        return bestScore
-    }
-
-    private fun alphaBetaPruningNoTimeLimit(state: GameHandler, currentDepth: Int, maximizingPlayer: IPlayer, paramAlpha: Double, paramBeta: Double): Double {
-        var alpha = paramAlpha
-        var beta = paramBeta
-
-        if (searchCutoff || currentDepth == 0 || state.getWinner(state.ballNode) != null) {
-            val value = minmaxEvaluation(state, maximizingPlayer)
-            return value
+            return minmaxEvaluation(state, maximizingPlayer)
         }
 
         val bestScore: Double
@@ -139,7 +96,7 @@ class MinimaxAI(timeLimitMilliSeconds: Int) : IGameAI {
             val possibleMoves = sortPossibleMovesByScore(SortOrderEnum.Descending, state, maximizingPlayer)
             for (possibleMove in possibleMoves) {
                 state.makePartialMove(possibleMove.returnMove!!)
-                alpha = Math.max(alpha, alphaBetaPruningNoTimeLimit(state, currentDepth - 1, maximizingPlayer, alpha, beta))
+                alpha = max(alpha, alphaBetaPruning(state, currentDepth - 1, maximizingPlayer, alpha, beta, startTime, timeLimit))
                 state.undoLastMove()
 
                 if (beta <= alpha) {
@@ -151,7 +108,7 @@ class MinimaxAI(timeLimitMilliSeconds: Int) : IGameAI {
             val possibleMoves = sortPossibleMovesByScore(SortOrderEnum.Ascending, state, maximizingPlayer)
             for (possibleMove in possibleMoves) {
                 state.makePartialMove(possibleMove.returnMove!!)
-                beta = Math.min(beta, alphaBetaPruningNoTimeLimit(state, currentDepth - 1, maximizingPlayer, alpha, beta))
+                beta = min(beta, alphaBetaPruning(state, currentDepth - 1, maximizingPlayer, alpha, beta, startTime, timeLimit))
                 state.undoLastMove()
 
                 if (beta <= alpha) {
@@ -196,7 +153,7 @@ class MinimaxAI(timeLimitMilliSeconds: Int) : IGameAI {
 
         score += (-state.numberOfTurns).toDouble()
 
-        val opponentsGoal = state.getOpponent(maximizingPlayer)?.goal!!.goalNode()
+        val opponentsGoal = state.getOpponent(maximizingPlayer).goal!!.goalNode()
         score += -PathFindingHelper.findPath(state.ballNode, opponentsGoal).size * 2
 
         //Neighbors are bounceable
@@ -210,9 +167,8 @@ class MinimaxAI(timeLimitMilliSeconds: Int) : IGameAI {
     }
 
     companion object {
-        private var TIME_LIMIT_MILLIS = 2000
         private val EVALS_PER_SECOND = 100
-        private val winCutoff = 900
+        private const val winCutoff = 900
         private var searchCutoff = false
     }
 }

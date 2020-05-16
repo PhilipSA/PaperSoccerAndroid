@@ -12,8 +12,6 @@ class AIPlayer(difficulty: DifficultyEnum, playerName: String, playerNumber: Int
 
     var gameAI: IGameAI = when (difficulty) {
         DifficultyEnum.Easy -> EuclideanAI()
-        DifficultyEnum.Medium -> MinimaxAI(1100)
-        DifficultyEnum.Hard -> MinimaxAI(1500)
         DifficultyEnum.VeryHard -> MinimaxAI(2000)
     }
 }

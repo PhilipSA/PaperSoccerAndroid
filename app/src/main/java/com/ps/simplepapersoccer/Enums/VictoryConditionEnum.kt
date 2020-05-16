@@ -6,5 +6,6 @@ package com.ps.simplepapersoccer.enums
 
 enum class VictoryConditionEnum {
     Goal,
-    OpponentOutOfMoves
+    OpponentOutOfMoves,
+    TimedOut
 }

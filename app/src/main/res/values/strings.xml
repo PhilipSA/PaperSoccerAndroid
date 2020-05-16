@@ -18,7 +18,7 @@
 
     <string name="banner_ad_unit_id" translatable="false">ca-app-pub-8311998646565881/5426668458</string>
 
-    <string name="pref_difficultyLevelTypes_default">Medium</string>
+    <string name="pref_difficultyLevelTypes_default">Easy</string>
     <string name="play_text">Play</string>
     <string name="settings_button_text">Settings</string>
     <string name="exit_button_text">Exit</string>
@@ -26,6 +26,7 @@
     <string name="quit_button_text">Quit</string>
     <string name="game_victory_out_of_moves">won because the opponent ran out of moves!</string>
     <string name="game_victory_scored_goal">scored a goal!</string>
+    <string name="game_victory_timed_out">won because opponent timed out</string>
 
     <string name="game_partial_turn">s turn</string>
     <string name="game_partial_its">It\'s</string>

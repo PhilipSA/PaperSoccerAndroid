@@ -15,6 +15,7 @@
     <string name="quit_button_text">Bakåt</string>
     <string name="play_again_button_text">Spela igen</string>
     <string name="game_victory_out_of_moves">vann för motspelare fick slut på drag!</string>
+    <string name="game_victory_timed_out">vann för motspelaren fick slut på tid</string>
     <string name="game_victory_scored_goal">gjorde mål!</string>
     <string name="game_partial_turn">s tur</string>
     <string name="game_partial_its">Det är</string>

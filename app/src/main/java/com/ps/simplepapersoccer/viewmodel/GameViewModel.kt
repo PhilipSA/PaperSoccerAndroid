@@ -7,6 +7,7 @@ import com.ps.simplepapersoccer.enums.DifficultyEnum
 import com.ps.simplepapersoccer.enums.GameModeEnum
 import com.ps.simplepapersoccer.gameObjects.game.GameHandler
 import com.ps.simplepapersoccer.gameObjects.game.GameViewDrawData
+import com.ps.simplepapersoccer.gameObjects.game.IGameHandlerListener
 import com.ps.simplepapersoccer.gameObjects.game.Victory
 import com.ps.simplepapersoccer.gameObjects.game.geometry.LinesToDraw
 import com.ps.simplepapersoccer.gameObjects.game.geometry.Node
@@ -17,7 +18,7 @@ import com.ps.simplepapersoccer.gameObjects.player.Player
 import java.util.*
 import kotlin.collections.HashSet
 
-class GameViewModel: ViewModel() {
+class GameViewModel: ViewModel(), IGameHandlerListener {
     lateinit var gameHandler: GameHandler
     lateinit var difficulty: String
 
@@ -28,9 +29,9 @@ class GameViewModel: ViewModel() {
 
     val executeUpdateGameViewTaskLiveData = MutableLiveData<GameViewDrawData>()
     val playerTurnTextLiveData = MutableLiveData<Boolean>()
-    val winnerLiveData = MutableLiveData<Victory>()
-    val reDrawLiveData = MutableLiveData<Boolean>()
-    val drawPartialMoveLiveData = MutableLiveData<PartialMove>()
+    override val winnerLiveData = MutableLiveData<Victory>()
+    override val reDrawLiveData = MutableLiveData<Boolean>()
+    override val drawPartialMoveLiveData = MutableLiveData<PartialMove>()
 
     fun setGameMode(gameMode: Int, playerName: String) {
         if (players.isNotEmpty()) {

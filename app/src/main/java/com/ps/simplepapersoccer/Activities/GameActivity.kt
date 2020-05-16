@@ -31,6 +31,7 @@ import com.ps.simplepapersoccer.gameObjects.player.PlayerActivityData
 import com.ps.simplepapersoccer.sound.FXPlayer
 import com.ps.simplepapersoccer.viewmodel.GameViewModel
 import kotlinx.android.synthetic.main.activity_game.*
+import kotlin.math.roundToLong
 
 class GameActivity : AppCompatActivity() {
     private var fxPlayer: FXPlayer? = null
@@ -87,7 +88,7 @@ class GameActivity : AppCompatActivity() {
         if (gameMode != GameModeEnum.AI_VS_AI) {
             game_view?.setOnTouchListener { view, motionEvent ->
                 if (motionEvent.action == MotionEvent.ACTION_DOWN) {
-                    val touchedNode = nodeCoordsToNode(Math.round(motionEvent.x).toFloat(), Math.round(motionEvent.y).toFloat())
+                    val touchedNode = nodeCoordsToNode(motionEvent.x.roundToLong().toFloat(), motionEvent.y.roundToLong().toFloat())
                     if (touchedNode != null) {
                         gameViewModel.gameHandler.playerMakeMove(touchedNode, getNonAIPlayer())
                     }
@@ -174,10 +175,16 @@ class GameActivity : AppCompatActivity() {
     private fun winner(victory: Victory) {
         setScoreText(victory.winner)
 
-        if (victory.victoryConditionEnum == VictoryConditionEnum.Goal) {
-            player_winner?.text = String.format("%s %s", victory.winner.playerName, getString(R.string.game_victory_scored_goal))
-        } else {
-            player_winner?.text = String.format("%s %s", victory.winner.playerName, getString(R.string.game_victory_out_of_moves))
+        when (victory.victoryConditionEnum) {
+            VictoryConditionEnum.Goal -> {
+                player_winner?.text = String.format("%s %s", victory.winner.playerName, getString(R.string.game_victory_scored_goal))
+            }
+            VictoryConditionEnum.OpponentOutOfMoves -> {
+                player_winner?.text = String.format("%s %s", victory.winner.playerName, getString(R.string.game_victory_out_of_moves))
+            }
+            else -> {
+                player_winner?.text = String.format("%s %s", victory.winner.playerName, getString(R.string.game_victory_timed_out))
+            }
         }
 
         if (victory.winner.isAi && gameViewModel.gameHandler.gameMode == GameModeEnum.PLAYER_VS_AI) {

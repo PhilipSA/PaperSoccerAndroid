@@ -106,6 +106,7 @@ class GameActivity : AppCompatActivity() {
         gameViewModel.executeUpdateGameViewTaskLiveData.observe(this, Observer {
             if (it != null) {
                 executeUpdateGameViewTask(it)
+                gameViewModel.executeUpdateGameViewTaskLiveData.value = null
             }
         })
 
@@ -116,16 +117,21 @@ class GameActivity : AppCompatActivity() {
         gameViewModel.winnerLiveData.observe(this, Observer {
             if (it != null) {
                 winner(it)
+                gameViewModel.winnerLiveData.value = null
             }
         })
 
         gameViewModel.reDrawLiveData.observe(this, Observer {
-            reDraw()
+            if (it == true) {
+                reDraw()
+                gameViewModel.reDrawLiveData.value = false
+            }
         })
 
         gameViewModel.drawPartialMoveLiveData.observe(this, Observer {
             if (it != null) {
                 drawPartialMove(it)
+                gameViewModel.drawPartialMoveLiveData.value = null
             }
         })
     }

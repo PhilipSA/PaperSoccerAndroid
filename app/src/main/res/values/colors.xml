@@ -6,5 +6,5 @@
     <color name="light_font">#f7f599</color>
     <color name="text_shadow">#7F000000</color>
 
-    <color name="primary_text_color">#000000</color>
+    <color name="primary_text_color">#FFF</color>
 </resources>

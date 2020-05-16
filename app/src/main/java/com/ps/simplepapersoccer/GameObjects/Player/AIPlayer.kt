@@ -5,8 +5,11 @@ import com.ps.simplepapersoccer.ai.EuclideanAI
 import com.ps.simplepapersoccer.ai.minimaxAI.MinimaxAI
 import com.ps.simplepapersoccer.enums.DifficultyEnum
 import com.ps.simplepapersoccer.gameObjects.player.abstraction.IPlayer
+import java.io.Serializable
 
-class AIPlayer(difficulty: DifficultyEnum, playerName: String, playerNumber: Int, playerColor: Int, isAi: Boolean) : IPlayer(playerName, playerNumber, playerColor, isAi) {
+class AIPlayer(difficulty: DifficultyEnum, playerName: String, playerNumber: Int, playerColor: Int, isAi: Boolean) :
+        IPlayer(playerName, playerNumber, playerColor, isAi), Serializable {
+
     var gameAI: IGameAI = when (difficulty) {
         DifficultyEnum.Easy -> EuclideanAI()
         DifficultyEnum.Medium -> MinimaxAI(1100)

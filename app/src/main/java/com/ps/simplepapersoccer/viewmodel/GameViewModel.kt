@@ -1,10 +1,10 @@
 package com.ps.simplepapersoccer.viewmodel
 
 import android.graphics.Color
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.ps.simplepapersoccer.enums.DifficultyEnum
 import com.ps.simplepapersoccer.enums.GameModeEnum
-import com.ps.simplepapersoccer.event.LiveEvent
 import com.ps.simplepapersoccer.gameObjects.game.GameHandler
 import com.ps.simplepapersoccer.gameObjects.game.GameViewDrawData
 import com.ps.simplepapersoccer.gameObjects.game.Victory
@@ -26,11 +26,11 @@ class GameViewModel: ViewModel() {
     val player1Color = Color.BLUE
     val player2Color = Color.RED
 
-    val executeUpdateGameViewTaskLiveData = LiveEvent<GameViewDrawData>()
-    val playerTurnTextLiveData = LiveEvent<Boolean>()
-    val winnerLiveData = LiveEvent<Victory>()
-    val reDrawLiveData = LiveEvent<Boolean>()
-    val drawPartialMoveLiveData = LiveEvent<PartialMove>()
+    val executeUpdateGameViewTaskLiveData = MutableLiveData<GameViewDrawData>()
+    val playerTurnTextLiveData = MutableLiveData<Boolean>()
+    val winnerLiveData = MutableLiveData<Victory>()
+    val reDrawLiveData = MutableLiveData<Boolean>()
+    val drawPartialMoveLiveData = MutableLiveData<PartialMove>()
 
     fun setGameMode(gameMode: Int, playerName: String) {
         if (players.isNotEmpty()) {

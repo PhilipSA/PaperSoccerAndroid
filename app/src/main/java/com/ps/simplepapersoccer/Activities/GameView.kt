@@ -28,7 +28,7 @@ class GameView : View {
     private var gameBoard: GameBoard? = null
 
     private var canvas: Canvas? = null
-    private var paint: Paint? = null
+    private var paint = Paint()
 
     private val nodeSize = 20
 
@@ -125,9 +125,9 @@ class GameView : View {
 
     private fun redrawMap() {
         paint = Paint()
-        paint?.textSize = 40f
-        paint?.strokeWidth = gridStrokeWidth.toFloat()
-        paintComponent(canvas!!, paint!!)
+        paint.textSize = 40f
+        paint.strokeWidth = gridStrokeWidth.toFloat()
+        paintComponent(canvas!!, paint)
     }
 
     private fun paintComponent(canvas: Canvas, paint: Paint) {
@@ -172,7 +172,7 @@ class GameView : View {
     }
 
     private fun drawPossibleMoves() {
-        paint?.color = gameViewDrawData?.currentPlayerTurn?.playerColor as Int
+        paint.color = gameViewDrawData?.currentPlayerTurn?.playerColor as Int
         if (gameViewDrawData?.currentPlayerTurn?.isAi!!) return
         gameViewDrawData?.nodeNeighbors!!
                 .map { nodeToCoords(it) }

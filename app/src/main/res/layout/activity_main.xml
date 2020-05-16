@@ -19,7 +19,7 @@
         android:id="@+id/single_player_button"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:onClick="SingleplayerClick"
+        android:onClick="singleplayerClick"
         android:text="@string/play_text" />
 
     <com.google.android.material.button.MaterialButton
@@ -27,7 +27,7 @@
         android:id="@+id/settings_button"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:onClick="SettingsClick"
+        android:onClick="settingsClick"
         android:text="@string/settings_button_text" />
 
     <com.google.android.material.button.MaterialButton
@@ -36,7 +36,7 @@
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:text="@string/howToPlayButtonText"
-        android:onClick="HowToPlayClick" />
+        android:onClick="howToPlayClick" />
 
     <com.google.android.material.button.MaterialButton
         style="@style/MainMenuButton"
@@ -44,14 +44,7 @@
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:layout_marginBottom="10dp"
-        android:onClick="ExitClick"
+        android:onClick="exitClick"
         android:text="@string/exit_button_text" />
-
-    <com.google.android.gms.ads.AdView
-        android:id="@+id/adView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        ads:adSize="BANNER"
-        ads:adUnitId="@string/banner_ad_unit_id" />
 
 </LinearLayout>

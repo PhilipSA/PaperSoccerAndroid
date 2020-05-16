@@ -1,6 +1,6 @@
 package com.ps.simplepapersoccer.gameObjects.game
 
-import com.ps.simplepapersoccer.Log
+import android.util.Log
 import com.ps.simplepapersoccer.ai.GameAIHandler
 import com.ps.simplepapersoccer.enums.GameModeEnum
 import com.ps.simplepapersoccer.enums.NodeTypeEnum
@@ -10,8 +10,9 @@ import com.ps.simplepapersoccer.gameObjects.move.PartialMove
 import com.ps.simplepapersoccer.gameObjects.player.AIPlayer
 import com.ps.simplepapersoccer.gameObjects.player.abstraction.IPlayer
 import com.ps.simplepapersoccer.viewmodel.GameViewModel
+import java.io.Serializable
 
-class GameHandler(private val gameViewModel: GameViewModel?, gridX: Int, gridY: Int, players: ArrayList<IPlayer>, val gameMode: Int) {
+class GameHandler(private val gameViewModel: GameViewModel?, gridX: Int, gridY: Int, players: ArrayList<IPlayer>, val gameMode: Int): Serializable {
 
     var player1: IPlayer = players[0]
     var player2: IPlayer = players[1]

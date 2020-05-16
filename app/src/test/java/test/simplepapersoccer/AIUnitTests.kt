@@ -9,7 +9,7 @@ import junit.framework.TestCase.assertEquals
 import org.junit.Before
 import org.junit.Test
 
-class MinimaxAIUnitTests {
+class AIUnitTests {
     var gameHandler: GameHandler? = null
     private lateinit var player1: IPlayer
     private lateinit var player2: IPlayer
@@ -18,7 +18,7 @@ class MinimaxAIUnitTests {
     @Before
     fun init()
     {
-        player1 = AIPlayer(DifficultyEnum.Hard, "TestSubject", 1, 0, true)
+        player1 = AIPlayer(DifficultyEnum.VeryHard, "TestSubject", 1, 0, true)
         player2 = AIPlayer(DifficultyEnum.Medium, "TestOpponent", 2, 0, true)
         createGameHandler(players)
     }
@@ -28,7 +28,7 @@ class MinimaxAIUnitTests {
     }
 
     @Test
-    fun higher_difficulty_win_vs_lower_difficulty() {
+    fun higherDifficultyWinVsLowerDifficulty() {
         for (i in 0 until 3) {
             createGameHandler(players)
             gameHandler?.updateGameState()

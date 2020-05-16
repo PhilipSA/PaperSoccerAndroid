@@ -6,26 +6,19 @@ import android.os.Bundle
 import android.view.View
 import android.view.Window
 import androidx.appcompat.app.AppCompatActivity
-import com.google.android.gms.ads.AdView
 import com.ps.simplepapersoccer.enums.GameModeEnum
 import com.ps.simplepapersoccer.R
 
 class MainActivity : AppCompatActivity() {
-
-    internal var mAdView: AdView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         this.requestWindowFeature(Window.FEATURE_NO_TITLE)
         setContentView(R.layout.activity_main)
-
-/*        mAdView = findViewById(R.id.adView) as AdView
-        val adRequest = AdRequest.Builder().build()
-        mAdView?.loadAd(adRequest)*/
     }
 
-    fun SingleplayerClick(view: View) {
+    fun singleplayerClick(view: View) {
         val intent = Intent(this, GameActivity::class.java)
 
         val builder = AlertDialog.Builder(this)
@@ -42,17 +35,17 @@ class MainActivity : AppCompatActivity() {
         builder.create().show()
     }
 
-    fun SettingsClick(view: View) {
+    fun settingsClick(view: View) {
         val intent = Intent(this, SettingsActivity::class.java)
         startActivity(intent)
     }
 
-    fun HowToPlayClick(view: View) {
+    fun howToPlayClick(view: View) {
         val intent = Intent(this, HowToPlayActivity::class.java)
         startActivity(intent)
     }
 
-    fun ExitClick(view: View) {
+    fun exitClick(view: View) {
         finish()
         System.exit(0)
     }

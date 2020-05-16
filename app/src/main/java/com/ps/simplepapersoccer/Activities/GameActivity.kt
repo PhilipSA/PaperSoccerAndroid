@@ -47,11 +47,11 @@ class GameActivity : AppCompatActivity() {
         gameViewModel = ViewModelProviders.of(this).get(GameViewModel::class.java)
 
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
-        gameViewModel.difficulty = sharedPreferences.getString("pref_difficultyLevel", "Medium")
-        val playerName = sharedPreferences.getString("pref_playerName", "Player")
+        gameViewModel.difficulty = sharedPreferences.getString("pref_difficultyLevel", "Medium")!!
+        val playerName = sharedPreferences.getString("pref_playerName", "Player")!!
 
-        val gridSizeX = sharedPreferences.getString("gridsize_x", "8").toInt()
-        val gridSizeY = sharedPreferences.getString("gridsize_y", "10").toInt()
+        val gridSizeX = sharedPreferences.getString("gridsize_x", "8")!!.toInt()
+        val gridSizeY = sharedPreferences.getString("gridsize_y", "10")!!.toInt()
 
         val gameMode = intent.getIntExtra("MULTIPLAYER_MODE", GameModeEnum.PLAYER_VS_AI)
 
@@ -162,7 +162,7 @@ class GameActivity : AppCompatActivity() {
         }
     }
 
-    fun drawPartialMove(move: PartialMove) {
+    private fun drawPartialMove(move: PartialMove) {
         val newLineCoords = game_view?.nodeToCoords(move.newNode)
         val oldNodeCoords = game_view?.nodeToCoords(move.oldNode)
 
@@ -171,7 +171,7 @@ class GameActivity : AppCompatActivity() {
         gameViewModel.addDrawDataToQueue(linesToDraw, move.newNode, move.madeTheMove)
     }
 
-    fun winner(victory: Victory) {
+    private fun winner(victory: Victory) {
         setScoreText(victory.winner)
 
         if (victory.victoryConditionEnum == VictoryConditionEnum.Goal) {

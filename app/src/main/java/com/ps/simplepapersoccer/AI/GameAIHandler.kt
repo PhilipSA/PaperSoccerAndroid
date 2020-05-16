@@ -17,7 +17,7 @@ class GameAIHandler(private val aiHandlerListener: IGameAiHandlerListener) {
     fun makeAIMove(aiPlayer : AIPlayer, gameHandler: GameHandler) {
         aiTimeOut = false
 
-        CoroutineScope(Dispatchers.IO).launch {
+        CoroutineScope(Dispatchers.Main).launch {
             val job = launch {
                 delay(2000)
                 aiTimeOut = true

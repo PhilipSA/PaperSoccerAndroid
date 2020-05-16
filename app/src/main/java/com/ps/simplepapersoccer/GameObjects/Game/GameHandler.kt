@@ -13,7 +13,7 @@ import com.ps.simplepapersoccer.gameObjects.player.abstraction.IPlayer
 import com.ps.simplepapersoccer.viewmodel.GameViewModel
 import java.io.Serializable
 
-class GameHandler(private val listener: IGameHandlerListener, gridX: Int, gridY: Int, players: ArrayList<IPlayer>, val gameMode: Int): IGameAiHandlerListener {
+class GameHandler(private val listener: IGameHandlerListener?, gridX: Int, gridY: Int, players: ArrayList<IPlayer>, val gameMode: Int): IGameAiHandlerListener {
 
     private val player1: IPlayer = players[0]
     private val player2: IPlayer = players[1]
@@ -36,7 +36,7 @@ class GameHandler(private val listener: IGameHandlerListener, gridX: Int, gridY:
         gameBoard = GameBoard(gridX, gridY)
         player1.goal = gameBoard.goal1
         player2.goal = gameBoard.goal2
-        listener.reDrawLiveData.postValue(true)
+        listener?.reDrawLiveData?.postValue(true)
     }
 
     fun updateGameState() {
@@ -73,8 +73,7 @@ class GameHandler(private val listener: IGameHandlerListener, gridX: Int, gridY:
 
     private fun makeMove(partialMove: PartialMove) {
         makePartialMove(partialMove)
-        Log.d(TAG, "$partialMove")
-        listener.drawPartialMoveLiveData.postValue(partialMove)
+        listener?.drawPartialMoveLiveData?.postValue(partialMove)
         ++numberOfTurns
         updateGameState()
     }
@@ -110,9 +109,8 @@ class GameHandler(private val listener: IGameHandlerListener, gridX: Int, gridY:
     }
 
     private fun winner(victory: Victory) {
-        Log.d(TAG, "$victory")
         victory.winner.score += 1
-        listener.winnerLiveData.postValue(victory)
+        listener?.winnerLiveData?.postValue(victory)
     }
 
     fun getOpponent(myPlayer: IPlayer): IPlayer {

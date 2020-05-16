@@ -37,6 +37,7 @@ dependencies {
     implementation("com.google.android.material:material:1.1.0")
 
     testImplementation("junit:junit:4.12")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.3.6")
     androidTestImplementation("org.mockito:mockito-core:3.2.4")
     //Life cycles
     implementation("androidx.lifecycle:lifecycle-extensions:2.2.0")

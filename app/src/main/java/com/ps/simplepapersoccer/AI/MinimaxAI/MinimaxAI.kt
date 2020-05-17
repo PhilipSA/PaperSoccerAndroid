@@ -1,5 +1,6 @@
 package com.ps.simplepapersoccer.ai.minimaxAI
 
+import com.ps.simplepapersoccer.ai.GameAIHandler.Companion.AI_TIMEOUT_MS
 import com.ps.simplepapersoccer.ai.abstraction.IGameAI
 import com.ps.simplepapersoccer.enums.NodeTypeEnum
 import com.ps.simplepapersoccer.enums.SortOrderEnum
@@ -11,7 +12,7 @@ import java.util.*
 import kotlin.math.max
 import kotlin.math.min
 
-class MinimaxAI(private val timeLimitMilliSeconds: Int) : IGameAI {
+class MinimaxAI(private val timeLimitMilliSeconds: Long = AI_TIMEOUT_MS) : IGameAI {
 
     override suspend fun makeMove(gameHandler: GameHandler): PartialMove {
         val bestMove = chooseMove(gameHandler)
@@ -29,7 +30,7 @@ class MinimaxAI(private val timeLimitMilliSeconds: Int) : IGameAI {
         for (move in moves) {
 
             state.makePartialMove(move.returnMove as PartialMove)
-            val searchTimeLimit = ((timeLimitMilliSeconds - 1000) / moves.size).toLong()
+            val searchTimeLimit = ((timeLimitMilliSeconds - 1000) / moves.size)
             val score = iterativeDeepeningSearch(state, searchTimeLimit, maximPlayer)
             //val score = alphaBetaPruningNoTimeLimit(state, 0, maximPlayer, Integer.MIN_VALUE.toDouble(), Integer.MAX_VALUE.toDouble())
             state.undoLastMove()

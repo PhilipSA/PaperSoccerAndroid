@@ -4,7 +4,7 @@ import com.ps.simplepapersoccer.gameObjects.game.geometry.TwoDimensionalPoint
 import com.ps.simplepapersoccer.helpers.MathHelper.euclideanDistance
 
 class IntegerLine(var fromPoint: TwoDimensionalPoint, var toPoint: TwoDimensionalPoint) {
-    var allPoints: MutableList<TwoDimensionalPoint> = mutableListOf()
+    var allPoints: HashSet<TwoDimensionalPoint> = hashSetOf()
     val length: Int get() = euclideanDistance(fromPoint, toPoint).toInt()
 
     init {

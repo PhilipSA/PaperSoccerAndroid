@@ -5,7 +5,7 @@ package com.ps.simplepapersoccer.enums
  */
 
 object GameModeEnum {
-    val PLAYER_VS_AI = 0
-    val MULTIPLAYER_MODE = 1
-    val AI_VS_AI = 2
+    const val PLAYER_VS_AI = 0
+    const val MULTIPLAYER_MODE = 1
+    const val AI_VS_AI = 2
 }

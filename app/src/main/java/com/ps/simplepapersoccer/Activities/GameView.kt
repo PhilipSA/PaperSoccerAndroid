@@ -17,10 +17,11 @@ import com.ps.simplepapersoccer.gameObjects.game.geometry.Node
 import com.ps.simplepapersoccer.R
 import com.ps.simplepapersoccer.viewmodel.GameViewModel
 import java.util.*
+import kotlin.collections.HashSet
 
 class GameView : View {
 
-    var drawLines: MutableList<LinesToDraw> = ArrayList()
+    var drawLines: HashSet<LinesToDraw> = HashSet()
 
     var gameViewDrawData: GameViewDrawData? = null
 
@@ -157,9 +158,9 @@ class GameView : View {
 
         paint.style = Paint.Style.FILL
 
-        for (i in drawLines.indices) {
-            paint.color = drawLines[i].color
-            canvas.drawLine(drawLines[i].fromPoint.x, drawLines[i].fromPoint.y, drawLines[i].toPoint.x, drawLines[i].toPoint.y, paint)
+        drawLines.forEach {
+            paint.color = it.color
+            canvas.drawLine(it.fromPoint.x, it.fromPoint.y, it.toPoint.x, it.toPoint.y, paint)
         }
 
         drawPossibleMoves()

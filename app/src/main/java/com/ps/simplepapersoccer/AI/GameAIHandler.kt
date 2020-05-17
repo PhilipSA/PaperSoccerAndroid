@@ -12,14 +12,14 @@ import java.io.Serializable
 import java.lang.Exception
 
 class GameAIHandler(private val aiHandlerListener: IGameAiHandlerListener) {
-    var aiTimeOut = false
+    private var aiTimeOut = false
 
     fun makeAIMove(aiPlayer : AIPlayer, gameHandler: GameHandler) {
         aiTimeOut = false
 
         CoroutineScope(Dispatchers.IO).launch {
             val job = launch {
-                delay(2000)
+                delay(AI_TIMEOUT_MS)
                 aiTimeOut = true
             }
 
@@ -37,5 +37,9 @@ class GameAIHandler(private val aiHandlerListener: IGameAiHandlerListener) {
         }
 
         aiHandlerListener.aiMove(aiMove, aiTimeOut)
+    }
+
+    companion object {
+        const val AI_TIMEOUT_MS = 2000L
     }
 }

@@ -2,8 +2,6 @@
     <string name="app_name">Simple Paper Soccer</string>
     <string name="difficulty_name">Difficulty</string>
     <string name="easy_difficulty">Easy</string>
-    <string name="medium_difficulty">Medium</string>
-    <string name="hard_difficulty">Hard</string>
     <string name="veryHard_difficulty">VeryHard</string>
     <string name="player_name">Player name</string>
     <string name="default_player_name">Player1</string>

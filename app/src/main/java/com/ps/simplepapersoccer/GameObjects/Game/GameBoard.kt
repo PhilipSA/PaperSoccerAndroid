@@ -9,7 +9,10 @@ import com.ps.simplepapersoccer.gameObjects.move.PartialMove
 import com.ps.simplepapersoccer.gameObjects.move.PossibleMove
 import com.ps.simplepapersoccer.gameObjects.move.StoredMove
 import com.ps.simplepapersoccer.helpers.MathHelper
-import java.util.ArrayList
+import java.util.*
+import java.util.concurrent.ArrayBlockingQueue
+import kotlin.collections.HashSet
+import kotlin.math.roundToInt
 
 class GameBoard(private val gridSizeX: Int, private val gridSizeY: Int) {
     var nodeHashSet = HashSet<Node>()
@@ -18,8 +21,8 @@ class GameBoard(private val gridSizeX: Int, private val gridSizeY: Int) {
 
     lateinit var goal1: Goal
     lateinit var goal2: Goal
-    private val goalScalingX = Math.round((gridSizeX / 6).toDouble()).toInt()
-    val goalScalingY = Math.round((gridSizeX / 6).toDouble()).toInt()
+    private val goalScalingX = (gridSizeX / 6).toDouble().roundToInt()
+    val goalScalingY = (gridSizeX / 6).toDouble().roundToInt()
 
     var topGoalLines: Goal = Goal(IntegerLine(TwoDimensionalPoint(gridSizeX / 2 - goalScalingX, 0), TwoDimensionalPoint(gridSizeX / 2 + goalScalingX, 0)),
             IntegerLine(TwoDimensionalPoint(gridSizeX / 2 - goalScalingX, 0), TwoDimensionalPoint(gridSizeX / 2 - goalScalingX, 1)),
@@ -28,7 +31,7 @@ class GameBoard(private val gridSizeX: Int, private val gridSizeY: Int) {
             IntegerLine(TwoDimensionalPoint(gridSizeX / 2 - goalScalingX, gridSizeY), TwoDimensionalPoint(gridSizeX / 2 - goalScalingX, gridSizeY-1)),
             IntegerLine(TwoDimensionalPoint(gridSizeX / 2 + goalScalingX, gridSizeY), TwoDimensionalPoint(gridSizeX / 2 + goalScalingX, gridSizeY-1)))
 
-    private val allPartialMoves = ArrayList<StoredMove>()
+    private val allPartialMoves = Stack<StoredMove>()
 
     init {
         makeNodes(gridSizeX, gridSizeY)
@@ -97,12 +100,11 @@ class GameBoard(private val gridSizeX: Int, private val gridSizeY: Int) {
     }
 
     fun undoLastMove(): PartialMove {
-        val storedMove = allPartialMoves.last()
+        val storedMove = allPartialMoves.pop()
         storedMove.partialMove.newNode.addNeighbor(storedMove.partialMove.oldNode)
         storedMove.partialMove.oldNode.addNeighbor(storedMove.partialMove.newNode)
         storedMove.partialMove.newNode.nodeType = storedMove.newNodeTypeEnum
         ballNode = storedMove.partialMove.oldNode
-        allPartialMoves.remove(storedMove)
         return storedMove.partialMove
     }
 

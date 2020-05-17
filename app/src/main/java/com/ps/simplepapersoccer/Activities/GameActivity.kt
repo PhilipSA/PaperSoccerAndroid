@@ -13,8 +13,10 @@ import android.view.animation.Animation
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import com.ps.simplepapersoccer.R
+import com.ps.simplepapersoccer.enums.DifficultyEnum
 import com.ps.simplepapersoccer.enums.GameModeEnum
 import com.ps.simplepapersoccer.enums.NodeTypeEnum
 import com.ps.simplepapersoccer.enums.VictoryConditionEnum
@@ -34,7 +36,7 @@ import kotlinx.android.synthetic.main.activity_game.*
 import kotlin.math.roundToLong
 
 class GameActivity : AppCompatActivity() {
-    private var fxPlayer: FXPlayer? = null
+    private val fxPlayer by lazy { FXPlayer(this) }
     private var myName: String = ""
     private var playerActivityDataMap: MutableMap<IPlayer, PlayerActivityData> = HashMap()
 
@@ -45,10 +47,10 @@ class GameActivity : AppCompatActivity() {
         this.requestWindowFeature(Window.FEATURE_NO_TITLE)
         setContentView(R.layout.activity_game)
 
-        gameViewModel = ViewModelProviders.of(this).get(GameViewModel::class.java)
+        gameViewModel = ViewModelProvider(this).get(GameViewModel::class.java)
 
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
-        gameViewModel.difficulty = sharedPreferences.getString("pref_difficultyLevel", "Medium")!!
+        gameViewModel.difficulty = sharedPreferences.getString("pref_difficultyLevel", DifficultyEnum.VeryHard.name)!!
         val playerName = sharedPreferences.getString("pref_playerName", "Player")!!
 
         val gridSizeX = sharedPreferences.getString("gridsize_x", "8")!!.toInt()
@@ -74,13 +76,11 @@ class GameActivity : AppCompatActivity() {
         setScoreText(gameViewModel.players[0])
         setScoreText(gameViewModel.players[1])
 
-        fxPlayer = FXPlayer(this)
-
         gameViewModel.gameHandler = GameHandler(gameViewModel, gridSizeX, gridSizeY, gameViewModel.players, gameMode)
 
         setPlayerTurnTextViewText()
 
-        game_view?.init(GameActivity.getWidth(this), GameActivity.getHeight(this), gridSizeX, gridSizeY, gameViewModel, gameViewModel.gameHandler.gameBoard)
+        game_view?.init(getWidth(this), getHeight(this), gridSizeX, gridSizeY, gameViewModel, gameViewModel.gameHandler.gameBoard)
         game_view?.gameViewDrawData = GameViewDrawData(null, gameViewModel.gameHandler.currentPlayersTurn, gameViewModel.gameHandler.currentPlayersTurn,
                 gameViewModel.gameHandler.ballNode,
                 gameViewModel.getAllNodeNeighbors(gameViewModel.gameHandler.ballNode))
@@ -137,7 +137,7 @@ class GameActivity : AppCompatActivity() {
     }
 
     private fun getNonAIPlayer(): IPlayer {
-        return if (gameViewModel.gameHandler.currentPlayersTurn.isAi) gameViewModel.gameHandler.getOpponent(gameViewModel.gameHandler.currentPlayersTurn)!!
+        return if (gameViewModel.gameHandler.currentPlayersTurn.isAi) gameViewModel.gameHandler.getOpponent(gameViewModel.gameHandler.currentPlayersTurn)
         else gameViewModel.gameHandler.currentPlayersTurn
     }
 
@@ -163,9 +163,9 @@ class GameActivity : AppCompatActivity() {
     private fun playBallSound(gameViewDrawData: GameViewDrawData) {
         if (gameViewModel.gameHandler.isGameOver) return
         if (gameViewDrawData.ballNode.nodeType != NodeTypeEnum.Empty) {
-            fxPlayer?.playSound(R.raw.bounce)
+            fxPlayer.playSound(R.raw.bounce)
         } else {
-            fxPlayer?.playSound(R.raw.soccerkick)
+            fxPlayer.playSound(R.raw.soccerkick)
         }
     }
 
@@ -194,9 +194,9 @@ class GameActivity : AppCompatActivity() {
         }
 
         if (victory.winner.isAi && gameViewModel.gameHandler.gameMode == GameModeEnum.PLAYER_VS_AI) {
-            fxPlayer?.playSound(R.raw.failure)
+            fxPlayer.playSound(R.raw.failure)
         } else {
-            fxPlayer?.playSound(R.raw.goodresult)
+            fxPlayer.playSound(R.raw.goodresult)
         }
 
         val anim = AlphaAnimation(0.5f, 0.0f)
@@ -215,7 +215,7 @@ class GameActivity : AppCompatActivity() {
     }
 
     fun quit(view: View) {
-        fxPlayer?.cleanUpIfEnd()
+        fxPlayer.cleanUpIfEnd()
         finish()
     }
 

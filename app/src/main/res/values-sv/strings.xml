@@ -4,9 +4,7 @@
     <string name="difficulty_name">Svårighetsgrad</string>
     <string name="easy_difficulty">Lätt</string>
     <string name="exit_button_text">Avsluta</string>
-    <string name="hard_difficulty">Svår</string>
     <string name="howToPlayButtonText">Hur man spelar</string>
-    <string name="medium_difficulty">Medel</string>
     <string name="player_name">Spelarnamn</string>
     <string name="pref_difficultyLevelTypes_default">Medel</string>
     <string name="settings_button_text">Inställningar</string>

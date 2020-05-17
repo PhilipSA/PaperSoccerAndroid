@@ -11,7 +11,7 @@ class Goal(var goalLine: IntegerLine, var leftPost: IntegerLine, var rightPost: 
     val height : Int get() = leftPost.length
     val width : Int get() = goalLine.length
     val outerGoalLine: IntegerLine get() = IntegerLine(leftPost.toPoint, rightPost.toPoint)
-    val allNodes: MutableList<Node> = mutableListOf()
+    val allNodes: HashSet<Node> = hashSetOf()
 
     fun isGoalNode(node: Node): Boolean {
         if (node.nodeType == NodeTypeEnum.Goal) return allNodes.contains(node)

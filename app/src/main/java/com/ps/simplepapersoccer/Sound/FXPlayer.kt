@@ -9,7 +9,7 @@ import android.util.SparseIntArray
 
 import com.ps.simplepapersoccer.R
 
-class FXPlayer(activity: Activity) {
+class FXPlayer(private val context: Context) {
     private var soundPool: SoundPool? = null
     private var soundMap: HashMap<Int, Int>
     private val audioManager: AudioManager
@@ -17,7 +17,6 @@ class FXPlayer(activity: Activity) {
     init {
 
         val maxStreams = 1
-        val mContext = activity.applicationContext
         val soundPool = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             SoundPool.Builder()
                     .setMaxStreams(maxStreams)
@@ -28,12 +27,12 @@ class FXPlayer(activity: Activity) {
 
         soundMap = HashMap()
         // fill your sounds
-        soundMap[R.raw.bounce] = soundPool.load(mContext, R.raw.bounce, 1)
-        soundMap[R.raw.soccerkick] = soundPool.load(mContext, R.raw.soccerkick, 2)
-        soundMap[R.raw.failure] = soundPool.load(mContext, R.raw.failure, 1)
-        soundMap[R.raw.goodresult] = soundPool.load(mContext, R.raw.goodresult, 1)
+        soundMap[R.raw.bounce] = soundPool.load(context, R.raw.bounce, 1)
+        soundMap[R.raw.soccerkick] = soundPool.load(context, R.raw.soccerkick, 2)
+        soundMap[R.raw.failure] = soundPool.load(context, R.raw.failure, 1)
+        soundMap[R.raw.goodresult] = soundPool.load(context, R.raw.goodresult, 1)
 
-        audioManager = mContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
         this.soundPool = soundPool
     }

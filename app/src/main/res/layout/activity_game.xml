@@ -35,34 +35,12 @@
 
     <TextView
         android:id="@+id/player2_name"
-        android:layout_width="150dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="center"
         android:text="Player2"
         style="@style/PlayerNameTextView"
         android:layout_alignParentTop="true" />
-
-    <TextView
-        android:id="@+id/player2_score"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="15sp"
-        android:layout_marginRight="5dp"
-        android:text="Player2: 0"
-        android:textColor="@color/primary_text_color"
-        android:layout_below="@id/player2_name"
-        android:layout_alignParentRight="true"
-        android:layout_marginTop="9dp" />
-
-    <TextView
-        android:id="@+id/player1_score"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="15sp"
-        android:layout_marginLeft="5dp"
-        android:text="Player1: 0"
-        android:textColor="@color/primary_text_color"
-        android:layout_below="@id/player2_name"
-        android:layout_marginTop="9dp" />
 
     <TextView
         android:id="@+id/player_winner"
@@ -78,14 +56,14 @@
         android:shadowDy="1"
         android:shadowRadius="20"
         android:layout_marginTop="115dp"
-        android:layout_below="@id/player1_score"
         android:layout_centerHorizontal="true" />
 
     <TextView
         android:id="@+id/player1_name"
-        android:layout_width="150dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
+        android:gravity="center"
         android:text="Player1"
         style="@style/PlayerNameTextView"/>
 

@@ -29,7 +29,6 @@ import com.ps.simplepapersoccer.gameObjects.game.geometry.TwoDimensionalPoint
 import com.ps.simplepapersoccer.gameObjects.game.geometry.TwoDimensionalPointF
 import com.ps.simplepapersoccer.gameObjects.move.PartialMove
 import com.ps.simplepapersoccer.gameObjects.player.abstraction.IPlayer
-import com.ps.simplepapersoccer.gameObjects.player.PlayerActivityData
 import com.ps.simplepapersoccer.sound.FXPlayer
 import com.ps.simplepapersoccer.viewmodel.GameViewModel
 import kotlinx.android.synthetic.main.activity_game.*
@@ -38,7 +37,7 @@ import kotlin.math.roundToLong
 class GameActivity : AppCompatActivity() {
     private val fxPlayer by lazy { FXPlayer(this) }
     private var myName: String = ""
-    private var playerActivityDataMap: MutableMap<IPlayer, PlayerActivityData> = HashMap()
+    private var playerActivityDataMap: MutableMap<IPlayer, TextView> = HashMap()
 
     private lateinit var gameViewModel: GameViewModel
 
@@ -65,16 +64,10 @@ class GameActivity : AppCompatActivity() {
 
         gameViewModel.setGameMode(gameMode, playerName)
 
-        player1_name!!.text = gameViewModel.players[0].playerName
-        player2_name!!.text = gameViewModel.players[1].playerName
+        setPlayerNameTexts()
 
-        val playerActivityData = PlayerActivityData(player1_name as TextView, player1_score as TextView)
-        playerActivityDataMap[gameViewModel.players[0]] = playerActivityData
-        val playerActivityData2 = PlayerActivityData(player2_name as TextView, player2_score as TextView)
-        playerActivityDataMap[gameViewModel.players[1]] = playerActivityData2
-
-        setScoreText(gameViewModel.players[0])
-        setScoreText(gameViewModel.players[1])
+        playerActivityDataMap[gameViewModel.players[0]] = player1_name
+        playerActivityDataMap[gameViewModel.players[1]] = player2_name
 
         gameViewModel.gameHandler = GameHandler(gameViewModel, gridSizeX, gridSizeY, gameViewModel.players, gameMode)
 
@@ -136,6 +129,11 @@ class GameActivity : AppCompatActivity() {
         })
     }
 
+    private fun setPlayerNameTexts() {
+        player1_name!!.text = String.format("%s: %d", gameViewModel.players[0].playerName, gameViewModel.players[0].score)
+        player2_name!!.text = String.format("%s: %d", gameViewModel.players[1].playerName, gameViewModel.players[1].score)
+    }
+
     private fun getNonAIPlayer(): IPlayer {
         return if (gameViewModel.gameHandler.currentPlayersTurn.isAi) gameViewModel.gameHandler.getOpponent(gameViewModel.gameHandler.currentPlayersTurn)
         else gameViewModel.gameHandler.currentPlayersTurn
@@ -149,10 +147,6 @@ class GameActivity : AppCompatActivity() {
     private fun setPlayerTurnTextViewText() {
         player_turn?.text = String.format("%s %s%s", getString(R.string.game_partial_its), gameViewModel.gameHandler.currentPlayersTurn.playerName, getString(R.string.game_partial_turn))
         player_turn?.setTextColor(gameViewModel.gameHandler.currentPlayersTurn.playerColor)
-    }
-
-    private fun setScoreText(player: IPlayer) {
-        playerActivityDataMap[player]?.playerScoreTextView?.text = String.format("%s: %d", player.playerName, player.score)
     }
 
     private fun executeUpdateGameViewTask(gameViewDrawData: GameViewDrawData) {
@@ -179,7 +173,7 @@ class GameActivity : AppCompatActivity() {
     }
 
     private fun winner(victory: Victory) {
-        setScoreText(victory.winner)
+        setPlayerNameTexts()
 
         when (victory.victoryConditionEnum) {
             VictoryConditionEnum.Goal -> {

@@ -1,82 +1,83 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:animateLayoutChanges="true"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
+    android:animateLayoutChanges="true"
     android:background="@drawable/drawable_background"
     tools:context=".activities.GameActivity">
 
     <com.ps.simplepapersoccer.activities.GameView
+        android:id="@+id/game_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/game_view" />
+        android:layout_height="wrap_content" />
 
     <com.google.android.material.button.MaterialButton
-        style="@style/MainMenuButton"
         android:id="@+id/quit_button"
+        style="@style/MainMenuButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
+        android:layout_alignParentBottom="true"
         android:onClick="quit"
         android:text="@string/quit_button_text"
         android:visibility="visible" />
 
     <com.google.android.material.button.MaterialButton
-        style="@style/MainMenuButton"
         android:id="@+id/play_again_button"
+        style="@style/MainMenuButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
         android:onClick="resetGame"
         android:text="@string/play_again_button_text"
         android:visibility="invisible" />
 
     <TextView
         android:id="@+id/player2_name"
+        style="@style/PlayerNameTextView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
         android:gravity="center"
-        android:text="Player2"
-        style="@style/PlayerNameTextView"
-        android:layout_alignParentTop="true" />
+        android:text="Player2" />
 
     <TextView
         android:id="@+id/player_winner"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Winner!"
-        android:visibility="invisible"
-        android:textSize="55sp"
-        android:textStyle="bold"
-        android:textColor="@color/light_font"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="115dp"
         android:shadowColor="@color/text_shadow"
         android:shadowDx="1"
         android:shadowDy="1"
         android:shadowRadius="20"
-        android:layout_marginTop="115dp"
-        android:layout_centerHorizontal="true" />
+        android:text="Winner!"
+        android:textColor="@color/light_font"
+        android:textSize="55sp"
+        android:textStyle="bold"
+        android:visibility="invisible" />
 
     <TextView
         android:id="@+id/player1_name"
+        style="@style/PlayerNameTextView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
+        android:layout_marginBottom="-1dp"
         android:gravity="center"
-        android:text="Player1"
-        style="@style/PlayerNameTextView"/>
+        android:text="Player1" />
 
     <TextView
         android:id="@+id/player_turn"
         android:layout_width="wrap_content"
         android:layout_height="25dp"
-        android:text="Player1"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:background="@drawable/drawable_tooltip_back"
         android:layout_above="@id/player1_name"
-        android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_marginBottom="5dp" />
+        android:layout_alignParentLeft="true"
+        android:layout_marginBottom="5dp"
+        android:background="@drawable/drawable_tooltip_back"
+        android:text="Player1"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
 </RelativeLayout>

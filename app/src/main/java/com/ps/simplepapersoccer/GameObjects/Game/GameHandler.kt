@@ -1,17 +1,14 @@
 package com.ps.simplepapersoccer.gameObjects.game
 
-import android.util.Log
 import com.ps.simplepapersoccer.ai.GameAIHandler
 import com.ps.simplepapersoccer.ai.abstraction.IGameAiHandlerListener
-import com.ps.simplepapersoccer.enums.GameModeEnum
-import com.ps.simplepapersoccer.enums.NodeTypeEnum
-import com.ps.simplepapersoccer.enums.VictoryConditionEnum
+import com.ps.simplepapersoccer.data.enums.GameModeEnum
+import com.ps.simplepapersoccer.data.enums.NodeTypeEnum
+import com.ps.simplepapersoccer.data.enums.VictoryConditionEnum
 import com.ps.simplepapersoccer.gameObjects.game.geometry.Node
 import com.ps.simplepapersoccer.gameObjects.move.PartialMove
 import com.ps.simplepapersoccer.gameObjects.player.AIPlayer
 import com.ps.simplepapersoccer.gameObjects.player.abstraction.IPlayer
-import com.ps.simplepapersoccer.viewmodel.GameViewModel
-import java.io.Serializable
 
 class GameHandler(private val listener: IGameHandlerListener?, gridX: Int, gridY: Int, players: ArrayList<IPlayer>, val gameMode: Int): IGameAiHandlerListener {
 
@@ -45,7 +42,7 @@ class GameHandler(private val listener: IGameHandlerListener?, gridX: Int, gridY
             winner(getWinner(ballNode)!!)
             return
         }
-        if (currentPlayersTurn.isAi && gameMode != GameModeEnum.MULTIPLAYER_MODE) {
+        if (currentPlayersTurn.isAi && gameMode != GameModeEnum.MULTIPLAYER_MODE.ordinal) {
             GameAIHandler(this).makeAIMove(currentPlayersTurn as AIPlayer, this)
         }
     }

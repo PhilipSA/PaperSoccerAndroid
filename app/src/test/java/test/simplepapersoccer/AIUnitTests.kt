@@ -1,18 +1,12 @@
 package test.simplepapersoccer
 
-import androidx.lifecycle.MutableLiveData
-import com.ps.simplepapersoccer.enums.DifficultyEnum
-import com.ps.simplepapersoccer.enums.GameModeEnum
+import com.ps.simplepapersoccer.data.enums.DifficultyEnum
+import com.ps.simplepapersoccer.data.enums.GameModeEnum
 import com.ps.simplepapersoccer.gameObjects.game.GameHandler
-import com.ps.simplepapersoccer.gameObjects.game.IGameHandlerListener
-import com.ps.simplepapersoccer.gameObjects.game.Victory
-import com.ps.simplepapersoccer.gameObjects.move.PartialMove
 import com.ps.simplepapersoccer.gameObjects.player.AIPlayer
 import com.ps.simplepapersoccer.gameObjects.player.abstraction.IPlayer
 import junit.framework.TestCase.assertEquals
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.setMain
 import org.junit.Before

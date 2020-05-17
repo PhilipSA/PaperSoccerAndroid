@@ -1,6 +1,6 @@
 package com.ps.simplepapersoccer.gameObjects.game
 
-import com.ps.simplepapersoccer.enums.NodeTypeEnum
+import com.ps.simplepapersoccer.data.enums.NodeTypeEnum
 import com.ps.simplepapersoccer.gameObjects.game.geometry.Abstraction.IntegerLine
 import com.ps.simplepapersoccer.gameObjects.game.geometry.Goal
 import com.ps.simplepapersoccer.gameObjects.game.geometry.Node
@@ -10,7 +10,6 @@ import com.ps.simplepapersoccer.gameObjects.move.PossibleMove
 import com.ps.simplepapersoccer.gameObjects.move.StoredMove
 import com.ps.simplepapersoccer.helpers.MathHelper
 import java.util.*
-import java.util.concurrent.ArrayBlockingQueue
 import kotlin.collections.HashSet
 import kotlin.math.roundToInt
 

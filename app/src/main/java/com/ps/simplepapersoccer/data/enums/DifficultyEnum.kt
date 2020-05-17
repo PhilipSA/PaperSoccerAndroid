@@ -1,4 +1,4 @@
-package com.ps.simplepapersoccer.enums
+package com.ps.simplepapersoccer.data.enums
 
 enum class DifficultyEnum {
     Easy,

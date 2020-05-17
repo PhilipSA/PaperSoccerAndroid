@@ -8,7 +8,7 @@ import com.ps.simplepapersoccer.gameObjects.game.geometry.TwoDimensionalPoint
 import android.graphics.drawable.ScaleDrawable
 import android.util.AttributeSet
 import android.view.View
-import com.ps.simplepapersoccer.enums.NodeTypeEnum
+import com.ps.simplepapersoccer.data.enums.NodeTypeEnum
 import com.ps.simplepapersoccer.gameObjects.game.GameBoard
 import com.ps.simplepapersoccer.gameObjects.game.GameViewDrawData
 import com.ps.simplepapersoccer.gameObjects.game.geometry.Abstraction.IntegerLine
@@ -16,7 +16,6 @@ import com.ps.simplepapersoccer.gameObjects.game.geometry.LinesToDraw
 import com.ps.simplepapersoccer.gameObjects.game.geometry.Node
 import com.ps.simplepapersoccer.R
 import com.ps.simplepapersoccer.viewmodel.GameViewModel
-import java.util.*
 import kotlin.collections.HashSet
 
 class GameView : View {

@@ -1,6 +1,6 @@
 package com.ps.simplepapersoccer.gameObjects.game.geometry
 
-import com.ps.simplepapersoccer.enums.NodeTypeEnum
+import com.ps.simplepapersoccer.data.enums.NodeTypeEnum
 import com.ps.simplepapersoccer.gameObjects.game.geometry.Abstraction.IntegerLine
 
 class Goal(var goalLine: IntegerLine, var leftPost: IntegerLine, var rightPost: IntegerLine) {

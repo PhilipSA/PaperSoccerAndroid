@@ -6,8 +6,10 @@ import android.os.Bundle
 import android.view.View
 import android.view.Window
 import androidx.appcompat.app.AppCompatActivity
-import com.ps.simplepapersoccer.enums.GameModeEnum
+import com.ps.simplepapersoccer.data.enums.GameModeEnum
 import com.ps.simplepapersoccer.R
+import com.ps.simplepapersoccer.data.constants.StringConstants.MULTIPLAYER_MODE
+import kotlin.system.exitProcess
 
 class MainActivity : AppCompatActivity() {
 
@@ -26,9 +28,9 @@ class MainActivity : AppCompatActivity() {
         builder.setItems(arrayOf<CharSequence>(getString(R.string.single_player_mode), getString(R.string.local_multiplayer_mode), getString(R.string.ai_vs_ai_mode))
         ) { dialog, which ->
             when (which) {
-                0 -> intent.putExtra("MULTIPLAYER_MODE", GameModeEnum.PLAYER_VS_AI)
-                1 -> intent.putExtra("MULTIPLAYER_MODE", GameModeEnum.MULTIPLAYER_MODE)
-                2 -> intent.putExtra("MULTIPLAYER_MODE", GameModeEnum.AI_VS_AI)
+                0 -> intent.putExtra(MULTIPLAYER_MODE, GameModeEnum.PLAYER_VS_AI)
+                1 -> intent.putExtra(MULTIPLAYER_MODE, GameModeEnum.MULTIPLAYER_MODE)
+                2 -> intent.putExtra(MULTIPLAYER_MODE, GameModeEnum.AI_VS_AI)
             }
             startActivity(intent)
         }
@@ -47,6 +49,6 @@ class MainActivity : AppCompatActivity() {
 
     fun exitClick(view: View) {
         finish()
-        System.exit(0)
+        exitProcess(0)
     }
 }

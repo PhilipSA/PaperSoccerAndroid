@@ -14,12 +14,15 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProviders
 import com.ps.simplepapersoccer.R
-import com.ps.simplepapersoccer.enums.DifficultyEnum
-import com.ps.simplepapersoccer.enums.GameModeEnum
-import com.ps.simplepapersoccer.enums.NodeTypeEnum
-import com.ps.simplepapersoccer.enums.VictoryConditionEnum
+import com.ps.simplepapersoccer.data.constants.StringConstants.MULTIPLAYER_MODE
+import com.ps.simplepapersoccer.data.constants.StringConstants.PREF_DIFFICULTY_LEVEL
+import com.ps.simplepapersoccer.data.constants.StringConstants.PREF_GRID_SIZE_X
+import com.ps.simplepapersoccer.data.constants.StringConstants.PREF_PLAYER_NAME
+import com.ps.simplepapersoccer.data.enums.DifficultyEnum
+import com.ps.simplepapersoccer.data.enums.GameModeEnum
+import com.ps.simplepapersoccer.data.enums.NodeTypeEnum
+import com.ps.simplepapersoccer.data.enums.VictoryConditionEnum
 import com.ps.simplepapersoccer.gameObjects.game.GameHandler
 import com.ps.simplepapersoccer.gameObjects.game.GameViewDrawData
 import com.ps.simplepapersoccer.gameObjects.game.geometry.LinesToDraw
@@ -49,13 +52,13 @@ class GameActivity : AppCompatActivity() {
         gameViewModel = ViewModelProvider(this).get(GameViewModel::class.java)
 
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
-        gameViewModel.difficulty = sharedPreferences.getString("pref_difficultyLevel", DifficultyEnum.VeryHard.name)!!
-        val playerName = sharedPreferences.getString("pref_playerName", "Player")!!
+        gameViewModel.difficulty = sharedPreferences.getString(PREF_DIFFICULTY_LEVEL, DifficultyEnum.VeryHard.name)!!
+        val playerName = sharedPreferences.getString(PREF_PLAYER_NAME, "Player")!!
 
-        val gridSizeX = sharedPreferences.getString("gridsize_x", "8")!!.toInt()
-        val gridSizeY = sharedPreferences.getString("gridsize_y", "10")!!.toInt()
+        val gridSizeX = sharedPreferences.getString(PREF_GRID_SIZE_X, "8")!!.toInt()
+        val gridSizeY = sharedPreferences.getString(PREF_GRID_SIZE_X, "10")!!.toInt()
 
-        val gameMode = intent.getIntExtra("MULTIPLAYER_MODE", GameModeEnum.PLAYER_VS_AI)
+        val gameMode = intent.getIntExtra(MULTIPLAYER_MODE, GameModeEnum.PLAYER_VS_AI.ordinal)
 
         myName = playerName
 
@@ -78,7 +81,7 @@ class GameActivity : AppCompatActivity() {
                 gameViewModel.gameHandler.ballNode,
                 gameViewModel.getAllNodeNeighbors(gameViewModel.gameHandler.ballNode))
 
-        if (gameMode != GameModeEnum.AI_VS_AI) {
+        if (gameMode != GameModeEnum.AI_VS_AI.ordinal) {
             game_view?.setOnTouchListener { view, motionEvent ->
                 if (motionEvent.action == MotionEvent.ACTION_DOWN) {
                     val touchedNode = nodeCoordsToNode(motionEvent.x.roundToLong().toFloat(), motionEvent.y.roundToLong().toFloat())
@@ -187,7 +190,7 @@ class GameActivity : AppCompatActivity() {
             }
         }
 
-        if (victory.winner.isAi && gameViewModel.gameHandler.gameMode == GameModeEnum.PLAYER_VS_AI) {
+        if (victory.winner.isAi && gameViewModel.gameHandler.gameMode == GameModeEnum.PLAYER_VS_AI.ordinal) {
             fxPlayer.playSound(R.raw.failure)
         } else {
             fxPlayer.playSound(R.raw.goodresult)

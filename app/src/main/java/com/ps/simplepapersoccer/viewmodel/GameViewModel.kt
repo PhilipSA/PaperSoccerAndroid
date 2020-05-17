@@ -3,8 +3,8 @@ package com.ps.simplepapersoccer.viewmodel
 import android.graphics.Color
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.ps.simplepapersoccer.enums.DifficultyEnum
-import com.ps.simplepapersoccer.enums.GameModeEnum
+import com.ps.simplepapersoccer.data.enums.DifficultyEnum
+import com.ps.simplepapersoccer.data.enums.GameModeEnum
 import com.ps.simplepapersoccer.gameObjects.game.GameHandler
 import com.ps.simplepapersoccer.gameObjects.game.GameViewDrawData
 import com.ps.simplepapersoccer.gameObjects.game.IGameHandlerListener
@@ -40,8 +40,8 @@ class GameViewModel: ViewModel(), IGameHandlerListener {
         }
 
         when (gameMode) {
-            GameModeEnum.PLAYER_VS_AI -> players = assignPlayerAndAi(difficulty, DifficultyEnum.valueOf(difficulty), playerName)
-            GameModeEnum.MULTIPLAYER_MODE -> {
+            GameModeEnum.PLAYER_VS_AI.ordinal -> players = assignPlayerAndAi(difficulty, DifficultyEnum.valueOf(difficulty), playerName)
+            GameModeEnum.MULTIPLAYER_MODE.ordinal -> {
                 players.add(Player(playerName, 1, player1Color, false))
                 players.add(Player("Player2", 2, player2Color, false))
             }

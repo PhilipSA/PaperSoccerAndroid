@@ -1,8 +1,4 @@
-package com.ps.simplepapersoccer.enums
-
-/**
- * Created by Admin on 2017-04-26.
- */
+package com.ps.simplepapersoccer.data.enums
 
 enum class VictoryConditionEnum {
     Goal,

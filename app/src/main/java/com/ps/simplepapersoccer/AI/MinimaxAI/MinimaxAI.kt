@@ -2,8 +2,8 @@ package com.ps.simplepapersoccer.ai.minimaxAI
 
 import com.ps.simplepapersoccer.ai.GameAIHandler.Companion.AI_TIMEOUT_MS
 import com.ps.simplepapersoccer.ai.abstraction.IGameAI
-import com.ps.simplepapersoccer.enums.NodeTypeEnum
-import com.ps.simplepapersoccer.enums.SortOrderEnum
+import com.ps.simplepapersoccer.data.enums.NodeTypeEnum
+import com.ps.simplepapersoccer.data.enums.SortOrderEnum
 import com.ps.simplepapersoccer.gameObjects.game.GameHandler
 import com.ps.simplepapersoccer.gameObjects.move.PartialMove
 import com.ps.simplepapersoccer.gameObjects.player.abstraction.IPlayer

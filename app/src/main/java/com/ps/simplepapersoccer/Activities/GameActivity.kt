@@ -77,7 +77,7 @@ class GameActivity : AppCompatActivity() {
                 gameViewModel.gameHandler.ballNode,
                 gameViewModel.getAllNodeNeighbors(gameViewModel.gameHandler.ballNode))
 
-        if (gameViewModel.player1Arg != "Player" && gameViewModel.player2Arg != "Player") {
+        if (gameViewModel.player1Arg == "Player" || gameViewModel.player2Arg == "Player") {
             game_view?.setOnTouchListener { view, motionEvent ->
                 if (motionEvent.action == MotionEvent.ACTION_DOWN) {
                     val touchedNode = nodeCoordsToNode(motionEvent.x.roundToLong().toFloat(), motionEvent.y.roundToLong().toFloat())

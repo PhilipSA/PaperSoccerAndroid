@@ -1,21 +1,34 @@
 package com.ps.simplepapersoccer.activities
 
+import android.content.Intent
 import android.os.Bundle
 import android.preference.PreferenceFragment
+import android.widget.ArrayAdapter
+import android.widget.SpinnerAdapter
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceFragmentCompat
 
 import com.ps.simplepapersoccer.R
+import com.ps.simplepapersoccer.gameObjects.player.AIPlayer
+import kotlinx.android.synthetic.main.activity_settings.*
 
-class SettingsActivity : AppCompatActivity() {
+class SettingsActivity : AppCompatActivity(R.layout.activity_settings) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        supportFragmentManager.beginTransaction().replace(android.R.id.content, MyPreferenceFragment()).commit()
-    }
 
-    class MyPreferenceFragment : PreferenceFragmentCompat() {
-        override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
-            addPreferencesFromResource(R.xml.preferences)
+        val playerTypes = AIPlayer.allAi.plus("Player")
+
+        settings_player1_spinner.adapter = ArrayAdapter(this, R.layout.support_simple_spinner_dropdown_item, playerTypes)
+        settings_player2_spinner.adapter = ArrayAdapter(this, R.layout.support_simple_spinner_dropdown_item, playerTypes)
+
+        settings_play.setOnClickListener {
+            val intent = Intent(this, GameActivity::class.java).apply {
+                putExtra(GameActivity.ARG_PLAYER1, settings_player1_spinner.selectedItem as String)
+                putExtra(GameActivity.ARG_PLAYER2, settings_player2_spinner.selectedItem as String)
+                putExtra(GameActivity.ARG_GRID_SIZE_X, settings_grid_size_x.text.toString().toInt())
+                putExtra(GameActivity.ARG_GRID_SIZE_Y, settings_grid_size_y.text.toString().toInt())
+            }
+            startActivity(intent)
         }
     }
 }

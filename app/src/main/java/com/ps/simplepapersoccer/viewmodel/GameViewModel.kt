@@ -3,8 +3,6 @@ package com.ps.simplepapersoccer.viewmodel
 import android.graphics.Color
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.ps.simplepapersoccer.data.enums.DifficultyEnum
-import com.ps.simplepapersoccer.data.enums.GameModeEnum
 import com.ps.simplepapersoccer.gameObjects.game.GameHandler
 import com.ps.simplepapersoccer.gameObjects.game.GameViewDrawData
 import com.ps.simplepapersoccer.gameObjects.game.IGameHandlerListener
@@ -20,7 +18,11 @@ import kotlin.collections.HashSet
 
 class GameViewModel: ViewModel(), IGameHandlerListener {
     lateinit var gameHandler: GameHandler
-    lateinit var difficulty: String
+
+    lateinit var player1Arg: String
+    lateinit var player2Arg: String
+
+    val isPlayerVsAi get() = players.count { it.isAi } == 1
 
     var players = ArrayList<IPlayer>()
 
@@ -33,46 +35,19 @@ class GameViewModel: ViewModel(), IGameHandlerListener {
     override val reDrawLiveData = MutableLiveData<Boolean>()
     override val drawPartialMoveLiveData = MutableLiveData<PartialMove>()
 
-    fun setGameMode(gameMode: Int, playerName: String) {
+    fun initPlayers(playerName: String) {
         if (players.isNotEmpty()) {
             players.shuffle()
             return
         }
 
-        when (gameMode) {
-            GameModeEnum.PLAYER_VS_AI.ordinal -> players = assignPlayerAndAi(difficulty, DifficultyEnum.valueOf(difficulty), playerName)
-            GameModeEnum.MULTIPLAYER_MODE.ordinal -> {
-                players.add(Player(playerName, 1, player1Color, false))
-                players.add(Player("Player2", 2, player2Color, false))
-            }
-            else -> players = assignTwoAi(difficulty, DifficultyEnum.valueOf(difficulty))
+        if (player1Arg == "Player") players.add(Player(playerName, 1, player1Color, false)) else {
+            players.add(AIPlayer(player1Arg, 1, player1Color, true))
         }
-    }
 
-    private fun assignPlayerAndAi(difficulty: String, difficultyEnum: DifficultyEnum, playerName: String): ArrayList<IPlayer> {
-        val players = ArrayList<IPlayer>()
-        val random = Random()
-        if (random.nextBoolean()) {
-            players.add(Player(playerName, 1, player1Color, false))
-            players.add(AIPlayer(difficultyEnum, "Ai$difficulty", 2, player2Color, true))
-        } else {
-            players.add(AIPlayer(difficultyEnum, "Ai$difficulty", 1, player1Color, true))
-            players.add(Player(playerName, 2, player2Color, false))
+        if (player2Arg == "Player") players.add(Player("Player2", 2, player2Color, false)) else {
+            players.add(AIPlayer(player2Arg, 2, player2Color, true))
         }
-        return players
-    }
-
-    private fun assignTwoAi(difficulty: String, difficultyEnum: DifficultyEnum): ArrayList<IPlayer> {
-        val players = ArrayList<IPlayer>()
-        val random = Random()
-        if (random.nextBoolean()) {
-            players.add(AIPlayer(difficultyEnum, "OtherAI", 1, player1Color, true))
-            players.add(AIPlayer(difficultyEnum, "Ai$difficulty", 2, player2Color, true))
-        } else {
-            players.add(AIPlayer(difficultyEnum, "Ai$difficulty", 1, player1Color, true))
-            players.add(AIPlayer(difficultyEnum, "OtherAI", 2, player2Color, true))
-        }
-        return players
     }
 
     fun addDrawDataToQueue(linesToDraw: LinesToDraw, ballNode: Node, madeTheMove: IPlayer) {

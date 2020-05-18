@@ -15,12 +15,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.ps.simplepapersoccer.R
-import com.ps.simplepapersoccer.data.constants.StringConstants.MULTIPLAYER_MODE
-import com.ps.simplepapersoccer.data.constants.StringConstants.PREF_DIFFICULTY_LEVEL
-import com.ps.simplepapersoccer.data.constants.StringConstants.PREF_GRID_SIZE_X
 import com.ps.simplepapersoccer.data.constants.StringConstants.PREF_PLAYER_NAME
-import com.ps.simplepapersoccer.data.enums.DifficultyEnum
-import com.ps.simplepapersoccer.data.enums.GameModeEnum
 import com.ps.simplepapersoccer.data.enums.NodeTypeEnum
 import com.ps.simplepapersoccer.data.enums.VictoryConditionEnum
 import com.ps.simplepapersoccer.gameObjects.game.GameHandler
@@ -52,27 +47,28 @@ class GameActivity : AppCompatActivity() {
         gameViewModel = ViewModelProvider(this).get(GameViewModel::class.java)
 
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
-        gameViewModel.difficulty = sharedPreferences.getString(PREF_DIFFICULTY_LEVEL, DifficultyEnum.VeryHard.name)!!
+
+        gameViewModel.player1Arg = intent.getStringExtra(ARG_PLAYER1)
+        gameViewModel.player2Arg = intent.getStringExtra(ARG_PLAYER2)
+
         val playerName = sharedPreferences.getString(PREF_PLAYER_NAME, "Player")!!
 
-        val gridSizeX = sharedPreferences.getString(PREF_GRID_SIZE_X, "8")!!.toInt()
-        val gridSizeY = sharedPreferences.getString(PREF_GRID_SIZE_X, "10")!!.toInt()
-
-        val gameMode = intent.getIntExtra(MULTIPLAYER_MODE, GameModeEnum.PLAYER_VS_AI.ordinal)
+        val gridSizeX = intent.getIntExtra(ARG_GRID_SIZE_X, 8)
+        val gridSizeY = intent.getIntExtra(ARG_GRID_SIZE_Y, 10)
 
         myName = playerName
 
         player1_name!!.setTextColor(gameViewModel.player1Color)
         player2_name!!.setTextColor(gameViewModel.player2Color)
 
-        gameViewModel.setGameMode(gameMode, playerName)
+        gameViewModel.initPlayers(playerName)
 
         setPlayerNameTexts()
 
         playerActivityDataMap[gameViewModel.players[0]] = player1_name
         playerActivityDataMap[gameViewModel.players[1]] = player2_name
 
-        gameViewModel.gameHandler = GameHandler(gameViewModel, gridSizeX, gridSizeY, gameViewModel.players, gameMode)
+        gameViewModel.gameHandler = GameHandler(gameViewModel, gridSizeX, gridSizeY, gameViewModel.players)
 
         setPlayerTurnTextViewText()
 
@@ -81,7 +77,7 @@ class GameActivity : AppCompatActivity() {
                 gameViewModel.gameHandler.ballNode,
                 gameViewModel.getAllNodeNeighbors(gameViewModel.gameHandler.ballNode))
 
-        if (gameMode != GameModeEnum.AI_VS_AI.ordinal) {
+        if (gameViewModel.player1Arg != "Player" && gameViewModel.player2Arg != "Player") {
             game_view?.setOnTouchListener { view, motionEvent ->
                 if (motionEvent.action == MotionEvent.ACTION_DOWN) {
                     val touchedNode = nodeCoordsToNode(motionEvent.x.roundToLong().toFloat(), motionEvent.y.roundToLong().toFloat())
@@ -190,7 +186,7 @@ class GameActivity : AppCompatActivity() {
             }
         }
 
-        if (victory.winner.isAi && gameViewModel.gameHandler.gameMode == GameModeEnum.PLAYER_VS_AI.ordinal) {
+        if (victory.winner.isAi && gameViewModel.isPlayerVsAi) {
             fxPlayer.playSound(R.raw.failure)
         } else {
             fxPlayer.playSound(R.raw.goodresult)
@@ -221,6 +217,12 @@ class GameActivity : AppCompatActivity() {
     }
 
     companion object {
+
+        const val ARG_PLAYER1 = "player1"
+        const val ARG_PLAYER2 = "player2"
+
+        const val ARG_GRID_SIZE_X = "grid_size_x"
+        const val ARG_GRID_SIZE_Y = "grid_size_y"
 
         fun getWidth(mContext: Context): Int {
             val width: Int

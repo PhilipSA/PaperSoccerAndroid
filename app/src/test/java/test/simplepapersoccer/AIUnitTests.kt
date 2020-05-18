@@ -1,7 +1,5 @@
 package test.simplepapersoccer
 
-import com.ps.simplepapersoccer.data.enums.DifficultyEnum
-import com.ps.simplepapersoccer.data.enums.GameModeEnum
 import com.ps.simplepapersoccer.gameObjects.game.GameHandler
 import com.ps.simplepapersoccer.gameObjects.player.AIPlayer
 import com.ps.simplepapersoccer.gameObjects.player.abstraction.IPlayer

@@ -2,7 +2,6 @@ package com.ps.simplepapersoccer.gameObjects.game
 
 import com.ps.simplepapersoccer.ai.GameAIHandler
 import com.ps.simplepapersoccer.ai.abstraction.IGameAiHandlerListener
-import com.ps.simplepapersoccer.data.enums.GameModeEnum
 import com.ps.simplepapersoccer.data.enums.NodeTypeEnum
 import com.ps.simplepapersoccer.data.enums.VictoryConditionEnum
 import com.ps.simplepapersoccer.gameObjects.game.geometry.Node
@@ -10,7 +9,7 @@ import com.ps.simplepapersoccer.gameObjects.move.PartialMove
 import com.ps.simplepapersoccer.gameObjects.player.AIPlayer
 import com.ps.simplepapersoccer.gameObjects.player.abstraction.IPlayer
 
-class GameHandler(private val listener: IGameHandlerListener?, gridX: Int, gridY: Int, players: ArrayList<IPlayer>, val gameMode: Int): IGameAiHandlerListener {
+class GameHandler(private val listener: IGameHandlerListener?, gridX: Int, gridY: Int, players: ArrayList<IPlayer>): IGameAiHandlerListener {
 
     private val player1: IPlayer = players[0]
     private val player2: IPlayer = players[1]
@@ -42,7 +41,7 @@ class GameHandler(private val listener: IGameHandlerListener?, gridX: Int, gridY
             winner(getWinner(ballNode)!!)
             return
         }
-        if (currentPlayersTurn.isAi && gameMode != GameModeEnum.MULTIPLAYER_MODE.ordinal) {
+        if (currentPlayersTurn.isAi) {
             GameAIHandler(this).makeAIMove(currentPlayersTurn as AIPlayer, this)
         }
     }

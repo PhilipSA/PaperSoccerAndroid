@@ -25,14 +25,6 @@
 
     <com.google.android.material.button.MaterialButton
         style="@style/MainMenuButton"
-        android:id="@+id/settings_button"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:onClick="settingsClick"
-        android:text="@string/settings_button_text" />
-
-    <com.google.android.material.button.MaterialButton
-        style="@style/MainMenuButton"
         android:id="@+id/howToPlayButton"
         android:layout_width="match_parent"
         android:layout_height="50dp"

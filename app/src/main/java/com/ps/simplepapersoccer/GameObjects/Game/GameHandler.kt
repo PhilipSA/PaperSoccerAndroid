@@ -8,8 +8,9 @@ import com.ps.simplepapersoccer.gameObjects.game.geometry.Node
 import com.ps.simplepapersoccer.gameObjects.move.PartialMove
 import com.ps.simplepapersoccer.gameObjects.player.AIPlayer
 import com.ps.simplepapersoccer.gameObjects.player.abstraction.IPlayer
+import kotlinx.coroutines.CoroutineDispatcher
 
-class GameHandler(private val listener: IGameHandlerListener?, gridX: Int, gridY: Int, players: ArrayList<IPlayer>): IGameAiHandlerListener {
+class GameHandler(private val listener: IGameHandlerListener?, gridX: Int, gridY: Int, players: ArrayList<IPlayer>, private val dispatcher: CoroutineDispatcher): IGameAiHandlerListener {
 
     private val player1: IPlayer = players[0]
     private val player2: IPlayer = players[1]
@@ -42,7 +43,7 @@ class GameHandler(private val listener: IGameHandlerListener?, gridX: Int, gridY
             return
         }
         if (currentPlayersTurn.isAi) {
-            GameAIHandler(this).makeAIMove(currentPlayersTurn as AIPlayer, this)
+            GameAIHandler(this, dispatcher).makeAIMove(currentPlayersTurn as AIPlayer, this)
         }
     }
 

@@ -10,7 +10,7 @@ import java.io.Serializable
 class AIPlayer(playerName: String, playerNumber: Int, playerColor: Int, isAi: Boolean) :
         IPlayer(playerName, playerNumber, playerColor, isAi), Serializable {
 
-    var gameAI: IGameAI = when (playerName) {
+    val gameAI: IGameAI = when (playerName) {
         EuclideanAI::class.java.simpleName -> EuclideanAI()
         MinimaxAI::class.java.simpleName -> MinimaxAI(AI_TIMEOUT_MS)
         else -> {

@@ -11,13 +11,13 @@ import java.io.ObjectOutputStream
 import java.io.Serializable
 import java.lang.Exception
 
-class GameAIHandler(private val aiHandlerListener: IGameAiHandlerListener) {
+class GameAIHandler(private val aiHandlerListener: IGameAiHandlerListener, private val dispatcher: CoroutineDispatcher) {
     private var aiTimeOut = false
 
     fun makeAIMove(aiPlayer : AIPlayer, gameHandler: GameHandler) {
         aiTimeOut = false
 
-        CoroutineScope(Dispatchers.IO).launch {
+        CoroutineScope(dispatcher).launch {
             val job = launch {
                 delay(AI_TIMEOUT_MS)
                 aiTimeOut = true

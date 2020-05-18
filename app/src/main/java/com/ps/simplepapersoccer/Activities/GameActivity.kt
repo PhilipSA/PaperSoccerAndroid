@@ -30,6 +30,7 @@ import com.ps.simplepapersoccer.gameObjects.player.abstraction.IPlayer
 import com.ps.simplepapersoccer.sound.FXPlayer
 import com.ps.simplepapersoccer.viewmodel.GameViewModel
 import kotlinx.android.synthetic.main.activity_game.*
+import kotlinx.coroutines.Dispatchers
 import kotlin.math.roundToLong
 
 class GameActivity : AppCompatActivity() {
@@ -68,7 +69,7 @@ class GameActivity : AppCompatActivity() {
         playerActivityDataMap[gameViewModel.players[0]] = player1_name
         playerActivityDataMap[gameViewModel.players[1]] = player2_name
 
-        gameViewModel.gameHandler = GameHandler(gameViewModel, gridSizeX, gridSizeY, gameViewModel.players)
+        gameViewModel.gameHandler = GameHandler(gameViewModel, gridSizeX, gridSizeY, gameViewModel.players, Dispatchers.Default)
 
         setPlayerTurnTextViewText()
 

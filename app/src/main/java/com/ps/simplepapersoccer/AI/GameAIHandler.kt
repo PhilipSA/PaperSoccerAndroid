@@ -1,5 +1,6 @@
 package com.ps.simplepapersoccer.ai
 
+import android.os.Handler
 import com.ps.simplepapersoccer.ai.abstraction.IGameAiHandlerListener
 import com.ps.simplepapersoccer.gameObjects.game.GameHandler
 import com.ps.simplepapersoccer.gameObjects.player.AIPlayer
@@ -13,6 +14,7 @@ import java.lang.Exception
 
 class GameAIHandler(private val aiHandlerListener: IGameAiHandlerListener, private val dispatcher: CoroutineDispatcher) {
     private var aiTimeOut = false
+    private val handler = Handler()
 
     fun makeAIMove(aiPlayer : AIPlayer, gameHandler: GameHandler) {
         aiTimeOut = false
@@ -36,7 +38,9 @@ class GameAIHandler(private val aiHandlerListener: IGameAiHandlerListener, priva
             throw Exception("The ai modified the GameHandler without reverting all changes")
         }
 
-        aiHandlerListener.aiMove(aiMove, aiTimeOut)
+        handler.post {
+            aiHandlerListener.aiMove(aiMove, aiTimeOut)
+        }
     }
 
     companion object {

@@ -33,7 +33,7 @@ class GameHandler(private val listener: IGameHandlerListener?, gridX: Int, gridY
         gameBoard = GameBoard(gridX, gridY)
         player1.goal = gameBoard.goal1
         player2.goal = gameBoard.goal2
-        listener?.reDrawLiveData?.postValue(true)
+        listener?.reDrawLiveData?.value = true
     }
 
     fun updateGameState() {
@@ -70,7 +70,7 @@ class GameHandler(private val listener: IGameHandlerListener?, gridX: Int, gridY
 
     private fun makeMove(partialMove: PartialMove) {
         makePartialMove(partialMove)
-        listener?.drawPartialMoveLiveData?.postValue(partialMove)
+        listener?.drawPartialMoveLiveData?.value = partialMove
         ++numberOfTurns
         updateGameState()
     }
@@ -107,7 +107,7 @@ class GameHandler(private val listener: IGameHandlerListener?, gridX: Int, gridY
 
     private fun winner(victory: Victory) {
         victory.winner.score += 1
-        listener?.winnerLiveData?.postValue(victory)
+        listener?.winnerLiveData?.value = victory
     }
 
     fun getOpponent(myPlayer: IPlayer): IPlayer {

@@ -51,7 +51,7 @@ class GameViewModel: ViewModel(), IGameHandlerListener {
     }
 
     fun addDrawDataToQueue(linesToDraw: LinesToDraw, ballNode: Node, madeTheMove: IPlayer) {
-        executeUpdateGameViewTaskLiveData.postValue(GameViewDrawData(linesToDraw, madeTheMove, gameHandler.currentPlayersTurn, ballNode, getAllNodeNeighbors(ballNode)))
+        executeUpdateGameViewTaskLiveData.value = GameViewDrawData(linesToDraw, madeTheMove, gameHandler.currentPlayersTurn, ballNode, getAllNodeNeighbors(ballNode))
     }
 
     fun getAllNodeNeighbors(node: Node): HashSet<Node> {
@@ -59,6 +59,6 @@ class GameViewModel: ViewModel(), IGameHandlerListener {
     }
 
     fun updatePlayerTurnText() {
-        playerTurnTextLiveData.postValue(true)
+        playerTurnTextLiveData.value = true
     }
 }

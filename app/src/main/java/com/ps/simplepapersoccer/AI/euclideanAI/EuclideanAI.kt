@@ -5,6 +5,7 @@ import com.ps.simplepapersoccer.gameObjects.game.GameHandler
 import com.ps.simplepapersoccer.gameObjects.move.PartialMove
 import com.ps.simplepapersoccer.helpers.PathFindingHelper
 
+//Dumb AI to use as test opponent
 class EuclideanAI : IGameAI {
 
     override suspend fun makeMove(gameHandler: GameHandler): PartialMove {

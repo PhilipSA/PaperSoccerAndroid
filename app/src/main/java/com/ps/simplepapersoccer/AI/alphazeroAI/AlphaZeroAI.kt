@@ -179,7 +179,9 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
         private fun generateNetwork(genome: Genome) {
             val network = Network(hashMapOf())
 
-            network.neurons[0] = newNeuron()
+            for ((i, _) in inputs.withIndex()) {
+                network.neurons[i] = newNeuron()
+            }
 
             for ((index, _) in outputs.withIndex()) {
                 network.neurons[MAX_NODES + index] = newNeuron()
@@ -681,7 +683,7 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
         private fun initPool() {
             pool = newPool()
 
-            loadFile()
+            //loadFile()
 
             for (x in 0..POPULATION) {
                 addToSpecies(basicGenome())
@@ -789,9 +791,9 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
         }
 
         private fun writeFile() {
-            val file = File(context.cacheDir, FILE_NAME)
+/*            val file = File(context.cacheDir, FILE_NAME)
             file.createNewFile()
-            file.writeText(Gson().toJson(pool))
+            file.writeText(Gson().toJson(pool))*/
         }
 
         private fun loadFile() {

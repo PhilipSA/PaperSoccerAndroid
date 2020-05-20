@@ -197,7 +197,7 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
                     }
                     val neuron = network.neurons[gene.out]
                     neuron!!.incoming.add(gene)
-                    if (network.neurons.get(gene.into) == null) {
+                    if (network.neurons[gene.into] == null) {
                         network.neurons[gene.into] = newNeuron()
                     }
                 }
@@ -228,7 +228,7 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
 
             val validOutputs = mutableListOf<PossibleMove>()
 
-            for ((index, x) in outputs.withIndex()) {
+            for ((index, _) in outputs.withIndex()) {
                 val move = outputs.toList()[index]
 
                 if (network.neurons[MAX_NODES + index]?.value ?: 0.0 > 0) {
@@ -301,7 +301,7 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
             val count = neurons.size
             var n = if (count <= 1) 1 else Random.nextInt(1, count)
 
-            for ((i, x) in outputs.withIndex()) {
+            for ((i, _) in outputs.withIndex()) {
                 n -= 1
                 if (n == 0) return i
             }

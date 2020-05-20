@@ -16,8 +16,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.setMain
 import org.junit.Before
 import org.junit.Test
-import org.mockito.ArgumentMatchers.anyLong
-import org.mockito.Mockito.`when`
 
 class AIUnitTests {
     private lateinit var gameHandler: GameHandler

@@ -795,10 +795,15 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
 
         private fun loadFile() {
             val file = File(context.cacheDir, FILE_NAME)
-            pool = Gson().fromJson(file.readText(), Pool::class.java)
 
-            while (fitnessAlreadyMeasured()) { nextGenome() }
-            initRun()
+            if (file.exists()) {
+                pool = Gson().fromJson(file.readText(), Pool::class.java)
+
+                while (fitnessAlreadyMeasured()) {
+                    nextGenome()
+                }
+                initRun()
+            }
         }
     }
 }

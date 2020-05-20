@@ -37,6 +37,8 @@ dependencies {
     implementation("com.google.android.material:material:1.1.0")
     implementation("com.google.code.gson:gson:2.8.6")
 
+    testImplementation("androidx.test:core:1.2.0")
+    testImplementation("org.robolectric:robolectric:4.3.1")
     testImplementation("junit:junit:4.13")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.3.6")
     testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0")

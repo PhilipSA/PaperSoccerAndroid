@@ -297,7 +297,7 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
             }
 
             val count = neurons.size
-            var n = Random.nextInt(1, count)
+            var n = if (count <= 1) 1 else Random.nextInt(1, count)
 
             for ((i, x) in outputs.withIndex()) {
                 n -= 1
@@ -550,7 +550,7 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
                 total += it.globalRank
             }
 
-            species.averageFitness = total / species.genomes.size
+            species.averageFitness = if (species.genomes.size == 0) 0 else total / species.genomes.size
         }
 
         private fun totalAverageFitness(): Int {
@@ -597,7 +597,7 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
             pool.species.forEach {
                 val sorted = it.genomes.sortedBy { it.fitness }
 
-                if (sorted.get(0).fitness > it.topFitness) {
+                if (sorted.getOrNull(0)?.fitness ?: 0.0 > it.topFitness) {
                     it.topFitness = sorted.get(0).fitness
                     it.staleness = 0
                 } else {
@@ -663,8 +663,10 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
             cullSpecies(true)
 
             while (children.size + pool.species.size < POPULATION) {
-                val species = pool.species.random()
-                children.add(breedChild(species))
+                if (pool.species.isNotEmpty()) {
+                    val species = pool.species.random()
+                    children.add(breedChild(species))
+                }
             }
 
             children.forEach {
@@ -705,7 +707,7 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
         private fun nextGenome() {
             pool.currentGenome = pool.currentGenome + 1
 
-            if (pool.currentGenome > pool.species[pool.currentSpecies].genomes.size) {
+            if (pool.currentGenome > pool.species.getOrNull(pool.currentSpecies)?.genomes?.size ?: 0) {
                 pool.currentGenome = 0
                 pool.currentSpecies = pool.currentSpecies + 1
 
@@ -717,8 +719,8 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
         }
 
         private fun fitnessAlreadyMeasured(): Boolean {
-            val species = pool.species[pool.currentSpecies]
-            val genome = species.genomes.getOrNull(pool.currentGenome)
+            val species = pool.species.getOrNull(pool.currentSpecies)
+            val genome = species?.genomes?.getOrNull(pool.currentGenome)
 
             return genome?.fitness != 0.0
         }
@@ -745,24 +747,23 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
                 }
             }
 
-            println("Max fitness: ${pool.maxFitness} Gen ${pool.generation} species ${pool.species.sumBy { it.averageFitness }} genome: ${pool.currentGenome}")
-
             gameHandler.undoLastMove()
 
             return PartialMove(current.oldNode, current.newNode, aiPlayer)
         }
 
         fun cutOff() {
-            val species = pool.species[pool.currentSpecies]
-            val genome = species.genomes[pool.currentGenome]
+            val species = pool.species.getOrNull(pool.currentSpecies)
+            val genome = species?.genomes?.getOrNull(pool.currentGenome)
 
             var fitness = fitnessEvaluation(gameHandler)
 
             if (fitness == 0.0) fitness = -1.0
 
-            genome.fitness = fitness
+            genome?.fitness = fitness
 
             if (fitness > pool.maxFitness) {
+                println("Max fitness: ${pool.maxFitness} Gen ${pool.generation} species ${pool.species.sumBy { it.averageFitness }} genome: ${pool.currentGenome}")
                 pool.maxFitness = fitness
                 writeFile()
             }

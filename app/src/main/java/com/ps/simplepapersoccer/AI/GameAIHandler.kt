@@ -12,11 +12,12 @@ import java.io.ObjectOutputStream
 import java.io.Serializable
 import java.lang.Exception
 
-class GameAIHandler(private val aiHandlerListener: IGameAiHandlerListener, private val dispatcher: CoroutineDispatcher) {
+class GameAIHandler(private val aiHandlerListener: IGameAiHandlerListener,
+                    private val dispatcher: CoroutineDispatcher,
+                    private val handler: Handler) {
     private var aiTimeOut = false
-    private val handler = Handler()
 
-    fun makeAIMove(aiPlayer : AIPlayer, gameHandler: GameHandler) {
+    fun makeAIMove(aiPlayer: AIPlayer, gameHandler: GameHandler) {
         aiTimeOut = false
 
         CoroutineScope(dispatcher).launch {
@@ -30,7 +31,7 @@ class GameAIHandler(private val aiHandlerListener: IGameAiHandlerListener, priva
         }
     }
 
-    private suspend fun makeAIMoveAsync(aiPlayer : AIPlayer, gameHandler: GameHandler) {
+    private suspend fun makeAIMoveAsync(aiPlayer: AIPlayer, gameHandler: GameHandler) {
         val gameHandlerHashCode = gameHandler.hashCode()
         val aiMove = aiPlayer.gameAI.makeMove(gameHandler)
 

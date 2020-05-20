@@ -26,7 +26,6 @@ class FXPlayer(private val context: Context) {
         }
 
         soundMap = HashMap()
-        // fill your sounds
         soundMap[R.raw.bounce] = soundPool.load(context, R.raw.bounce, 1)
         soundMap[R.raw.soccerkick] = soundPool.load(context, R.raw.soccerkick, 2)
         soundMap[R.raw.failure] = soundPool.load(context, R.raw.failure, 1)

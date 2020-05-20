@@ -118,7 +118,6 @@ class GameBoard(private val gridSizeX: Int, private val gridSizeY: Int) {
         ballNode = partialMove.newNode
     }
 
-    //Returns the node with the XY coordinates
     fun findNodeByCoords(point: TwoDimensionalPoint): Node? {
         return nodeHashSet.firstOrNull { it.coords == point }
     }

@@ -1,27 +1,36 @@
-package com.ps.simplepapersoccer.AI.alphazeroAI
+package com.ps.simplepapersoccer.ai.alphazeroAI
 
-import com.ps.simplepapersoccer.ai.GameAIHandler
 import com.ps.simplepapersoccer.ai.abstraction.IGameAI
-import com.ps.simplepapersoccer.gameObjects.game.GameBoard
+import com.ps.simplepapersoccer.data.enums.NodeTypeEnum
 import com.ps.simplepapersoccer.gameObjects.game.GameHandler
 import com.ps.simplepapersoccer.gameObjects.move.PartialMove
-import kotlin.math.exp
-import kotlin.math.max
+import com.ps.simplepapersoccer.gameObjects.move.PossibleMove
+import com.ps.simplepapersoccer.gameObjects.player.AIPlayer
+import com.ps.simplepapersoccer.helpers.PathFindingHelper
+import kotlin.math.*
 import kotlin.random.Random
 
-class AlphaZeroAI(private val timeLimitMilliSeconds: Long = GameAIHandler.AI_TIMEOUT_MS) : IGameAI {
-    override suspend fun makeMove(gameHandler: GameHandler): PartialMove {
+class AlphaZeroAI(private val aiPlayer: AIPlayer) : IGameAI {
 
+    private var neuralNetwork: NeuralNetwork? = null
+
+    override suspend fun makeMove(gameHandler: GameHandler): PartialMove {
+        if (neuralNetwork == null) {
+            neuralNetwork = NeuralNetwork(gameHandler, aiPlayer)
+        }
+        neuralNetwork?.gameHandler =gameHandler
+
+        return neuralNetwork!!.nextMove()
     }
 
-    private class DoBeLearnin(private val gameHandler: GameHandler) {
+    private class NeuralNetwork(var gameHandler: GameHandler, private val aiPlayer: AIPlayer) {
         companion object {
-            private val population = 300
-            private val deltaDisjoint = 2.0
-            private val deltaWeights = 0.4
-            private val deltaThreshold = 1.0
+            private const val POPULATION = 300
+            private const val DELTA_DISJOINT = 2.0
+            private const val DELTA_WEIGHTS = 0.4
+            private const val DELTA_THRESHOLD = 1.0
 
-            private val staleSpecies = 15
+            private const val STALE_SPECIES = 15
 
             private const val MUTATE_CONNECTION_CHANCE = 0.25
             private const val PERTURB_CHANCE = 0.90
@@ -35,15 +44,16 @@ class AlphaZeroAI(private val timeLimitMilliSeconds: Long = GameAIHandler.AI_TIM
 
             private val timeoutConstant = 20
 
-            private val maxNodes = 1000000
+            private const val MAX_NODES = 1000000
         }
 
-        data class Neuron(
+        private data class Neuron(
                 val incoming: MutableList<Gene>,
                 var value: Double
         )
 
-        data class MutationRates(
+        private data class MutationRates(
+                var mutation: Double = 0.0,
                 val connections: Double = MUTATE_CONNECTION_CHANCE,
                 val link: Double = LINK_MUTATION_CHANCE,
                 val bias: Double = BIAS_MUTATION_CHANCE,
@@ -53,60 +63,71 @@ class AlphaZeroAI(private val timeLimitMilliSeconds: Long = GameAIHandler.AI_TIM
                 val step: Double = STEP_SIZE
         )
 
-        data class Genome(
+        private data class Genome(
                 val genes: MutableList<Gene>,
-                val fitness: Int,
+                var fitness: Double,
                 val adjustedFitness: Int,
-                var network: Network?,
+                var network: Network,
                 var maxNeuron: Int,
-                val globalRank: Int,
+                var globalRank: Int,
                 val mutationRates: MutationRates
         )
 
-        data class Species(
-                val topFitness: Int,
-                val staleness: Int,
-                val genomes: HashSet<Genome>,
-                val averageFitness: Int
+        private data class Species(
+                var topFitness: Double,
+                var staleness: Int,
+                val genomes: MutableList<Genome>,
+                var averageFitness: Int
         )
 
-        data class Pool(
-                val species: HashSet<Species>,
-                val generation: Int,
-                val currentSpecies: Int,
-                val currentGenome: Int,
-                val maxFitness: Int,
-                var innovation = HashSet<>
+        private data class Pool(
+                var species: MutableList<Species>,
+                var generation: Int,
+                var currentSpecies: Int,
+                var currentGenome: Int,
+                var maxFitness: Double,
+                var innovation: Int
         )
 
-        data class Gene(
-                val into: Int,
-                val out: Int,
+        private data class Gene(
+                var into: Int,
+                var out: Int,
                 var weight: Double,
-                val enabled: Boolean,
-                val innovation: Int
+                var enabled: Boolean,
+                var innovation: Int
         )
 
-        data class Network(
+        private data class Network(
                 val neurons: HashMap<Int, Neuron>
         )
 
+        lateinit var pool: Pool
         private val outputs get() = gameHandler.gameBoard.allPossibleMovesFromNode(gameHandler.ballNode)
-        private val inputs = hashSetOf(gameHandler.gameBoard.hashCode())
+        private val inputs = gameHandler.gameBoard.nodeHashSet
+
+        init {
+            initPool()
+        }
 
         private fun sigmoid(x: Double): Double {
             return 2 / (1 + exp(-4.9 * x)) - 1
         }
 
-        val pool = Pool()
-
-        private fun newInnovation() {
+        private fun newInnovation(): Int {
             pool.innovation = pool.innovation + 1
             return pool.innovation
         }
 
+        private fun newPool(): Pool {
+            return Pool(mutableListOf(), 0, 0, 0, 0.0, 0)
+        }
+
+        private fun newSpecies(): Species {
+            return Species(0.0, 0, mutableListOf(), 0)
+        }
+
         private fun newGenome(): Genome {
-            return Genome(arrayListOf(), 0, 0, null, 0, 0, MutationRates())
+            return Genome(arrayListOf(), 0.0, 0, Network(hashMapOf()), 0, 0, MutationRates())
         }
 
         private fun copyGenome(genome: Genome): Genome {
@@ -120,7 +141,10 @@ class AlphaZeroAI(private val timeLimitMilliSeconds: Long = GameAIHandler.AI_TIM
         }
 
         private fun basicGenome(): Genome {
-            return Genome(maxNeuron = inputs)
+            val genome = newGenome()
+            genome.maxNeuron = inputs.size
+            mutate(genome)
+            return genome
         }
 
         private fun newGene(): Gene {
@@ -136,7 +160,7 @@ class AlphaZeroAI(private val timeLimitMilliSeconds: Long = GameAIHandler.AI_TIM
         }
 
         private fun newNeuron(): Neuron {
-            return Neuron(hashSetOf(), 0.0)
+            return Neuron(mutableListOf(), 0.0)
         }
 
         private fun generateNetwork(genome: Genome) {
@@ -144,21 +168,21 @@ class AlphaZeroAI(private val timeLimitMilliSeconds: Long = GameAIHandler.AI_TIM
 
             network.neurons[0] = newNeuron()
 
-            for ((index, x) in outputs.withIndex()) {
-                network.neurons[maxNodes + index] = newNeuron()
+            for ((index, _) in outputs.withIndex()) {
+                network.neurons[MAX_NODES + index] = newNeuron()
             }
 
             val sortedGenomes = genome.genes.sortedBy { it.out }
 
-            for ((index, x) in sortedGenomes.withIndex()) {
+            for ((index, _) in sortedGenomes.withIndex()) {
                 val gene = genome.genes[index]
                 if (gene.enabled) {
-                    if (network.neurons[gene.out] == null) {
+                    if (network.neurons.get(gene.out) == null) {
                         network.neurons[gene.out] = newNeuron()
                     }
                     val neuron = network.neurons[gene.out]
-                    neuron?.incoming?.add(gene)
-                    if (network.neurons[gene.into] == null) {
+                    neuron!!.incoming.add(gene)
+                    if (network.neurons.get(gene.into) == null) {
                         network.neurons[gene.into] = newNeuron()
                     }
                 }
@@ -167,27 +191,37 @@ class AlphaZeroAI(private val timeLimitMilliSeconds: Long = GameAIHandler.AI_TIM
             genome.network = network
         }
 
-        private fun evaluateNetwork(network: Network, input: GameBoard) {
-            inputs.add(input.hashCode())
-
+        private fun evaluateNetwork(network: Network): MutableList<PossibleMove> {
             for ((index, x) in inputs.withIndex()) {
-                network.neurons[index]?.value = x
+                network.neurons[index]?.value = x.hashCode().toDouble()
             }
 
-            for ((i, neuron) in network.neurons.entries.withIndex()) {
+            for ((i, neuron) in network.neurons) {
                 var sum = 0.0
 
-                for ((j, x) in neuron.value.incoming) {
-                    val incoming = neuron.value.incoming[j]
-                    val other = network.neurons[incoming.into]!!
+                for ((j, x) in neuron.incoming) {
+                    val incoming = neuron.incoming[j]
+                    val other = network.neurons[incoming.into]
 
-                    sum += incoming.weight * other.value
+                    sum += incoming.weight * other!!.value
                 }
 
-                if (neuron.value.incoming > 0) {
-                    neuron.value.value = sigmoid(sum)
+                if (neuron.incoming.size > 0) {
+                    neuron.value = sigmoid(sum)
                 }
             }
+
+            val validOutputs = mutableListOf<PossibleMove>()
+
+            for ((index, x) in outputs.withIndex()) {
+                val move = outputs.toList()[index]
+
+                if (network.neurons[MAX_NODES + index]?.value ?: 0.0 > 0) {
+                    validOutputs.add(move)
+                }
+            }
+
+            return if (validOutputs.isNotEmpty()) validOutputs else outputs.toMutableList()
         }
 
         private fun crossover(genome1: Genome, genome2: Genome): Genome {
@@ -221,28 +255,25 @@ class AlphaZeroAI(private val timeLimitMilliSeconds: Long = GameAIHandler.AI_TIM
             }
 
             child.maxNeuron = max(genome1.maxNeuron, genome2.maxNeuron)
-
-            for ((mutation, rate) in genome1.mutationRates) {
-                child.mutationRates[mutation] = rate
-            }
+            child.mutationRates.mutation = genome1.mutationRates.mutation
 
             return child
         }
 
         private fun randomNeuron(genes: MutableList<Gene>, nonInput: Boolean): Int {
-            val neurons = mutableListOf<Boolean>()
+            val neurons = hashMapOf<Int, Boolean>()
 
             if (nonInput.not()) {
-                for ((i, x) in inputs.withIndex()) {
+                for ((i, _) in inputs.withIndex()) {
                     neurons[i] = true
                 }
             }
 
-            for ((i, x) in outputs.withIndex()) {
-                neurons[maxNodes+i] = true
+            for ((i, _) in outputs.withIndex()) {
+                neurons[MAX_NODES + i] = true
             }
 
-            for ((i, x) in genes) {
+            for ((i, _) in genes) {
                 if (nonInput.not() || genes[i].into > inputs.size) {
                     neurons[genes[i].into] = true
                 }
@@ -281,11 +312,444 @@ class AlphaZeroAI(private val timeLimitMilliSeconds: Long = GameAIHandler.AI_TIM
                 val gene = genome.genes[i]
 
                 if (Random.nextDouble(0.0, 1.0) < PERTURB_CHANCE) {
-                    gene.weight = gene.weight + Random.nextDouble(0.0, 1.0) * step*2 - step
+                    gene.weight = gene.weight + Random.nextDouble(0.0, 1.0) * step * 2 - step
                 } else {
-                    gene.weight = Random.nextDouble(0.0, 1.0)*4 - 2
+                    gene.weight = Random.nextDouble(0.0, 1.0) * 4 - 2
                 }
             }
         }
+
+        //TODO: Figure out what the hell inputs is supposed to be
+        private fun linkMutate(genome: Genome, forceBias: Boolean) {
+            var neuron1 = randomNeuron(genome.genes, false)
+            var neuron2 = randomNeuron(genome.genes, true)
+
+            val newLink = newGene()
+
+            if (neuron1 <= inputs.size && neuron2 <= inputs.size) {
+                return
+            }
+
+            if (neuron2 <= inputs.size) {
+                val temp = neuron1
+                neuron1 = neuron2
+                neuron2 = temp
+            }
+
+            newLink.into = neuron1
+            newLink.out = neuron2
+
+            if (forceBias) newLink.into = inputs.size
+
+            if (containsLink(genome.genes, newLink)) return
+
+            newLink.innovation = newInnovation()
+            newLink.weight = Random.nextDouble(0.0, 1.0) * 4 - 2
+
+            genome.genes.add(newLink)
+        }
+
+        private fun nodeMutate(genome: Genome) {
+            if (genome.genes.size == 0) return
+
+            ++genome.maxNeuron
+
+            val gene = genome.genes[Random.nextInt(0, genome.genes.size)]
+
+            if (gene.enabled.not()) return
+
+            gene.enabled = false
+
+            val gene1 = copyGene(gene)
+            gene1.out = genome.maxNeuron
+            gene1.weight = 1.0
+            gene1.innovation = newInnovation()
+            gene1.enabled = true
+            genome.genes.add(gene1)
+
+            val gene2 = copyGene(gene)
+            gene2.into = genome.maxNeuron
+            gene2.innovation = newInnovation()
+            gene2.enabled = true
+            genome.genes.add(gene2)
+        }
+
+        private fun enableDisableMutate(genome: Genome, enable: Boolean) {
+            val candidates = mutableListOf<Gene>()
+
+            for ((i, gene) in genome.genes.withIndex()) {
+                if (gene.enabled == enable.not()) {
+                    candidates.add(gene)
+                }
+            }
+
+            if (candidates.size == 0) return
+
+            val gene = candidates[Random.nextInt(0, candidates.size)]
+            gene.enabled = !gene.enabled
+        }
+
+        //TODO: What is MutationRates type?
+        private fun mutate(genome: Genome) {
+            if (Random.nextInt(1, 2) == 1) {
+                genome.mutationRates.mutation = 0.95 * genome.mutationRates.mutation
+            } else {
+                genome.mutationRates.mutation = 1.05263 * genome.mutationRates.mutation
+            }
+
+            if (Random.nextDouble(0.0, 1.0) < genome.mutationRates.mutation) {
+                pointMutate(genome)
+            }
+
+            var p = genome.mutationRates.link
+
+            while(p > 0 ){
+                if (Random.nextDouble(0.0, 1.0) < p) {
+                    linkMutate(genome, false)
+                }
+                --p
+            }
+
+            p = genome.mutationRates.bias
+            while(p > 0 ){
+                if (Random.nextDouble(0.0, 1.0) < p) {
+                    linkMutate(genome, true)
+                }
+                --p
+            }
+
+            p = genome.mutationRates.node
+            while(p > 0 ){
+                if (Random.nextDouble(0.0, 1.0) < p) {
+                    nodeMutate(genome)
+                }
+                --p
+            }
+
+
+            p = genome.mutationRates.enable
+            while(p > 0 ){
+                if (Random.nextDouble(0.0, 1.0) < p) {
+                    enableDisableMutate(genome, true)
+                }
+                --p
+            }
+
+            p = genome.mutationRates.disable
+            while(p > 0 ){
+                if (Random.nextDouble(0.0, 1.0) < p) {
+                    enableDisableMutate(genome, false)
+                }
+                --p
+            }
+        }
+
+        private fun disjoint(genes1: List<Gene>, genes2: List<Gene>): Int {
+            val i1 = mutableListOf<Boolean>()
+
+            genes1.forEach {
+                i1[it.innovation] = true
+            }
+
+            val i2 = mutableListOf<Boolean>()
+
+            genes2.forEach {
+                i1[it.innovation] = true
+            }
+
+            var disjointGenes = 0
+
+            genes1.forEach {
+                if (i2[it.innovation].not()) {
+                    ++disjointGenes
+                }
+            }
+
+            genes2.forEach {
+                if (i1[it.innovation].not()) {
+                    ++disjointGenes
+                }
+            }
+
+            val n = max(genes1.size, genes2.size)
+
+            return try {
+                disjointGenes / n
+            } catch (e: ArithmeticException) {
+                Int.MAX_VALUE
+            }
+        }
+
+        private fun weights(genes1: List<Gene>, genes2: List<Gene>): Int {
+            val i2 = mutableListOf<Gene>()
+
+            genes2.forEach {
+                i2[it.innovation] = it
+            }
+
+            var sum = 0
+            var coincident = 0
+
+            genes1.forEach {
+                if (i2.getOrNull(it.innovation) != null) {
+                    val gene2 = i2[it.innovation]
+                    sum = (sum + abs(it.weight - gene2.weight)).roundToInt()
+                    ++coincident
+                }
+            }
+
+            return try {
+                sum / coincident
+            } catch (e: ArithmeticException) {
+                Int.MAX_VALUE
+            }
+        }
+
+        private fun sameSpecies(genome1: Genome, genome2: Genome): Boolean {
+            val dd = DELTA_DISJOINT * disjoint(genome1.genes, genome2.genes)
+            val dw = DELTA_WEIGHTS * weights(genome1.genes, genome2.genes)
+            return dd + dw < DELTA_THRESHOLD
+        }
+
+        private fun rankGlobally() {
+            val global = mutableListOf<Genome>()
+
+            pool.species.forEach {
+                it.genomes.forEach {
+                    global.add(it)
+                }
+            }
+
+            global.sortBy { it.fitness }
+
+            for ((i, gene) in global.withIndex()) {
+                global[i].globalRank = i
+            }
+        }
+
+        private fun calculateAverageFitness(species: Species) {
+            var total = 0
+
+            species.genomes.forEach {
+                total += it.globalRank
+            }
+
+            species.averageFitness = total / species.genomes.size
+        }
+
+        private fun totalAverageFitness(): Int {
+            var total = 0
+
+            pool.species.forEach {
+                total += it.averageFitness
+            }
+
+            return total
+        }
+
+        private fun cullSpecies(cutToOne: Boolean) {
+            pool.species.forEach {
+                it.genomes.sortedByDescending { it.fitness }
+
+                var remaining = ceil((it.genomes.size / 2).toDouble()).toInt()
+                if (cutToOne) remaining = 1
+
+                while (it.genomes.size > remaining) {
+                    val last = it.genomes.last()
+                    it.genomes.remove(last)
+                }
+            }
+        }
+
+        private fun breedChild(species: Species): Genome {
+            val child = if (Random.nextDouble(0.0, 1.0) < CROSSOVER_CHANCE) {
+                val g1 = species.genomes.random()
+                val g2 = species.genomes.random()
+                crossover(g1, g2)
+            } else {
+                val g = species.genomes.random()
+                copyGenome(g)
+            }
+
+            mutate(child)
+            return child
+        }
+
+        private fun removeStaleSpecies() {
+            val survived = mutableListOf<Species>()
+
+            pool.species.forEach {
+                val sorted = it.genomes.sortedBy { it.fitness }
+
+                if (sorted.get(0).fitness > it.topFitness) {
+                    it.topFitness = sorted.get(0).fitness
+                    it.staleness = 0
+                } else {
+                    ++it.staleness
+                }
+
+                if (it.staleness < STALE_SPECIES || it.topFitness >= pool.maxFitness) {
+                    survived.add(it)
+                }
+            }
+
+            pool.species = survived
+        }
+
+        private fun removeWeakSpecies() {
+            val survived = mutableListOf<Species>()
+
+            val sum = totalAverageFitness()
+
+            pool.species.forEach {
+                val breed = floor((it.averageFitness / sum * POPULATION).toDouble())
+                if (breed > 1) survived.add(it)
+            }
+
+            pool.species = survived
+        }
+
+        private fun addToSpecies(child: Genome) {
+            var foundSpecies = false
+            pool.species.forEach {
+                if (foundSpecies.not() && sameSpecies(child, it.genomes.first())) {
+                    it.genomes.add(child)
+                    foundSpecies = true
+                }
+            }
+
+            if (foundSpecies.not()) {
+                val childSpecies = newSpecies()
+                childSpecies.genomes.add(child)
+                pool.species.add(childSpecies)
+            }
+        }
+
+        //TODO: write to file
+        private fun newGeneration() {
+            cullSpecies(false)
+            rankGlobally()
+            removeStaleSpecies()
+            rankGlobally()
+            pool.species.forEach {
+                calculateAverageFitness(it)
+            }
+            removeWeakSpecies()
+            val sum = totalAverageFitness()
+            val children = mutableListOf<Genome>()
+
+            pool.species.forEach {
+                val breed = floor((it.averageFitness / sum * POPULATION).toDouble()).toInt() - 1
+                for (i in 0..breed) {
+                    children.add(breedChild(it))
+                }
+            }
+            cullSpecies(true)
+
+            while (children.size + pool.species.size < POPULATION) {
+                val species = pool.species.random()
+                children.add(breedChild(species))
+            }
+
+            children.forEach {
+                addToSpecies(it)
+            }
+
+            pool.generation = pool.generation + 1
+
+            //writeFile("backup." .. pool.generation .. "." .. forms.gettext(saveLoadFile))
+        }
+
+        private fun initPool() {
+            pool = newPool()
+
+            for (x in 0..POPULATION) {
+                addToSpecies(basicGenome())
+            }
+
+            initRun()
+        }
+
+        private fun initRun() {
+            val species = pool.species[pool.currentSpecies]
+            val genome = species.genomes[pool.currentGenome]
+            generateNetwork(genome)
+            evaluateCurrent()
+        }
+
+        private fun evaluateCurrent(): MutableList<PossibleMove> {
+            val species = pool.species[pool.currentSpecies]
+            val genome = species.genomes[pool.currentGenome]
+
+            return evaluateNetwork(genome.network)
+        }
+
+        private fun nextGenome() {
+            ++pool.currentGenome
+
+            if (pool.currentGenome > pool.species[pool.currentSpecies].genomes.size) {
+                pool.currentGenome = 0
+                ++pool.currentSpecies
+                if (pool.currentSpecies > pool.species.size) {
+                    newGeneration()
+                    pool.currentSpecies = 0
+                }
+            }
+        }
+
+        private fun fitnessAlreadyMeasured(): Boolean {
+            val species = pool.species[pool.currentSpecies]
+            val genome = species.genomes.getOrNull(pool.currentGenome)
+
+            return genome?.fitness != 0.0
+        }
+
+        fun nextMove(): PartialMove {
+            val species = pool.species[pool.currentSpecies]
+            val genome = species.genomes[pool.currentGenome]
+
+            val current = evaluateCurrent().random()
+            val partialMove = PartialMove(current.oldNode, current.newNode, aiPlayer)
+
+            gameHandler.makePartialMove(partialMove)
+
+            var fitness = fitnessEvaluation(gameHandler)
+            if (fitness > pool.maxFitness) {
+                pool.maxFitness = fitness
+            }
+
+            if (fitness == 0.0) fitness = -1.0
+
+            genome.fitness = fitness
+
+            pool.currentSpecies = 0
+            pool.currentGenome = 0
+
+            while (fitnessAlreadyMeasured()) {
+                nextGenome()
+            }
+
+            gameHandler.undoLastMove()
+
+            return PartialMove(current.oldNode, current.newNode, aiPlayer)
+        }
+
+        private fun fitnessEvaluation(state: GameHandler): Double {
+            var score = 0.0
+
+            if (state.getWinner(state.ballNode)?.winner != null) score = 1000.0
+
+            score += (-state.numberOfTurns).toDouble()
+
+            val opponentsGoal = state.getOpponent(aiPlayer).goal!!.goalNode()
+            score += -PathFindingHelper.findPath(state.ballNode, opponentsGoal).size * 2
+
+            //Neighbors are bounceable
+            state.gameBoard.allPossibleMovesFromNode(state.ballNode).forEach {
+                if (it.newNode.nodeType == NodeTypeEnum.BounceAble) ++score
+            }
+            return score
+        }
+
     }
 }

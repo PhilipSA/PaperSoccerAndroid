@@ -5,8 +5,8 @@ import android.os.Message
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
+import com.ps.simplepapersoccer.ai.alphazeroAI.AlphaZeroAI
 import com.ps.simplepapersoccer.ai.euclideanAI.EuclideanAI
-import com.ps.simplepapersoccer.ai.minimaxAI.MinimaxAI
 import com.ps.simplepapersoccer.gameObjects.game.GameHandler
 import com.ps.simplepapersoccer.gameObjects.player.AIPlayer
 import com.ps.simplepapersoccer.gameObjects.player.abstraction.IPlayer
@@ -32,7 +32,7 @@ class AIUnitTests {
     }
     @Before
     fun init() {
-        player1 = AIPlayer(MinimaxAI::class.java.simpleName, 1, 0, true)
+        player1 = AIPlayer(AlphaZeroAI::class.java.simpleName, 1, 0, true)
         player2 = AIPlayer(EuclideanAI::class.java.simpleName, 2, 0, true)
         createGameHandler(players)
     }
@@ -46,7 +46,7 @@ class AIUnitTests {
         Dispatchers.setMain(Dispatchers.Unconfined)
 
         runBlocking {
-            for (i in 0 until 3) {
+            for (i in 0 until 3000) {
                 createGameHandler(players)
                 gameHandler.updateGameState()
             }

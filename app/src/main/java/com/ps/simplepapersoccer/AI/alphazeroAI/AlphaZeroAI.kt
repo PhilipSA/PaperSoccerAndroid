@@ -1,5 +1,8 @@
 package com.ps.simplepapersoccer.ai.alphazeroAI
 
+import android.content.Context
+import android.util.Log
+import com.google.gson.Gson
 import com.ps.simplepapersoccer.ai.abstraction.IGameAI
 import com.ps.simplepapersoccer.data.enums.NodeTypeEnum
 import com.ps.simplepapersoccer.gameObjects.game.GameHandler
@@ -7,23 +10,29 @@ import com.ps.simplepapersoccer.gameObjects.move.PartialMove
 import com.ps.simplepapersoccer.gameObjects.move.PossibleMove
 import com.ps.simplepapersoccer.gameObjects.player.AIPlayer
 import com.ps.simplepapersoccer.helpers.PathFindingHelper
+import java.io.File
 import kotlin.math.*
 import kotlin.random.Random
 
-class AlphaZeroAI(private val aiPlayer: AIPlayer) : IGameAI {
+class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) : IGameAI {
 
     private var neuralNetwork: NeuralNetwork? = null
 
     override suspend fun makeMove(gameHandler: GameHandler): PartialMove {
         if (neuralNetwork == null) {
-            neuralNetwork = NeuralNetwork(gameHandler, aiPlayer)
+            neuralNetwork = NeuralNetwork(context, gameHandler, aiPlayer)
         }
-        neuralNetwork?.gameHandler =gameHandler
+
+        //New game
+        if (neuralNetwork?.gameHandler != gameHandler) {
+            neuralNetwork?.cutOff()
+            neuralNetwork?.gameHandler = gameHandler
+        }
 
         return neuralNetwork!!.nextMove()
     }
 
-    private class NeuralNetwork(var gameHandler: GameHandler, private val aiPlayer: AIPlayer) {
+    private class NeuralNetwork(private val context: Context, var gameHandler: GameHandler, private val aiPlayer: AIPlayer) {
         companion object {
             private const val POPULATION = 300
             private const val DELTA_DISJOINT = 2.0
@@ -45,6 +54,8 @@ class AlphaZeroAI(private val aiPlayer: AIPlayer) : IGameAI {
             private val timeoutConstant = 20
 
             private const val MAX_NODES = 1000000
+
+            private const val FILE_NAME = "temp.pool"
         }
 
         private data class Neuron(
@@ -52,16 +63,18 @@ class AlphaZeroAI(private val aiPlayer: AIPlayer) : IGameAI {
                 var value: Double
         )
 
-        private data class MutationRates(
+        private data class MutationRates (
                 var mutation: Double = 0.0,
-                val connections: Double = MUTATE_CONNECTION_CHANCE,
-                val link: Double = LINK_MUTATION_CHANCE,
-                val bias: Double = BIAS_MUTATION_CHANCE,
-                val node: Double = NODE_MUTATION_CHANCE,
-                val enable: Double = ENABLE_MUTATION_CHANCE,
-                val disable: Double = DISABLE_MUTATION_CHANCE,
-                val step: Double = STEP_SIZE
-        )
+                var connections: Double = MUTATE_CONNECTION_CHANCE,
+                var link: Double = LINK_MUTATION_CHANCE,
+                var bias: Double = BIAS_MUTATION_CHANCE,
+                var node: Double = NODE_MUTATION_CHANCE,
+                var enable: Double = ENABLE_MUTATION_CHANCE,
+                var disable: Double = DISABLE_MUTATION_CHANCE,
+                var step: Double = STEP_SIZE
+        ) {
+            fun getValues() = listOf(connections, link, bias, node, enable, disable, step)
+        }
 
         private data class Genome(
                 val genes: MutableList<Gene>,
@@ -103,7 +116,7 @@ class AlphaZeroAI(private val aiPlayer: AIPlayer) : IGameAI {
 
         lateinit var pool: Pool
         private val outputs get() = gameHandler.gameBoard.allPossibleMovesFromNode(gameHandler.ballNode)
-        private val inputs = gameHandler.gameBoard.nodeHashSet
+        private val inputs get() = gameHandler.gameBoard.nodeHashSet
 
         init {
             initPool()
@@ -304,7 +317,6 @@ class AlphaZeroAI(private val aiPlayer: AIPlayer) : IGameAI {
             return false
         }
 
-        //TODO: Mimic LUA math.random
         private fun pointMutate(genome: Genome) {
             val step = genome.mutationRates.step
 
@@ -319,7 +331,6 @@ class AlphaZeroAI(private val aiPlayer: AIPlayer) : IGameAI {
             }
         }
 
-        //TODO: Figure out what the hell inputs is supposed to be
         private fun linkMutate(genome: Genome, forceBias: Boolean) {
             var neuron1 = randomNeuron(genome.genes, false)
             var neuron2 = randomNeuron(genome.genes, true)
@@ -389,21 +400,34 @@ class AlphaZeroAI(private val aiPlayer: AIPlayer) : IGameAI {
             gene.enabled = !gene.enabled
         }
 
-        //TODO: What is MutationRates type?
-        private fun mutate(genome: Genome) {
-            if (Random.nextInt(1, 2) == 1) {
-                genome.mutationRates.mutation = 0.95 * genome.mutationRates.mutation
+        private fun mutateHelper(rate: Double): Double {
+            return if (Random.nextInt(1, 2) == 1) {
+                0.95 * rate
             } else {
-                genome.mutationRates.mutation = 1.05263 * genome.mutationRates.mutation
+                1.05263 * rate
+            }
+        }
+
+        private fun mutate(genome: Genome) {
+            for ((mutation, rate) in genome.mutationRates.getValues().withIndex()) {
+                val value = mutateHelper(rate)
+
+                if (mutation == 0) genome.mutationRates.connections = value
+                if (mutation == 1) genome.mutationRates.link = value
+                if (mutation == 2) genome.mutationRates.bias = value
+                if (mutation == 3) genome.mutationRates.node = value
+                if (mutation == 4) genome.mutationRates.enable = value
+                if (mutation == 5) genome.mutationRates.disable = value
+                if (mutation == 6) genome.mutationRates.step = value
             }
 
-            if (Random.nextDouble(0.0, 1.0) < genome.mutationRates.mutation) {
+            if (Random.nextDouble(0.0, 1.0) < genome.mutationRates.connections) {
                 pointMutate(genome)
             }
 
             var p = genome.mutationRates.link
 
-            while(p > 0 ){
+            while (p > 0) {
                 if (Random.nextDouble(0.0, 1.0) < p) {
                     linkMutate(genome, false)
                 }
@@ -411,7 +435,7 @@ class AlphaZeroAI(private val aiPlayer: AIPlayer) : IGameAI {
             }
 
             p = genome.mutationRates.bias
-            while(p > 0 ){
+            while (p > 0) {
                 if (Random.nextDouble(0.0, 1.0) < p) {
                     linkMutate(genome, true)
                 }
@@ -419,7 +443,7 @@ class AlphaZeroAI(private val aiPlayer: AIPlayer) : IGameAI {
             }
 
             p = genome.mutationRates.node
-            while(p > 0 ){
+            while (p > 0) {
                 if (Random.nextDouble(0.0, 1.0) < p) {
                     nodeMutate(genome)
                 }
@@ -428,7 +452,7 @@ class AlphaZeroAI(private val aiPlayer: AIPlayer) : IGameAI {
 
 
             p = genome.mutationRates.enable
-            while(p > 0 ){
+            while (p > 0) {
                 if (Random.nextDouble(0.0, 1.0) < p) {
                     enableDisableMutate(genome, true)
                 }
@@ -436,7 +460,7 @@ class AlphaZeroAI(private val aiPlayer: AIPlayer) : IGameAI {
             }
 
             p = genome.mutationRates.disable
-            while(p > 0 ){
+            while (p > 0) {
                 if (Random.nextDouble(0.0, 1.0) < p) {
                     enableDisableMutate(genome, false)
                 }
@@ -473,11 +497,7 @@ class AlphaZeroAI(private val aiPlayer: AIPlayer) : IGameAI {
 
             val n = max(genes1.size, genes2.size)
 
-            return try {
-                disjointGenes / n
-            } catch (e: ArithmeticException) {
-                Int.MAX_VALUE
-            }
+            return if (n == 0) 0 else disjointGenes / n
         }
 
         private fun weights(genes1: List<Gene>, genes2: List<Gene>): Int {
@@ -498,11 +518,7 @@ class AlphaZeroAI(private val aiPlayer: AIPlayer) : IGameAI {
                 }
             }
 
-            return try {
-                sum / coincident
-            } catch (e: ArithmeticException) {
-                Int.MAX_VALUE
-            }
+            return if (coincident == 0) 0 else sum / coincident
         }
 
         private fun sameSpecies(genome1: Genome, genome2: Genome): Boolean {
@@ -514,8 +530,8 @@ class AlphaZeroAI(private val aiPlayer: AIPlayer) : IGameAI {
         private fun rankGlobally() {
             val global = mutableListOf<Genome>()
 
-            pool.species.forEach {
-                it.genomes.forEach {
+            pool.species.forEach { species ->
+                species.genomes.forEach {
                     global.add(it)
                 }
             }
@@ -548,15 +564,15 @@ class AlphaZeroAI(private val aiPlayer: AIPlayer) : IGameAI {
         }
 
         private fun cullSpecies(cutToOne: Boolean) {
-            pool.species.forEach {
-                it.genomes.sortedByDescending { it.fitness }
+            pool.species.forEach { species ->
+                species.genomes.sortedByDescending { it.fitness }
 
-                var remaining = ceil((it.genomes.size / 2).toDouble()).toInt()
+                var remaining = ceil((species.genomes.size / 2).toDouble()).toInt()
                 if (cutToOne) remaining = 1
 
-                while (it.genomes.size > remaining) {
-                    val last = it.genomes.last()
-                    it.genomes.remove(last)
+                while (species.genomes.size > remaining) {
+                    val last = species.genomes.last()
+                    species.genomes.remove(last)
                 }
             }
         }
@@ -611,9 +627,9 @@ class AlphaZeroAI(private val aiPlayer: AIPlayer) : IGameAI {
 
         private fun addToSpecies(child: Genome) {
             var foundSpecies = false
-            pool.species.forEach {
-                if (foundSpecies.not() && sameSpecies(child, it.genomes.first())) {
-                    it.genomes.add(child)
+            pool.species.forEach { species ->
+                if (foundSpecies.not() && sameSpecies(child, species.genomes.first())) {
+                    species.genomes.add(child)
                     foundSpecies = true
                 }
             }
@@ -657,11 +673,13 @@ class AlphaZeroAI(private val aiPlayer: AIPlayer) : IGameAI {
 
             pool.generation = pool.generation + 1
 
-            //writeFile("backup." .. pool.generation .. "." .. forms.gettext(saveLoadFile))
+            writeFile()
         }
 
         private fun initPool() {
             pool = newPool()
+
+            loadFile()
 
             for (x in 0..POPULATION) {
                 addToSpecies(basicGenome())
@@ -685,11 +703,12 @@ class AlphaZeroAI(private val aiPlayer: AIPlayer) : IGameAI {
         }
 
         private fun nextGenome() {
-            ++pool.currentGenome
+            pool.currentGenome = pool.currentGenome + 1
 
             if (pool.currentGenome > pool.species[pool.currentSpecies].genomes.size) {
                 pool.currentGenome = 0
-                ++pool.currentSpecies
+                pool.currentSpecies = pool.currentSpecies + 1
+
                 if (pool.currentSpecies > pool.species.size) {
                     newGeneration()
                     pool.currentSpecies = 0
@@ -705,22 +724,48 @@ class AlphaZeroAI(private val aiPlayer: AIPlayer) : IGameAI {
         }
 
         fun nextMove(): PartialMove {
-            val species = pool.species[pool.currentSpecies]
-            val genome = species.genomes[pool.currentGenome]
-
             val current = evaluateCurrent().random()
             val partialMove = PartialMove(current.oldNode, current.newNode, aiPlayer)
 
             gameHandler.makePartialMove(partialMove)
 
-            var fitness = fitnessEvaluation(gameHandler)
-            if (fitness > pool.maxFitness) {
-                pool.maxFitness = fitness
+            if (gameHandler.getWinner(gameHandler.ballNode)?.winner != null) {
+                cutOff()
             }
+
+            var measured = 0
+            var total = 0
+
+            pool.species.forEach {
+                it.genomes.forEach { genome ->
+                    ++total
+                    if (genome.fitness != 0.0) {
+                        ++measured
+                    }
+                }
+            }
+
+            println("Max fitness: ${pool.maxFitness} Gen ${pool.generation} species ${pool.species.sumBy { it.averageFitness }} genome: ${pool.currentGenome}")
+
+            gameHandler.undoLastMove()
+
+            return PartialMove(current.oldNode, current.newNode, aiPlayer)
+        }
+
+        fun cutOff() {
+            val species = pool.species[pool.currentSpecies]
+            val genome = species.genomes[pool.currentGenome]
+
+            var fitness = fitnessEvaluation(gameHandler)
 
             if (fitness == 0.0) fitness = -1.0
 
             genome.fitness = fitness
+
+            if (fitness > pool.maxFitness) {
+                pool.maxFitness = fitness
+                writeFile()
+            }
 
             pool.currentSpecies = 0
             pool.currentGenome = 0
@@ -729,27 +774,31 @@ class AlphaZeroAI(private val aiPlayer: AIPlayer) : IGameAI {
                 nextGenome()
             }
 
-            gameHandler.undoLastMove()
-
-            return PartialMove(current.oldNode, current.newNode, aiPlayer)
+            initRun()
         }
 
         private fun fitnessEvaluation(state: GameHandler): Double {
             var score = 0.0
 
-            if (state.getWinner(state.ballNode)?.winner != null) score = 1000.0
+            if (state.getWinner(state.ballNode)?.winner == aiPlayer) score = 1000.0
 
-            score += (-state.numberOfTurns).toDouble()
+            score += state.numberOfTurns
 
-            val opponentsGoal = state.getOpponent(aiPlayer).goal!!.goalNode()
-            score += -PathFindingHelper.findPath(state.ballNode, opponentsGoal).size * 2
-
-            //Neighbors are bounceable
-            state.gameBoard.allPossibleMovesFromNode(state.ballNode).forEach {
-                if (it.newNode.nodeType == NodeTypeEnum.BounceAble) ++score
-            }
             return score
         }
 
+        private fun writeFile() {
+            val file = File(context.cacheDir, FILE_NAME)
+            file.createNewFile()
+            file.writeText(Gson().toJson(pool))
+        }
+
+        private fun loadFile() {
+            val file = File(context.cacheDir, FILE_NAME)
+            pool = Gson().fromJson(file.readText(), Pool::class.java)
+
+            while (fitnessAlreadyMeasured()) { nextGenome() }
+            initRun()
+        }
     }
 }

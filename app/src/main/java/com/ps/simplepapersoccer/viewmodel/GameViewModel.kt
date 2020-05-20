@@ -1,6 +1,8 @@
 package com.ps.simplepapersoccer.viewmodel
 
+import android.app.Application
 import android.graphics.Color
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.ps.simplepapersoccer.gameObjects.game.GameHandler
@@ -16,7 +18,7 @@ import com.ps.simplepapersoccer.gameObjects.player.Player
 import java.util.*
 import kotlin.collections.HashSet
 
-class GameViewModel: ViewModel(), IGameHandlerListener {
+class GameViewModel(application: Application): AndroidViewModel(application), IGameHandlerListener {
     lateinit var gameHandler: GameHandler
 
     lateinit var player1Arg: String
@@ -42,11 +44,11 @@ class GameViewModel: ViewModel(), IGameHandlerListener {
         }
 
         if (player1Arg == "Player") players.add(Player(playerName, 1, player1Color, false)) else {
-            players.add(AIPlayer(player1Arg, 1, player1Color, true))
+            players.add(AIPlayer(getApplication(), player1Arg, 1, player1Color, true))
         }
 
         if (player2Arg == "Player") players.add(Player("Player2", 2, player2Color, false)) else {
-            players.add(AIPlayer(player2Arg, 2, player2Color, true))
+            players.add(AIPlayer(getApplication(), player2Arg, 2, player2Color, true))
         }
     }
 

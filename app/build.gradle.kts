@@ -35,6 +35,7 @@ dependencies {
     implementation("androidx.preference:preference:1.1.1")
     implementation("androidx.constraintlayout:constraintlayout:1.1.3")
     implementation("com.google.android.material:material:1.1.0")
+    implementation("com.google.code.gson:gson:2.8.6")
 
     testImplementation("junit:junit:4.13")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.3.6")

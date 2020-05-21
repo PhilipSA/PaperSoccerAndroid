@@ -221,7 +221,7 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
             network.neurons.values.forEach { neuron ->
                 var sum = 0.0
 
-                for ((j, x) in neuron.incoming) {
+                for ((j, x) in neuron.incoming.withIndex()) {
                     val incoming = neuron.incoming[j]
                     val other = network.neurons[incoming.into]
 
@@ -264,7 +264,7 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
                 innovations2[gene.innovation] = gene
             }
 
-            for ((i, _) in genome1.genes) {
+            for ((i, _) in genome1.genes.withIndex()) {
                 val gene1 = genome1.genes[i]
                 val gene2 = innovations2[gene1.innovation]
 
@@ -303,7 +303,7 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
                 neurons[MAX_NODES + i] = true
             }
 
-            for ((i, _) in genes) {
+            for (i in 0 until genes.size) {
                 if (nonInput.not() || genes[i].into > inputs) {
                     neurons[genes[i].into] = true
                 }

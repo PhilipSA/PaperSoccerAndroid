@@ -1,5 +1,6 @@
-package com.ps.simplepapersoccer.AI.jonasAI
+package com.ps.simplepapersoccer.ai.jonasAI
 
+import com.ps.simplepapersoccer.ai.jonasAI.MoveSequence
 import com.ps.simplepapersoccer.ai.abstraction.IGameAI
 import com.ps.simplepapersoccer.data.enums.NodeTypeEnum
 import com.ps.simplepapersoccer.gameObjects.game.GameHandler

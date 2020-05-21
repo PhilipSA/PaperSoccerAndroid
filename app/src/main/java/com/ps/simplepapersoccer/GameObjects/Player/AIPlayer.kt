@@ -7,6 +7,7 @@ import com.ps.simplepapersoccer.ai.GameAIHandler.Companion.AI_TIMEOUT_MS
 import com.ps.simplepapersoccer.ai.alphazeroAI.AlphaZeroAI
 import com.ps.simplepapersoccer.ai.jonasAI.JonasAI
 import com.ps.simplepapersoccer.ai.minimaxAI.MinimaxAI
+import com.ps.simplepapersoccer.ai.randomAI.RandomAI
 import com.ps.simplepapersoccer.gameObjects.player.abstraction.IPlayer
 import java.io.Serializable
 
@@ -18,12 +19,17 @@ class AIPlayer(context: Context, playerName: String, playerNumber: Int, playerCo
         MinimaxAI::class.java.simpleName -> MinimaxAI(AI_TIMEOUT_MS)
         JonasAI::class.java.simpleName -> JonasAI()
         AlphaZeroAI::class.java.simpleName -> AlphaZeroAI(context, this)
+        RandomAI::class.java.simpleName -> RandomAI()
         else -> {
             EuclideanAI()
         }
     }
 
     companion object {
-        val allAi = listOf(EuclideanAI::class.java.simpleName, MinimaxAI::class.java.simpleName, JonasAI::class.java.simpleName, AlphaZeroAI::class.java.simpleName)
+        val allAi = listOf(EuclideanAI::class.java.simpleName,
+                MinimaxAI::class.java.simpleName,
+                JonasAI::class.java.simpleName,
+                AlphaZeroAI::class.java.simpleName,
+                RandomAI::class.java.simpleName)
     }
 }

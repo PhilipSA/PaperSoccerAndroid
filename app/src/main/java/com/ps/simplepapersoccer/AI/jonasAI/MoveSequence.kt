@@ -1,4 +1,4 @@
-package com.ps.simplepapersoccer.AI.jonasAI
+package com.ps.simplepapersoccer.ai.jonasAI
 
 import com.ps.simplepapersoccer.gameObjects.game.geometry.Node
 import com.ps.simplepapersoccer.gameObjects.move.PartialMove

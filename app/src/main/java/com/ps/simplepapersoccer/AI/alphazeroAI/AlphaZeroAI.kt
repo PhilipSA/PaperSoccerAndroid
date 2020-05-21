@@ -715,7 +715,7 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
             val genome = species.genomes[pool.currentGenome]
 
             val inputs = gameHandler.gameBoard.nodeHashSet.map { it.hashCode().toDouble() }.toMutableList()
-            inputs.add(aiPlayer.playerColor.hashCode().toDouble())
+            inputs.add(aiPlayer.playerNumber.hashCode().toDouble())
 
             return evaluateNetwork(genome.network, inputs)
         }

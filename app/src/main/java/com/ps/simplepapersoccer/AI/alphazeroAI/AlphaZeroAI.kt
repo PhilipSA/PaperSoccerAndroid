@@ -315,7 +315,7 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
             }
 
             val count = neurons.size
-            var n = Random.nextInt(1, count)
+            var n = if (count <= 1) 1 else Random.nextInt(1, count)
 
             for ((k, _) in neurons) {
                 n -= 1
@@ -799,7 +799,7 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
 
             if (state.getWinner(state.ballNode)?.winner == aiPlayer) score = 1000.0
 
-            score += state.numberOfTurns
+            score -= state.numberOfTurns
 
             val opponentsGoal = state.getOpponent(aiPlayer).goal!!
             val closestToOpponentsGoal = state.gameBoard.nodeHashSet.filter { it.nodeType == NodeTypeEnum.BounceAble }.minBy { MathHelper.euclideanDistance(opponentsGoal.goalNode().coords, it.coords) }!!

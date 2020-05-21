@@ -116,7 +116,7 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
 
         lateinit var pool: Pool
         private val outputs get() = gameHandler.gameBoard.allPossibleMovesFromNode(gameHandler.ballNode)
-        private val inputs get() = gameHandler.gameBoard.nodeHashSet
+        private val inputs get() = gameHandler.gameBoard.nodeHashSet.size
 
         init {
             initPool()
@@ -132,7 +132,7 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
         }
 
         private fun newPool(): Pool {
-            return Pool(mutableListOf(), 0, 0, 0, 0.0, 0)
+            return Pool(mutableListOf(), 0, 0, 0, 0.0, outputs.size)
         }
 
         private fun newSpecies(): Species {
@@ -144,7 +144,11 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
         }
 
         private fun copyGenome(genome: Genome): Genome {
-            return genome.copy(genes = genome.genes,
+            val newGenes = genome.genes.map {
+                copyGene(it)
+            }.toMutableList()
+
+            return genome.copy(genes = newGenes,
                     fitness = genome.fitness,
                     adjustedFitness = genome.adjustedFitness,
                     network = genome.network,
@@ -155,7 +159,7 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
 
         private fun basicGenome(): Genome {
             val genome = newGenome()
-            genome.maxNeuron = inputs.size
+            genome.maxNeuron = inputs
             mutate(genome)
             return genome
         }
@@ -179,7 +183,7 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
         private fun generateNetwork(genome: Genome) {
             val network = Network(hashMapOf())
 
-            for ((i, _) in inputs.withIndex()) {
+            for (i in 0 until inputs) {
                 network.neurons[i] = newNeuron()
             }
 
@@ -187,12 +191,11 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
                 network.neurons[MAX_NODES + index] = newNeuron()
             }
 
-            val sortedGenomes = genome.genes.sortedBy { it.out }
+            genome.genes.sortBy { it.out }
 
-            for ((index, _) in sortedGenomes.withIndex()) {
-                val gene = genome.genes[index]
+            genome.genes.forEach { gene ->
                 if (gene.enabled) {
-                    if (network.neurons.get(gene.out) == null) {
+                    if (network.neurons[gene.out] == null) {
                         network.neurons[gene.out] = newNeuron()
                     }
                     val neuron = network.neurons[gene.out]
@@ -206,12 +209,16 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
             genome.network = network
         }
 
-        private fun evaluateNetwork(network: Network): MutableList<PossibleMove> {
-            for ((index, x) in inputs.withIndex()) {
-                network.neurons[index]?.value = x.hashCode().toDouble()
+        private fun evaluateNetwork(network: Network, inputsArg: MutableList<Double>): MutableList<PossibleMove> {
+            if (inputsArg.size != inputs) {
+                return mutableListOf()
             }
 
-            for ((i, neuron) in network.neurons) {
+            for (index in 0 until inputs) {
+                network.neurons[index]?.value = inputsArg[index]
+            }
+
+            network.neurons.values.forEach { neuron ->
                 var sum = 0.0
 
                 for ((j, x) in neuron.incoming) {
@@ -253,8 +260,7 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
 
             val innovations2 = HashMap<Int, Gene>()
 
-            for ((i, _) in genome2.genes) {
-                val gene = genome2.genes[i]
+            genome2.genes.forEach { gene ->
                 innovations2[gene.innovation] = gene
             }
 
@@ -270,7 +276,16 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
             }
 
             child.maxNeuron = max(genome1.maxNeuron, genome2.maxNeuron)
-            child.mutationRates.mutation = genome1.mutationRates.mutation
+
+            for ((mutation, rate) in genome1.mutationRates.getValues().withIndex()) {
+                if (mutation == 0) child.mutationRates.connections = rate
+                if (mutation == 1) child.mutationRates.link = rate
+                if (mutation == 2) child.mutationRates.bias = rate
+                if (mutation == 3) child.mutationRates.node = rate
+                if (mutation == 4) child.mutationRates.enable = rate
+                if (mutation == 5) child.mutationRates.disable = rate
+                if (mutation == 6) child.mutationRates.step = rate
+            }
 
             return child
         }
@@ -279,7 +294,7 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
             val neurons = hashMapOf<Int, Boolean>()
 
             if (nonInput.not()) {
-                for ((i, _) in inputs.withIndex()) {
+                for (i in 0 until inputs) {
                     neurons[i] = true
                 }
             }
@@ -289,29 +304,28 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
             }
 
             for ((i, _) in genes) {
-                if (nonInput.not() || genes[i].into > inputs.size) {
+                if (nonInput.not() || genes[i].into > inputs) {
                     neurons[genes[i].into] = true
                 }
 
-                if (nonInput.not() || genes[i].out > inputs.size) {
+                if (nonInput.not() || genes[i].out > inputs) {
                     neurons[genes[i].out] = true
                 }
             }
 
             val count = neurons.size
-            var n = if (count <= 1) 1 else Random.nextInt(1, count)
+            var n = Random.nextInt(1, count)
 
-            for ((i, _) in outputs.withIndex()) {
+            for ((k, _) in neurons) {
                 n -= 1
-                if (n == 0) return i
+                if (n == 0) return k
             }
 
             return 0
         }
 
         private fun containsLink(genes: MutableList<Gene>, link: Gene): Boolean {
-            for ((i, x) in genes.withIndex()) {
-                val gene = genes[i]
+            genes.forEach { gene ->
                 if (gene.into == link.into && gene.out == link.out) {
                     return true
                 }
@@ -322,9 +336,7 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
         private fun pointMutate(genome: Genome) {
             val step = genome.mutationRates.step
 
-            for ((i, x) in genome.genes.withIndex()) {
-                val gene = genome.genes[i]
-
+            genome.genes.forEach { gene ->
                 if (Random.nextDouble(0.0, 1.0) < PERTURB_CHANCE) {
                     gene.weight = gene.weight + Random.nextDouble(0.0, 1.0) * step * 2 - step
                 } else {
@@ -339,11 +351,11 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
 
             val newLink = newGene()
 
-            if (neuron1 <= inputs.size && neuron2 <= inputs.size) {
+            if (neuron1 <= inputs && neuron2 <= inputs) {
                 return
             }
 
-            if (neuron2 <= inputs.size) {
+            if (neuron2 <= inputs) {
                 val temp = neuron1
                 neuron1 = neuron2
                 neuron2 = temp
@@ -352,7 +364,7 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
             newLink.into = neuron1
             newLink.out = neuron2
 
-            if (forceBias) newLink.into = inputs.size
+            if (forceBias) newLink.into = inputs
 
             if (containsLink(genome.genes, newLink)) return
 
@@ -370,7 +382,6 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
             val gene = genome.genes[Random.nextInt(0, genome.genes.size)]
 
             if (gene.enabled.not()) return
-
             gene.enabled = false
 
             val gene1 = copyGene(gene)
@@ -390,7 +401,7 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
         private fun enableDisableMutate(genome: Genome, enable: Boolean) {
             val candidates = mutableListOf<Gene>()
 
-            for ((i, gene) in genome.genes.withIndex()) {
+            genome.genes.forEach { gene ->
                 if (gene.enabled == enable.not()) {
                     candidates.add(gene)
                 }
@@ -399,7 +410,7 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
             if (candidates.size == 0) return
 
             val gene = candidates[Random.nextInt(0, candidates.size)]
-            gene.enabled = !gene.enabled
+            gene.enabled = gene.enabled.not()
         }
 
         private fun mutateHelper(rate: Double): Double {
@@ -471,13 +482,13 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
         }
 
         private fun disjoint(genes1: List<Gene>, genes2: List<Gene>): Int {
-            val i1 = mutableListOf<Boolean>()
+            val i1 = HashMap<Int, Boolean>()
 
             genes1.forEach {
                 i1[it.innovation] = true
             }
 
-            val i2 = mutableListOf<Boolean>()
+            val i2 = HashMap<Int, Boolean>()
 
             genes2.forEach {
                 i1[it.innovation] = true
@@ -486,13 +497,13 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
             var disjointGenes = 0
 
             genes1.forEach {
-                if (i2[it.innovation].not()) {
+                if (i2[it.innovation]?.not() == true) {
                     ++disjointGenes
                 }
             }
 
             genes2.forEach {
-                if (i1[it.innovation].not()) {
+                if (i1[it.innovation]?.not() == true) {
                     ++disjointGenes
                 }
             }
@@ -502,25 +513,25 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
             return if (n == 0) 0 else disjointGenes / n
         }
 
-        private fun weights(genes1: List<Gene>, genes2: List<Gene>): Int {
-            val i2 = mutableListOf<Gene>()
+        private fun weights(genes1: List<Gene>, genes2: List<Gene>): Double {
+            val i2 = HashMap<Int, Gene>()
 
             genes2.forEach {
                 i2[it.innovation] = it
             }
 
-            var sum = 0
-            var coincident = 0
+            var sum = 0.0
+            var coincident = 0.0
 
-            genes1.forEach {
-                if (i2.getOrNull(it.innovation) != null) {
-                    val gene2 = i2[it.innovation]
-                    sum = (sum + abs(it.weight - gene2.weight)).roundToInt()
+            genes1.forEach { gene ->
+                if (i2[gene.innovation] != null) {
+                    val gene2 = i2[gene.innovation]
+                    sum += abs(gene.weight - gene2!!.weight)
                     ++coincident
                 }
             }
 
-            return if (coincident == 0) 0 else sum / coincident
+            return if (coincident == 0.0) 0.0 else sum / coincident
         }
 
         private fun sameSpecies(genome1: Genome, genome2: Genome): Boolean {
@@ -540,8 +551,8 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
 
             global.sortBy { it.fitness }
 
-            for ((i, gene) in global.withIndex()) {
-                global[i].globalRank = i
+            for ((g, _) in global.withIndex()) {
+                global[g].globalRank = g
             }
         }
 
@@ -558,8 +569,8 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
         private fun totalAverageFitness(): Int {
             var total = 0
 
-            pool.species.forEach {
-                total += it.averageFitness
+            pool.species.forEach { species ->
+                total += species.averageFitness
             }
 
             return total
@@ -567,14 +578,13 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
 
         private fun cullSpecies(cutToOne: Boolean) {
             pool.species.forEach { species ->
-                species.genomes.sortedByDescending { it.fitness }
+                species.genomes.sortByDescending { it.fitness }
 
-                var remaining = ceil((species.genomes.size / 2).toDouble()).toInt()
-                if (cutToOne) remaining = 1
+                var remaining = ceil((species.genomes.size / 2).toDouble())
+                if (cutToOne) remaining = 1.0
 
                 while (species.genomes.size > remaining) {
-                    val last = species.genomes.last()
-                    species.genomes.remove(last)
+                    species.genomes.removeAt(species.genomes.lastIndex)
                 }
             }
         }
@@ -596,18 +606,18 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
         private fun removeStaleSpecies() {
             val survived = mutableListOf<Species>()
 
-            pool.species.forEach {
-                val sorted = it.genomes.sortedBy { it.fitness }
+            pool.species.forEach { species ->
+                species.genomes.sortByDescending { it.fitness }
 
-                if (sorted.getOrNull(0)?.fitness ?: 0.0 > it.topFitness) {
-                    it.topFitness = sorted.get(0).fitness
-                    it.staleness = 0
+                if (species.genomes.getOrNull(0)?.fitness ?: 0.0 > species.topFitness) {
+                    species.topFitness = species.genomes[0].fitness
+                    species.staleness = 0
                 } else {
-                    ++it.staleness
+                    ++species.staleness
                 }
 
-                if (it.staleness < STALE_SPECIES || it.topFitness >= pool.maxFitness) {
-                    survived.add(it)
+                if (species.staleness < STALE_SPECIES || species.topFitness >= pool.maxFitness) {
+                    survived.add(species)
                 }
             }
 
@@ -619,9 +629,9 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
 
             val sum = totalAverageFitness()
 
-            pool.species.forEach {
-                val breed = floor((it.averageFitness / sum * POPULATION).toDouble())
-                if (breed > 1) survived.add(it)
+            pool.species.forEach { species ->
+                val breed = floor((species.averageFitness / sum * POPULATION).toDouble())
+                if (breed > 1) survived.add(species)
             }
 
             pool.species = survived
@@ -649,17 +659,17 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
             rankGlobally()
             removeStaleSpecies()
             rankGlobally()
-            pool.species.forEach {
-                calculateAverageFitness(it)
+            pool.species.forEach { species ->
+                calculateAverageFitness(species)
             }
             removeWeakSpecies()
             val sum = totalAverageFitness()
             val children = mutableListOf<Genome>()
 
-            pool.species.forEach {
-                val breed = floor((it.averageFitness / sum * POPULATION).toDouble()).toInt() - 1
+            pool.species.forEach { species ->
+                val breed = floor((species.averageFitness / sum * POPULATION).toDouble()).toInt() - 1
                 for (i in 0..breed) {
-                    children.add(breedChild(it))
+                    children.add(breedChild(species))
                 }
             }
             cullSpecies(true)
@@ -703,7 +713,9 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
             val species = pool.species[pool.currentSpecies]
             val genome = species.genomes[pool.currentGenome]
 
-            return evaluateNetwork(genome.network)
+            val inputs = gameHandler.gameBoard.nodeHashSet.map { it.hashCode().toDouble() }.toMutableList()
+
+            return evaluateNetwork(genome.network, inputs)
         }
 
         private fun nextGenome() {
@@ -740,8 +752,8 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
             var measured = 0
             var total = 0
 
-            pool.species.forEach {
-                it.genomes.forEach { genome ->
+            pool.species.forEach { species ->
+                species.genomes.forEach { genome ->
                     ++total
                     if (genome.fitness != 0.0) {
                         ++measured

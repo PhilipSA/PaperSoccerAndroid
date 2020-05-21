@@ -9,6 +9,7 @@ import com.ps.simplepapersoccer.gameObjects.game.GameHandler
 import com.ps.simplepapersoccer.gameObjects.move.PartialMove
 import com.ps.simplepapersoccer.gameObjects.move.PossibleMove
 import com.ps.simplepapersoccer.gameObjects.player.AIPlayer
+import com.ps.simplepapersoccer.helpers.MathHelper
 import com.ps.simplepapersoccer.helpers.PathFindingHelper
 import java.io.File
 import kotlin.math.*
@@ -116,7 +117,7 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
 
         lateinit var pool: Pool
         private val outputs get() = gameHandler.gameBoard.allPossibleMovesFromNode(gameHandler.ballNode)
-        private val inputs get() = gameHandler.gameBoard.nodeHashSet.size
+        private val inputs get() = gameHandler.gameBoard.nodeHashSet.size + 1
 
         init {
             initPool()
@@ -714,6 +715,7 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
             val genome = species.genomes[pool.currentGenome]
 
             val inputs = gameHandler.gameBoard.nodeHashSet.map { it.hashCode().toDouble() }.toMutableList()
+            inputs.add(aiPlayer.playerColor.hashCode().toDouble())
 
             return evaluateNetwork(genome.network, inputs)
         }
@@ -798,6 +800,11 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
             if (state.getWinner(state.ballNode)?.winner == aiPlayer) score = 1000.0
 
             score += state.numberOfTurns
+
+            val opponentsGoal = state.getOpponent(aiPlayer).goal!!
+            val closestToOpponentsGoal = state.gameBoard.nodeHashSet.filter { it.nodeType == NodeTypeEnum.BounceAble }.minBy { MathHelper.euclideanDistance(opponentsGoal.goalNode().coords, it.coords) }!!
+
+            score -= MathHelper.euclideanDistance(opponentsGoal.goalNode().coords, closestToOpponentsGoal.coords)
 
             return score
         }

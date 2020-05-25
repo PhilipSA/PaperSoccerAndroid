@@ -19,7 +19,7 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
 
     private var neuralNetwork: NeuralNetwork? = null
 
-    override suspend fun makeMove(gameHandler: GameHandler): PartialMove {
+    override suspend fun makeMove(gameHandler: GameHandler): PartialMove? {
         if (neuralNetwork == null) {
             neuralNetwork = NeuralNetwork(context, gameHandler, aiPlayer)
         }
@@ -116,8 +116,8 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
         )
 
         lateinit var pool: Pool
-        private val outputs = 8
-        private val inputs = gameHandler.gameBoard.nodeHashSet.size + 1
+        private val outputs = 7
+        private val inputs get() = gameHandler.gameBoard.nodeHashSet.size + 1
 
         init {
             initPool()
@@ -210,9 +210,9 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
             genome.network = network
         }
 
-        private fun evaluateNetwork(network: Network, inputsArg: MutableList<Double>): MutableList<PossibleMove> {
+        private fun evaluateNetwork(network: Network, inputsArg: MutableList<Double>): PossibleMove? {
             if (inputsArg.size != inputs) {
-                return mutableListOf()
+                return null
             }
 
             for (index in 0 until inputs) {
@@ -234,18 +234,21 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
                 }
             }
 
-            val validOutputs = mutableListOf<PossibleMove>()
-            val validMoves = gameHandler.gameBoard.allPossibleMovesFromNode(gameHandler.ballNode)
+            var bestMove: PossibleMove? = null
+            val validMoves = gameHandler.gameBoard.allPossibleMovesFromNode(gameHandler.ballNode).toList().sortedBy { it.newNode.coords.x + it.newNode.coords.y }
 
             for (index in 0 until outputs) {
-                val move = validMoves.toList().getOrNull(index)
+                val move = validMoves.getOrNull(index)
+                var highestValue = 0.0
+                val neuronValue = network.neurons[MAX_NODES + index]?.value ?: 0.0
 
-                if (network.neurons[MAX_NODES + index]?.value ?: 0.0 > 0 && move != null) {
-                    validOutputs.add(move)
+                if (neuronValue > highestValue && move != null) {
+                    bestMove = move
+                    highestValue = neuronValue
                 }
             }
 
-            return validOutputs
+            return bestMove
         }
 
         private fun crossover(genome1: Genome, genome2: Genome): Genome {
@@ -711,7 +714,7 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
             evaluateCurrent()
         }
 
-        private fun evaluateCurrent(): MutableList<PossibleMove> {
+        private fun evaluateCurrent(): PossibleMove? {
             val species = pool.species[pool.currentSpecies]
             val genome = species.genomes[pool.currentGenome]
 
@@ -742,8 +745,9 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
             return genome?.fitness != 0.0
         }
 
-        fun nextMove(): PartialMove {
-            val current = evaluateCurrent().random()
+        fun nextMove(): PartialMove? {
+            val current = evaluateCurrent() ?: return null
+
             val partialMove = PartialMove(current.oldNode, current.newNode, aiPlayer)
 
             gameHandler.makePartialMove(partialMove)
@@ -803,9 +807,13 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
             score -= state.numberOfTurns
 
             val opponentsGoal = state.getOpponent(aiPlayer).goal!!
-            val closestToOpponentsGoal = state.gameBoard.nodeHashSet.filter { it.nodeType == NodeTypeEnum.BounceAble }.minBy { MathHelper.euclideanDistance(opponentsGoal.goalNode().coords, it.coords) }!!
+            val closestToOpponentsGoal = state.gameBoard.nodeHashSet.filter { it.nodeType == NodeTypeEnum.BounceAble }.minBy { MathHelper.euclideanDistance(opponentsGoal.goalNode().coords, it.coords) }
 
-            score -= MathHelper.euclideanDistance(opponentsGoal.goalNode().coords, closestToOpponentsGoal.coords)
+            if (closestToOpponentsGoal != null) {
+                score -= MathHelper.euclideanDistance(opponentsGoal.goalNode().coords, closestToOpponentsGoal.coords)
+            } else {
+                score -= 1000
+            }
 
             return score
         }

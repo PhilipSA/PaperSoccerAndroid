@@ -5,5 +5,5 @@ import com.ps.simplepapersoccer.gameObjects.move.PartialMove
 import java.io.Serializable
 
 interface IGameAI: Serializable {
-    suspend fun makeMove(gameHandler: GameHandler): PartialMove
+    suspend fun makeMove(gameHandler: GameHandler): PartialMove?
 }

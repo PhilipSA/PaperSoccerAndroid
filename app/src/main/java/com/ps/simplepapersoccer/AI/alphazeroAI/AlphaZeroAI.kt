@@ -273,7 +273,7 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
                 val gene1 = genome1.genes[i]
                 val gene2 = innovations2[gene1.innovation]
 
-                if (gene2 != null && Random.nextInt(2) == 1 && gene2.enabled) {
+                if (gene2 != null && Random.nextBoolean() && gene2.enabled) {
                     child.genes.add(copyGene(gene2))
                 } else {
                     child.genes.add(copyGene(gene1))
@@ -419,7 +419,7 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
         }
 
         private fun mutateHelper(rate: Double): Double {
-            return if (Random.nextInt(1, 2) == 1) {
+            return if (Random.nextBoolean()) {
                 0.95 * rate
             } else {
                 1.05263 * rate

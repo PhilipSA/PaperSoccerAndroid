@@ -117,7 +117,7 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
 
         lateinit var pool: Pool
         private val outputs = 7
-        private val inputs get() = gameHandler.gameBoard.nodeHashSet.size + 1
+        private val inputs get() = gameHandler.gameBoard.nodeHashSet.size + 2
 
         init {
             initPool()
@@ -210,13 +210,13 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
             genome.network = network
         }
 
-        private fun evaluateNetwork(network: Network, inputsArg: MutableList<Double>): PossibleMove? {
+        private fun evaluateNetwork(network: Network, inputsArg: MutableList<Int>): PossibleMove? {
             if (inputsArg.size != inputs) {
                 return null
             }
 
             for (index in 0 until inputs) {
-                network.neurons[index]?.value = inputsArg[index]
+                network.neurons[index]?.value = inputsArg[index].toDouble()
             }
 
             network.neurons.values.forEach { neuron ->
@@ -696,15 +696,15 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
         }
 
         private fun initPool() {
-            pool = newPool()
+            if (loadFile().not()) {
+                pool = newPool()
 
-            //loadFile()
+                for (x in 0..POPULATION) {
+                    addToSpecies(basicGenome())
+                }
 
-            for (x in 0..POPULATION) {
-                addToSpecies(basicGenome())
+                initRun()
             }
-
-            initRun()
         }
 
         private fun initRun() {
@@ -718,8 +718,9 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
             val species = pool.species[pool.currentSpecies]
             val genome = species.genomes[pool.currentGenome]
 
-            val inputs = gameHandler.gameBoard.nodeHashSet.map { it.hashCode().toDouble() }.toMutableList()
-            inputs.add(aiPlayer.playerNumber.hashCode().toDouble())
+            val inputs = gameHandler.gameBoard.nodeHashSet.map { it.identifierHashCode() }.toMutableList()
+            inputs.add(aiPlayer.playerNumber.hashCode())
+            inputs.add(gameHandler.ballNode.identifierHashCode())
 
             return evaluateNetwork(genome.network, inputs)
         }
@@ -819,21 +820,24 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
         }
 
         private fun writeFile() {
-/*            val file = File(context.cacheDir, FILE_NAME)
+            val file = File(context.cacheDir, FILE_NAME)
             file.createNewFile()
-            file.writeText(Gson().toJson(pool))*/
+            file.writeText(Gson().toJson(pool))
         }
 
-        private fun loadFile() {
+        private fun loadFile(): Boolean {
             val file = File(context.cacheDir, FILE_NAME)
 
-            if (file.exists()) {
+            return if (file.exists()) {
                 pool = Gson().fromJson(file.readText(), Pool::class.java)
 
                 while (fitnessAlreadyMeasured()) {
                     nextGenome()
                 }
                 initRun()
+                true
+            } else {
+                false
             }
         }
     }

@@ -116,8 +116,8 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
         )
 
         lateinit var pool: Pool
-        private val outputs get() = gameHandler.gameBoard.allPossibleMovesFromNode(gameHandler.ballNode)
-        private val inputs get() = gameHandler.gameBoard.nodeHashSet.size + 1
+        private val outputs = 8
+        private val inputs = gameHandler.gameBoard.nodeHashSet.size + 1
 
         init {
             initPool()
@@ -133,7 +133,7 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
         }
 
         private fun newPool(): Pool {
-            return Pool(mutableListOf(), 0, 0, 0, 0.0, outputs.size)
+            return Pool(mutableListOf(), 0, 0, 0, 0.0, outputs)
         }
 
         private fun newSpecies(): Species {
@@ -188,7 +188,7 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
                 network.neurons[i] = newNeuron()
             }
 
-            for ((index, _) in outputs.withIndex()) {
+            for (index in 0 until outputs) {
                 network.neurons[MAX_NODES + index] = newNeuron()
             }
 
@@ -235,16 +235,17 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
             }
 
             val validOutputs = mutableListOf<PossibleMove>()
+            val validMoves = gameHandler.gameBoard.allPossibleMovesFromNode(gameHandler.ballNode)
 
-            for ((index, _) in outputs.withIndex()) {
-                val move = outputs.toList()[index]
+            for (index in 0 until outputs) {
+                val move = validMoves.toList().getOrNull(index)
 
-                if (network.neurons[MAX_NODES + index]?.value ?: 0.0 > 0) {
+                if (network.neurons[MAX_NODES + index]?.value ?: 0.0 > 0 && move != null) {
                     validOutputs.add(move)
                 }
             }
 
-            return if (validOutputs.isNotEmpty()) validOutputs else outputs.toMutableList()
+            return validOutputs
         }
 
         private fun crossover(genome1: Genome, genome2: Genome): Genome {
@@ -300,7 +301,7 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
                 }
             }
 
-            for ((i, _) in outputs.withIndex()) {
+            for (i in 0 until outputs) {
                 neurons[MAX_NODES + i] = true
             }
 

@@ -19,6 +19,8 @@ class GameHandler(private val listener: IGameHandlerListener?, gridX: Int, gridY
 
     var currentPlayersTurn: IPlayer; private set
 
+    var winner: Victory? = null
+
     var numberOfTurns = 0
     val gameBoard: GameBoard
     private var ongoingTurn = false
@@ -108,6 +110,7 @@ class GameHandler(private val listener: IGameHandlerListener?, gridX: Int, gridY
     }
 
     private fun winner(victory: Victory) {
+        this.winner = victory
         victory.winner.score += 1
         listener?.winnerLiveData?.value = victory
     }

@@ -778,9 +778,7 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
             val species = pool.species.getOrNull(pool.currentSpecies)
             val genome = species?.genomes?.getOrNull(pool.currentGenome)
 
-            var fitness = fitnessEvaluation(gameHandler)
-
-            if (fitness == 0.0) fitness = -1.0
+            val fitness = fitnessEvaluation(gameHandler)
 
             genome?.fitness = fitness
 
@@ -801,11 +799,10 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
         }
 
         private fun fitnessEvaluation(state: GameHandler): Double {
-            var score = 0.0
+            var score = 100.0
 
-            if (state.getWinner(state.ballNode)?.winner == aiPlayer) score = 1000.0
-
-            score -= state.numberOfTurns
+            score = if (state.winner?.winner == aiPlayer) 1000.0
+            else -1000.0
 
             val opponentsGoal = state.getOpponent(aiPlayer).goal!!
             val closestToOpponentsGoal = state.gameBoard.nodeHashSet.filter { it.nodeType == NodeTypeEnum.BounceAble }.minBy { MathHelper.euclideanDistance(opponentsGoal.goalNode().coords, it.coords) }

@@ -118,6 +118,8 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
         lateinit var pool: Pool
         private val outputs = 7
         private val inputs get() = gameHandler.gameBoard.nodeHashSet.size + 2
+        private var moveScores = 0.0
+        private val poolCacheDirectory = "C:\\Users\\Admin\\Documents\\AlphaZero"
 
         init {
             initPool()
@@ -753,6 +755,8 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
 
             gameHandler.makePartialMove(partialMove)
 
+            moveScores += moveEvaluation(gameHandler)
+
             if (gameHandler.getWinner(gameHandler.ballNode)?.winner != null) {
                 cutOff()
             }
@@ -790,6 +794,7 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
 
             pool.currentSpecies = 0
             pool.currentGenome = 0
+            moveScores = 0.0
 
             while (fitnessAlreadyMeasured()) {
                 nextGenome()
@@ -799,31 +804,59 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
         }
 
         private fun fitnessEvaluation(state: GameHandler): Double {
+            var score = if (state.winner?.winner == aiPlayer) 1000.0
+            else -10.0
+
+            score += moveScores
+
+            return score
+        }
+
+        private fun moveEvaluation(state: GameHandler): Double {
             var score = 100.0
 
-            score = if (state.winner?.winner == aiPlayer) 1000.0
-            else -1000.0
+            score -= (state.numberOfTurns).toDouble()
 
-            val opponentsGoal = state.getOpponent(aiPlayer).goal!!
-            val closestToOpponentsGoal = state.gameBoard.nodeHashSet.filter { it.nodeType == NodeTypeEnum.BounceAble }.minBy { MathHelper.euclideanDistance(opponentsGoal.goalNode().coords, it.coords) }
+            val opponentsGoal = state.getOpponent(aiPlayer).goal!!.goalNode()
+            score -= PathFindingHelper.findPath(state.ballNode, opponentsGoal).size * 2
 
-            if (closestToOpponentsGoal != null) {
-                score -= MathHelper.euclideanDistance(opponentsGoal.goalNode().coords, closestToOpponentsGoal.coords)
-            } else {
-                score -= 1000
+            //Neighbors are bounceable
+            state.gameBoard.allPossibleMovesFromNode(state.ballNode).forEach{
+                ++score
             }
 
             return score
         }
 
+        private fun playTop() {
+            var maxfitness = 0.0
+            var maxs = 0
+            var maxg = 0
+
+            pool.species.withIndex().forEach { species ->
+                species.value.genomes.withIndex().forEach { genome ->
+                    if (genome.value.fitness > maxfitness) {
+                        maxfitness = genome.value.fitness
+                        maxs = species.index
+                        maxg = genome.index
+                    }
+                }
+            }
+
+            pool.currentSpecies = maxs
+            pool.currentGenome = maxg
+            pool.maxFitness = maxfitness
+            initRun()
+        }
+
         private fun writeFile() {
-            val file = File(context.cacheDir, FILE_NAME)
+            val file = File(poolCacheDirectory, FILE_NAME)
             file.createNewFile()
             file.writeText(Gson().toJson(pool))
         }
 
         private fun loadFile(): Boolean {
-            val file = File(context.cacheDir, FILE_NAME)
+            val file = File(poolCacheDirectory, FILE_NAME)
 
             return if (file.exists()) {
                 pool = Gson().fromJson(file.readText(), Pool::class.java)

@@ -1,6 +1,9 @@
+import org.jetbrains.kotlin.kapt3.base.Kapt.kapt
+
 plugins {
     id("com.android.application")
     kotlin("android")
+    kotlin("kapt")
     id("kotlin-android-extensions")
 }
 
@@ -35,7 +38,8 @@ dependencies {
     implementation("androidx.preference:preference:1.1.1")
     implementation("androidx.constraintlayout:constraintlayout:1.1.3")
     implementation("com.google.android.material:material:1.1.0")
-    implementation("com.google.code.gson:gson:2.8.6")
+    kapt("com.squareup.moshi:moshi-kotlin-codegen:1.9.2")
+    implementation("com.squareup.moshi:moshi-kotlin:1.9.2")
 
     testImplementation("androidx.test:core:1.2.0")
     testImplementation("org.robolectric:robolectric:4.3.1")

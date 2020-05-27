@@ -1,8 +1,6 @@
 package com.ps.simplepapersoccer.ai.alphazeroAI
 
 import android.content.Context
-import android.util.Log
-import com.google.gson.Gson
 import com.ps.simplepapersoccer.ai.abstraction.IGameAI
 import com.ps.simplepapersoccer.data.enums.NodeTypeEnum
 import com.ps.simplepapersoccer.gameObjects.game.GameHandler
@@ -11,6 +9,8 @@ import com.ps.simplepapersoccer.gameObjects.move.PossibleMove
 import com.ps.simplepapersoccer.gameObjects.player.AIPlayer
 import com.ps.simplepapersoccer.helpers.MathHelper
 import com.ps.simplepapersoccer.helpers.PathFindingHelper
+import com.squareup.moshi.JsonClass
+import com.squareup.moshi.Moshi
 import java.io.File
 import kotlin.math.*
 import kotlin.random.Random
@@ -33,7 +33,7 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
         return neuralNetwork!!.nextMove()
     }
 
-    private class NeuralNetwork(private val context: Context, var gameHandler: GameHandler, private val aiPlayer: AIPlayer) {
+    class NeuralNetwork(private val context: Context, var gameHandler: GameHandler, private val aiPlayer: AIPlayer) {
         companion object {
             private const val POPULATION = 300
             private const val DELTA_DISJOINT = 2.0
@@ -59,12 +59,14 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
             private const val FILE_NAME = "temp.pool"
         }
 
-        private data class Neuron(
+        @JsonClass(generateAdapter = true)
+        data class Neuron(
                 val incoming: MutableList<Gene>,
                 var value: Double
         )
 
-        private data class MutationRates (
+        @JsonClass(generateAdapter = true)
+        data class MutationRates (
                 var mutation: Double = 0.0,
                 var connections: Double = MUTATE_CONNECTION_CHANCE,
                 var link: Double = LINK_MUTATION_CHANCE,
@@ -77,7 +79,8 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
             fun getValues() = listOf(connections, link, bias, node, enable, disable, step)
         }
 
-        private data class Genome(
+        @JsonClass(generateAdapter = true)
+        data class Genome(
                 val genes: MutableList<Gene>,
                 var fitness: Double,
                 val adjustedFitness: Int,
@@ -87,14 +90,16 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
                 val mutationRates: MutationRates
         )
 
-        private data class Species(
+        @JsonClass(generateAdapter = true)
+        data class Species(
                 var topFitness: Double,
                 var staleness: Int,
                 val genomes: MutableList<Genome>,
                 var averageFitness: Int
         )
 
-        private data class Pool(
+        @JsonClass(generateAdapter = true)
+        data class Pool(
                 var species: MutableList<Species>,
                 var generation: Int,
                 var currentSpecies: Int,
@@ -103,7 +108,8 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
                 var innovation: Int
         )
 
-        private data class Gene(
+        @JsonClass(generateAdapter = true)
+        data class Gene(
                 var into: Int,
                 var out: Int,
                 var weight: Double,
@@ -111,8 +117,9 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
                 var innovation: Int
         )
 
-        private data class Network(
-                val neurons: HashMap<Int, Neuron>
+        @JsonClass(generateAdapter = true)
+        data class Network(
+                val neurons: MutableMap<Int, Neuron>
         )
 
         lateinit var pool: Pool
@@ -240,9 +247,10 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
             var bestMove: PossibleMove? = null
             val validMoves = gameHandler.gameBoard.allPossibleMovesFromNode(gameHandler.ballNode).toList().sortedBy { it.newNode.coords.x + it.newNode.coords.y }
 
+            var highestValue = 0.0
+
             for (index in 0 until outputs) {
                 val move = validMoves.getOrNull(index)
-                var highestValue = 0.0
                 val neuronValue = network.neurons[MAX_NODES + index]?.value ?: 0.0
 
                 if (neuronValue > highestValue && move != null) {
@@ -852,14 +860,14 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
         private fun writeFile() {
             val file = File(poolCacheDirectory, FILE_NAME)
             file.createNewFile()
-            file.writeText(Gson().toJson(pool))
+            file.writeText(Moshi.Builder().build().adapter(Pool::class.java).toJson(pool))
         }
 
         private fun loadFile(): Boolean {
             val file = File(poolCacheDirectory, FILE_NAME)
 
             return if (file.exists()) {
-                pool = Gson().fromJson(file.readText(), Pool::class.java)
+                pool = Moshi.Builder().build().adapter(Pool::class.java).fromJson(file.readText())!!
 
                 while (fitnessAlreadyMeasured()) {
                     nextGenome()

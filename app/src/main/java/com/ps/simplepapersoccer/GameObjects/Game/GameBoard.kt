@@ -16,7 +16,7 @@ import kotlin.math.roundToInt
 class GameBoard(private val gridSizeX: Int, private val gridSizeY: Int) {
     var nodeHashSet = HashSet<Node>()
 
-    var ballNode: Node
+    val ballNode get() = nodeHashSet.first { it.containsBall }
 
     lateinit var goal1: Goal
     lateinit var goal2: Goal
@@ -34,7 +34,7 @@ class GameBoard(private val gridSizeX: Int, private val gridSizeY: Int) {
 
     init {
         makeNodes(gridSizeX, gridSizeY)
-        ballNode = findNodeByCoords(TwoDimensionalPoint(gridSizeX / 2, gridSizeY / 2)) as Node
+        findNodeByCoords(TwoDimensionalPoint(gridSizeX / 2, gridSizeY / 2))?.containsBall = true
     }
 
     private fun isEdgeNode(point: TwoDimensionalPoint) : Boolean {
@@ -103,7 +103,10 @@ class GameBoard(private val gridSizeX: Int, private val gridSizeY: Int) {
         storedMove.partialMove.newNode.addNeighbor(storedMove.partialMove.oldNode)
         storedMove.partialMove.oldNode.addNeighbor(storedMove.partialMove.newNode)
         storedMove.partialMove.newNode.nodeType = storedMove.newNodeTypeEnum
-        ballNode = storedMove.partialMove.oldNode
+
+        storedMove.partialMove.oldNode.containsBall = true
+        storedMove.partialMove.newNode.containsBall = false
+
         return storedMove.partialMove
     }
 
@@ -115,7 +118,8 @@ class GameBoard(private val gridSizeX: Int, private val gridSizeY: Int) {
         if (partialMove.oldNode.nodeType == NodeTypeEnum.Empty)
             partialMove.oldNode.nodeType = NodeTypeEnum.BounceAble
 
-        ballNode = partialMove.newNode
+        partialMove.newNode.containsBall = true
+        partialMove.oldNode.containsBall = false
     }
 
     fun findNodeByCoords(point: TwoDimensionalPoint): Node? {

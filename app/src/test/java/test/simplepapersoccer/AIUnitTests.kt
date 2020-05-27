@@ -9,6 +9,7 @@ import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
 import com.ps.simplepapersoccer.ai.alphazeroAI.AlphaZeroAI
 import com.ps.simplepapersoccer.ai.euclideanAI.EuclideanAI
+import com.ps.simplepapersoccer.ai.randomAI.RandomAI
 import com.ps.simplepapersoccer.gameObjects.game.GameHandler
 import com.ps.simplepapersoccer.gameObjects.player.AIPlayer
 import com.ps.simplepapersoccer.gameObjects.player.abstraction.IPlayer
@@ -38,7 +39,7 @@ class AIUnitTests {
     @Before
     fun init() {
         player1 = AIPlayer(ApplicationProvider.getApplicationContext<Application>(), AlphaZeroAI::class.java.simpleName, 1, 0, true)
-        player2 = AIPlayer(ApplicationProvider.getApplicationContext<Application>(), EuclideanAI::class.java.simpleName, 2, 0, true)
+        player2 = AIPlayer(ApplicationProvider.getApplicationContext<Application>(), RandomAI::class.java.simpleName, 2, 0, true)
         createGameHandler(players)
     }
 
@@ -51,13 +52,13 @@ class AIUnitTests {
         Dispatchers.setMain(Dispatchers.Unconfined)
 
         runBlocking {
-            for (i in 0 until 2000) {
+            for (i in 0 until 10000) {
+                players.shuffle()
                 createGameHandler(players)
                 gameHandler.updateGameState()
             }
 
-            assertEquals(0, player2.score)
-            assertEquals(3, player1.score)
+            assertEquals(10000, player1.score)
         }
     }
 }

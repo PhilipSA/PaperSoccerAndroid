@@ -117,9 +117,10 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
 
         lateinit var pool: Pool
         private val outputs = 7
-        private val inputs get() = gameHandler.gameBoard.nodeHashSet.size + 2
+        private val inputs get() = gameHandler.gameBoard.nodeHashSet.size + 1
         private var moveScores = 0.0
-        private val poolCacheDirectory = "C:\\Users\\Admin\\Documents\\AlphaZero"
+        //private val poolCacheDirectory = "C:\\Users\\Admin\\Documents\\AlphaZero"
+        private val poolCacheDirectory = context.cacheDir
 
         init {
             initPool()
@@ -720,9 +721,8 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
             val species = pool.species[pool.currentSpecies]
             val genome = species.genomes[pool.currentGenome]
 
-            val inputs = gameHandler.gameBoard.nodeHashSet.map { it.identifierHashCode() }.toMutableList()
+            val inputs = gameHandler.gameBoard.nodeHashSet.toMutableList().sortedBy { it.coords.x + it.coords.y }.map { it.identifierHashCode() }.toMutableList()
             inputs.add(aiPlayer.playerNumber.hashCode())
-            inputs.add(gameHandler.ballNode.identifierHashCode())
 
             return evaluateNetwork(genome.network, inputs)
         }

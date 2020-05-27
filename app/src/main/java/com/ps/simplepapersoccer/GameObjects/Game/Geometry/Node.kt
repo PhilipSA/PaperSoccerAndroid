@@ -8,9 +8,10 @@ class Node(val coords: TwoDimensionalPoint, var nodeType: NodeTypeEnum) {
     var cameFrom: Node? = null
     var nodeValue: Double = 0.0
     var costSoFar: Double = 0.0
+    var containsBall: Boolean = false
 
     fun identifierHashCode(): Int {
-        return coords.hashCode() xor nodeType.hashCode() xor neighbors.hashCode()
+        return nodeType.hashCode() xor neighbors.size.hashCode() xor containsBall.hashCode()
     }
 
     fun pairMatchesType(other: Node, firstNodeType: NodeTypeEnum, otherNodeType: NodeTypeEnum): Boolean {

@@ -2,18 +2,22 @@ package com.ps.simplepapersoccer.ai.alphazeroAI
 
 import android.content.Context
 import com.ps.simplepapersoccer.ai.abstraction.IGameAI
-import com.ps.simplepapersoccer.data.enums.NodeTypeEnum
 import com.ps.simplepapersoccer.gameObjects.game.GameHandler
 import com.ps.simplepapersoccer.gameObjects.move.PartialMove
 import com.ps.simplepapersoccer.gameObjects.move.PossibleMove
 import com.ps.simplepapersoccer.gameObjects.player.AIPlayer
-import com.ps.simplepapersoccer.helpers.MathHelper
 import com.ps.simplepapersoccer.helpers.PathFindingHelper
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.Moshi
 import java.io.File
+import java.io.IOException
+import java.util.*
+import java.util.zip.Deflater
+import java.util.zip.Inflater
+import kotlin.collections.HashMap
 import kotlin.math.*
 import kotlin.random.Random
+
 
 class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) : IGameAI {
 
@@ -126,8 +130,8 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
         private val outputs = 7
         private val inputs get() = gameHandler.gameBoard.nodeHashSet.size + 1
         private var moveScores = 0.0
-        //private val poolCacheDirectory = "C:\\Users\\Admin\\Documents\\AlphaZero"
-        private val poolCacheDirectory = context.cacheDir
+        private val poolCacheDirectory = "C:\\Users\\Admin\\Documents\\AlphaZero"
+        //private val poolCacheDirectory = context.cacheDir
 
         init {
             initPool()
@@ -730,7 +734,7 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
             val genome = species.genomes[pool.currentGenome]
 
             val inputs = gameHandler.gameBoard.nodeHashSet.toMutableList().sortedBy { it.coords.x + it.coords.y }.map { it.identifierHashCode() }.toMutableList()
-            inputs.add(aiPlayer.playerNumber.hashCode())
+            inputs.add(aiPlayer.goal?.goalNode()?.coords.hashCode())
 
             return evaluateNetwork(genome.network, inputs)
         }
@@ -817,6 +821,9 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
 
             score += moveScores
 
+            if (state.winner?.winner == aiPlayer) score -= state.numberOfTurns
+            else score += state.numberOfTurns
+
             return score
         }
 
@@ -829,9 +836,7 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
             score -= PathFindingHelper.findPath(state.ballNode, opponentsGoal).size * 2
 
             //Neighbors are bounceable
-            state.gameBoard.allPossibleMovesFromNode(state.ballNode).forEach{
-                ++score
-            }
+            score += state.gameBoard.allPossibleMovesFromNode(state.ballNode).size
 
             return score
         }
@@ -859,15 +864,35 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
 
         private fun writeFile() {
             val file = File(poolCacheDirectory, FILE_NAME)
-            file.createNewFile()
-            file.writeText(Moshi.Builder().build().adapter(Pool::class.java).toJson(pool))
+            try {
+                file.createNewFile()
+
+                val poolJson = Moshi.Builder().build().adapter(Pool::class.java).toJson(pool)
+                val poolByteArray = poolJson.toByteArray()
+
+                val input = ByteArray(poolByteArray.size)
+                val compresser = Deflater()
+                compresser.setInput(poolByteArray)
+                compresser.finish()
+                val resultLength = compresser.deflate(input)
+                compresser.end()
+
+                file.writeBytes(input.copyOf(resultLength))
+            } catch (e: IOException) { }
         }
 
         private fun loadFile(): Boolean {
             val file = File(poolCacheDirectory, FILE_NAME)
 
             return if (file.exists()) {
-                pool = Moshi.Builder().build().adapter(Pool::class.java).fromJson(file.readText())!!
+                val decompresser = Inflater()
+                decompresser.setInput(file.readBytes())
+                val result = ByteArray(file.length().toInt() * 20)
+                val resultLength = decompresser.inflate(result)
+                val outputString = String(result).trim('\u0000')
+                decompresser.end()
+
+                pool = Moshi.Builder().build().adapter(Pool::class.java).fromJson(outputString)!!
 
                 while (fitnessAlreadyMeasured()) {
                     nextGenome()

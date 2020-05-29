@@ -11,7 +11,7 @@ import com.ps.simplepapersoccer.ai.randomAI.RandomAI
 import com.ps.simplepapersoccer.gameObjects.player.abstraction.IPlayer
 import java.io.Serializable
 
-class AIPlayer(context: Context, playerName: String, playerNumber: Int, playerColor: Int, isAi: Boolean) :
+class AIPlayer(context: Context?, playerName: String, playerNumber: Int, playerColor: Int, isAi: Boolean) :
         IPlayer(playerName, playerNumber, playerColor, isAi), Serializable {
 
     val gameAI: IGameAI = when (playerName) {

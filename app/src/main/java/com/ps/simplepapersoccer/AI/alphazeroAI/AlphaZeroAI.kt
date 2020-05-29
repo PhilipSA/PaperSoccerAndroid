@@ -1,6 +1,7 @@
 package com.ps.simplepapersoccer.ai.alphazeroAI
 
 import android.content.Context
+import android.content.Context.MODE_PRIVATE
 import com.ps.simplepapersoccer.ai.abstraction.IGameAI
 import com.ps.simplepapersoccer.gameObjects.game.GameHandler
 import com.ps.simplepapersoccer.gameObjects.move.PartialMove
@@ -9,7 +10,10 @@ import com.ps.simplepapersoccer.gameObjects.player.AIPlayer
 import com.ps.simplepapersoccer.helpers.PathFindingHelper
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.Moshi
+import okio.Buffer
+import okio.BufferedSource
 import java.io.File
+import java.io.FileOutputStream
 import java.io.IOException
 import java.util.*
 import java.util.zip.Deflater
@@ -19,7 +23,7 @@ import kotlin.math.*
 import kotlin.random.Random
 
 
-class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) : IGameAI {
+class AlphaZeroAI(private val context: Context?, private val aiPlayer: AIPlayer) : IGameAI {
 
     private var neuralNetwork: NeuralNetwork? = null
 
@@ -37,7 +41,7 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
         return neuralNetwork!!.nextMove()
     }
 
-    class NeuralNetwork(private val context: Context, var gameHandler: GameHandler, private val aiPlayer: AIPlayer) {
+    class NeuralNetwork(private val context: Context?, var gameHandler: GameHandler, private val aiPlayer: AIPlayer) {
         companion object {
             private const val POPULATION = 300
             private const val DELTA_DISJOINT = 2.0
@@ -70,7 +74,7 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
         )
 
         @JsonClass(generateAdapter = true)
-        data class MutationRates (
+        data class MutationRates(
                 var mutation: Double = 0.0,
                 var connections: Double = MUTATE_CONNECTION_CHANCE,
                 var link: Double = LINK_MUTATION_CHANCE,
@@ -130,8 +134,8 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
         private val outputs = 7
         private val inputs get() = gameHandler.gameBoard.nodeHashSet.size + 1
         private var moveScores = 0.0
-        private val poolCacheDirectory = "C:\\Users\\Admin\\Documents\\AlphaZero"
-        //private val poolCacheDirectory = context.cacheDir
+        private val poolCacheDirectory = context?.filesDir?.toString()
+                ?: "C:\\Users\\Admin\\Documents\\AlphaZero"
 
         init {
             initPool()
@@ -887,9 +891,9 @@ class AlphaZeroAI(private val context: Context, private val aiPlayer: AIPlayer) 
             return if (file.exists()) {
                 val decompresser = Inflater()
                 decompresser.setInput(file.readBytes())
-                val result = ByteArray(file.length().toInt() * 20)
+                val result = ByteArray(file.length().toInt() * 10)
                 val resultLength = decompresser.inflate(result)
-                val outputString = String(result).trim('\u0000')
+                val outputString = String(result, 0, resultLength)
                 decompresser.end()
 
                 pool = Moshi.Builder().build().adapter(Pool::class.java).fromJson(outputString)!!

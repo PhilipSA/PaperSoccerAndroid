@@ -42,9 +42,7 @@ dependencies {
     implementation("com.squareup.moshi:moshi-kotlin:1.9.2")
 
     testImplementation("androidx.test:core:1.2.0")
-    testImplementation("org.robolectric:robolectric:4.3.1")
     testImplementation("junit:junit:4.13")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.3.6")
     testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0")
     androidTestImplementation("org.mockito:mockito-core:3.2.4")
     //Life cycles

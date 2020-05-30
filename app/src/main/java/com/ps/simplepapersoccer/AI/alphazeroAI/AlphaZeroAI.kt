@@ -2,6 +2,7 @@ package com.ps.simplepapersoccer.ai.alphazeroAI
 
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
+import android.util.Log
 import com.ps.simplepapersoccer.ai.abstraction.IGameAI
 import com.ps.simplepapersoccer.gameObjects.game.GameHandler
 import com.ps.simplepapersoccer.gameObjects.move.PartialMove
@@ -132,8 +133,8 @@ class AlphaZeroAI(private val context: Context?, private val aiPlayer: AIPlayer)
 
         lateinit var pool: Pool
         private val outputs = 7
-        private val inputs get() = gameHandler.gameBoard.nodeHashSet.size + 1
-        private var moveScores = 0.0
+        private val inputs get() = gameHandler.gameBoard.nodeHashSet.size
+
         private val poolCacheDirectory = context?.filesDir?.toString()
                 ?: "C:\\Users\\Admin\\Documents\\AlphaZero"
 
@@ -737,8 +738,10 @@ class AlphaZeroAI(private val context: Context?, private val aiPlayer: AIPlayer)
             val species = pool.species[pool.currentSpecies]
             val genome = species.genomes[pool.currentGenome]
 
-            val inputs = gameHandler.gameBoard.nodeHashSet.toMutableList().sortedBy { it.coords.x + it.coords.y }.map { it.identifierHashCode() }.toMutableList()
-            inputs.add(aiPlayer.goal?.goalNode()?.coords.hashCode())
+            val inputs = gameHandler.gameBoard.nodeHashSet.toMutableList().sortedBy { it.coords.x + it.coords.y }
+                    .map { it.identifierHashCode() }.toMutableList()
+
+            if (aiPlayer.goal?.goalNode()?.coords?.y != 0) inputs.reverse()
 
             return evaluateNetwork(genome.network, inputs)
         }
@@ -767,16 +770,6 @@ class AlphaZeroAI(private val context: Context?, private val aiPlayer: AIPlayer)
         fun nextMove(): PartialMove? {
             val current = evaluateCurrent() ?: return null
 
-            val partialMove = PartialMove(current.oldNode, current.newNode, aiPlayer)
-
-            gameHandler.makePartialMove(partialMove)
-
-            moveScores += moveEvaluation(gameHandler)
-
-            if (gameHandler.getWinner(gameHandler.ballNode)?.winner != null) {
-                cutOff()
-            }
-
             var measured = 0
             var total = 0
 
@@ -788,8 +781,6 @@ class AlphaZeroAI(private val context: Context?, private val aiPlayer: AIPlayer)
                     }
                 }
             }
-
-            gameHandler.undoLastMove()
 
             return PartialMove(current.oldNode, current.newNode, aiPlayer)
         }
@@ -810,7 +801,6 @@ class AlphaZeroAI(private val context: Context?, private val aiPlayer: AIPlayer)
 
             pool.currentSpecies = 0
             pool.currentGenome = 0
-            moveScores = 0.0
 
             while (fitnessAlreadyMeasured()) {
                 nextGenome()
@@ -821,26 +811,13 @@ class AlphaZeroAI(private val context: Context?, private val aiPlayer: AIPlayer)
 
         private fun fitnessEvaluation(state: GameHandler): Double {
             var score = if (state.winner?.winner == aiPlayer) 1000.0
-            else -10.0
-
-            score += moveScores
-
-            if (state.winner?.winner == aiPlayer) score -= state.numberOfTurns
-            else score += state.numberOfTurns
-
-            return score
-        }
-
-        private fun moveEvaluation(state: GameHandler): Double {
-            var score = 100.0
-
-            score -= (state.numberOfTurns).toDouble()
+            else 30.0
 
             val opponentsGoal = state.getOpponent(aiPlayer).goal!!.goalNode()
             score -= PathFindingHelper.findPath(state.ballNode, opponentsGoal).size * 2
 
-            //Neighbors are bounceable
-            score += state.gameBoard.allPossibleMovesFromNode(state.ballNode).size
+            if (state.winner?.winner == aiPlayer) score -= state.numberOfTurns
+            else score += state.numberOfTurns
 
             return score
         }
@@ -882,7 +859,9 @@ class AlphaZeroAI(private val context: Context?, private val aiPlayer: AIPlayer)
                 compresser.end()
 
                 file.writeBytes(input.copyOf(resultLength))
-            } catch (e: IOException) { }
+            } catch (e: IOException) {
+                Log.d(AlphaZeroAI::class.java.canonicalName, e.message, e)
+            }
         }
 
         private fun loadFile(): Boolean {

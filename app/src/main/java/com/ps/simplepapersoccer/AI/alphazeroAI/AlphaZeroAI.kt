@@ -1,7 +1,6 @@
 package com.ps.simplepapersoccer.ai.alphazeroAI
 
 import android.content.Context
-import android.content.Context.MODE_PRIVATE
 import android.util.Log
 import com.ps.simplepapersoccer.ai.abstraction.IGameAI
 import com.ps.simplepapersoccer.gameObjects.game.GameHandler
@@ -9,20 +8,11 @@ import com.ps.simplepapersoccer.gameObjects.move.PartialMove
 import com.ps.simplepapersoccer.gameObjects.move.PossibleMove
 import com.ps.simplepapersoccer.gameObjects.player.AIPlayer
 import com.ps.simplepapersoccer.helpers.PathFindingHelper
-import com.squareup.moshi.JsonClass
-import com.squareup.moshi.Moshi
-import okio.Buffer
-import okio.BufferedSource
-import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
-import java.util.*
+import java.io.*
 import java.util.zip.Deflater
 import java.util.zip.Inflater
-import kotlin.collections.HashMap
 import kotlin.math.*
 import kotlin.random.Random
-
 
 class AlphaZeroAI(private val context: Context?, private val aiPlayer: AIPlayer) : IGameAI {
 
@@ -68,13 +58,11 @@ class AlphaZeroAI(private val context: Context?, private val aiPlayer: AIPlayer)
             private const val FILE_NAME = "temp.pool"
         }
 
-        @JsonClass(generateAdapter = true)
         data class Neuron(
                 val incoming: MutableList<Gene>,
                 var value: Double
-        )
+        ): Serializable
 
-        @JsonClass(generateAdapter = true)
         data class MutationRates(
                 var mutation: Double = 0.0,
                 var connections: Double = MUTATE_CONNECTION_CHANCE,
@@ -84,11 +72,10 @@ class AlphaZeroAI(private val context: Context?, private val aiPlayer: AIPlayer)
                 var enable: Double = ENABLE_MUTATION_CHANCE,
                 var disable: Double = DISABLE_MUTATION_CHANCE,
                 var step: Double = STEP_SIZE
-        ) {
+        ): Serializable {
             fun getValues() = listOf(connections, link, bias, node, enable, disable, step)
         }
 
-        @JsonClass(generateAdapter = true)
         data class Genome(
                 val genes: MutableList<Gene>,
                 var fitness: Double,
@@ -97,17 +84,15 @@ class AlphaZeroAI(private val context: Context?, private val aiPlayer: AIPlayer)
                 var maxNeuron: Int,
                 var globalRank: Int,
                 val mutationRates: MutationRates
-        )
+        ): Serializable
 
-        @JsonClass(generateAdapter = true)
         data class Species(
                 var topFitness: Double,
                 var staleness: Int,
                 val genomes: MutableList<Genome>,
                 var averageFitness: Int
-        )
+        ): Serializable
 
-        @JsonClass(generateAdapter = true)
         data class Pool(
                 var species: MutableList<Species>,
                 var generation: Int,
@@ -115,21 +100,24 @@ class AlphaZeroAI(private val context: Context?, private val aiPlayer: AIPlayer)
                 var currentGenome: Int,
                 var maxFitness: Double,
                 var innovation: Int
-        )
+        ): Serializable
 
-        @JsonClass(generateAdapter = true)
         data class Gene(
                 var into: Int,
                 var out: Int,
                 var weight: Double,
                 var enabled: Boolean,
                 var innovation: Int
-        )
+        ): Serializable
 
-        @JsonClass(generateAdapter = true)
         data class Network(
                 val neurons: MutableMap<Int, Neuron>
-        )
+        ): Serializable
+
+        data class PoolDto(
+                val uncompressedSize: Int,
+                val pool: ByteArray
+        ): Serializable
 
         lateinit var pool: Pool
         private val outputs = 7
@@ -848,8 +836,14 @@ class AlphaZeroAI(private val context: Context?, private val aiPlayer: AIPlayer)
             try {
                 file.createNewFile()
 
-                val poolJson = Moshi.Builder().build().adapter(Pool::class.java).toJson(pool)
-                val poolByteArray = poolJson.toByteArray()
+                val poolByteArrayOutput = ByteArrayOutputStream().use { byteArray ->
+                    ObjectOutputStream(byteArray).use {
+                        it.writeObject(pool)
+                    }
+                    byteArray
+                }
+
+                val poolByteArray = poolByteArrayOutput.toByteArray()
 
                 val input = ByteArray(poolByteArray.size)
                 val compresser = Deflater()
@@ -858,7 +852,17 @@ class AlphaZeroAI(private val context: Context?, private val aiPlayer: AIPlayer)
                 val resultLength = compresser.deflate(input)
                 compresser.end()
 
-                file.writeBytes(input.copyOf(resultLength))
+                val compressedPool = input.copyOf(resultLength)
+                val poolDto = PoolDto(poolByteArray.size, compressedPool)
+
+                val poolDtoByteOutput = ByteArrayOutputStream().use { byteArray ->
+                    ObjectOutputStream(byteArray).use {
+                        it.writeObject(poolDto)
+                    }
+                    byteArray
+                }
+
+                file.writeBytes(poolDtoByteOutput.toByteArray())
             } catch (e: IOException) {
                 Log.d(AlphaZeroAI::class.java.canonicalName, e.message, e)
             }
@@ -868,14 +872,20 @@ class AlphaZeroAI(private val context: Context?, private val aiPlayer: AIPlayer)
             val file = File(poolCacheDirectory, FILE_NAME)
 
             return if (file.exists()) {
+
+                val poolDto = ObjectInputStream(ByteArrayInputStream(file.readBytes(), 0, file.length().toInt())).use {
+                    it.readObject() as PoolDto
+                }
+
                 val decompresser = Inflater()
-                decompresser.setInput(file.readBytes())
-                val result = ByteArray(file.length().toInt() * 10)
+                decompresser.setInput(poolDto.pool)
+                val result = ByteArray(poolDto.uncompressedSize)
                 val resultLength = decompresser.inflate(result)
-                val outputString = String(result, 0, resultLength)
                 decompresser.end()
 
-                pool = Moshi.Builder().build().adapter(Pool::class.java).fromJson(outputString)!!
+                ObjectInputStream(ByteArrayInputStream(result, 0, resultLength)).use {
+                    pool = it.readObject() as Pool
+                }
 
                 while (fitnessAlreadyMeasured()) {
                     nextGenome()

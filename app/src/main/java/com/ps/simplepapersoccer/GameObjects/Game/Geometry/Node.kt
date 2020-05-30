@@ -11,7 +11,9 @@ class Node(val coords: TwoDimensionalPoint, var nodeType: NodeTypeEnum) {
     var containsBall: Boolean = false
 
     fun identifierHashCode(): Int {
-        return nodeType.hashCode() xor neighbors.size.hashCode() xor containsBall.hashCode()
+        return nodeType.hashCode()
+                .xor(neighbors.sumBy { it.nodeType.hashCode() + (coords.x - it.coords.x) + (coords.y - it.coords.y) }.hashCode()
+                        .xor(containsBall.hashCode()))
     }
 
     fun pairMatchesType(other: Node, firstNodeType: NodeTypeEnum, otherNodeType: NodeTypeEnum): Boolean {

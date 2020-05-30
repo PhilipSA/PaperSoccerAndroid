@@ -9,56 +9,46 @@ import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
 import com.ps.simplepapersoccer.ai.alphazeroAI.AlphaZeroAI
 import com.ps.simplepapersoccer.ai.euclideanAI.EuclideanAI
+import com.ps.simplepapersoccer.ai.minimaxAI.MinimaxAI
 import com.ps.simplepapersoccer.ai.randomAI.RandomAI
 import com.ps.simplepapersoccer.gameObjects.game.GameHandler
 import com.ps.simplepapersoccer.gameObjects.player.AIPlayer
 import com.ps.simplepapersoccer.gameObjects.player.abstraction.IPlayer
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.setMain
-import org.junit.Before
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
-@RunWith(RobolectricTestRunner::class)
 class AIUnitTests {
-    private lateinit var gameHandler: GameHandler
-    private lateinit var player1: IPlayer
-    private lateinit var player2: IPlayer
-    private val players get() = arrayListOf(player1, player2)
 
-    private val handler = mock<Handler> {
-        on { post(any()) }.thenAnswer { invocation ->
-            val msg = invocation.getArgument<Runnable>(0)
-            msg.run()
-            null
+    private fun runTestGame(players: ArrayList<IPlayer>, handler: Handler) {
+        for (i in 0 until 5000) {
+            players.shuffle()
+            val gameHandler = GameHandler(null, 10, 12, players, Dispatchers.Unconfined, handler)
+            gameHandler.updateGameState()
+            if (i % 1000 == 0) {
+                println(i)
+                System.gc()
+                System.runFinalization()
+            }
         }
-    }
-    @Before
-    fun init() {
-        player1 = AIPlayer(ApplicationProvider.getApplicationContext<Application>(), AlphaZeroAI::class.java.simpleName, 1, 0, true)
-        player2 = AIPlayer(ApplicationProvider.getApplicationContext<Application>(), RandomAI::class.java.simpleName, 2, 0, true)
-        createGameHandler(players)
-    }
-
-    private fun createGameHandler(players: ArrayList<IPlayer>) {
-        gameHandler = GameHandler(null, 10, 12, players, Dispatchers.Main, handler)
     }
 
     @Test
     fun higherDifficultyWinVsLowerDifficulty() {
-        Dispatchers.setMain(Dispatchers.Unconfined)
-
-        runBlocking {
-            for (i in 0 until 10000) {
-                players.shuffle()
-                createGameHandler(players)
-                gameHandler.updateGameState()
+        val handler = mock<Handler> {
+            on { post(any()) }.thenAnswer { invocation ->
+                val msg = invocation.getArgument<Runnable>(0)
+                msg.run()
+                null
             }
-
-            assertEquals(10000, player1.score)
         }
+
+        val player1: IPlayer = AIPlayer(null, AlphaZeroAI::class.java.simpleName, 1, 0, true)
+        val player2: IPlayer = AIPlayer(null, AlphaZeroAI::class.java.simpleName, 2, 0, true)
+        val players = arrayListOf(player1, player2)
+
+        runTestGame(players, handler)
+
+        assertEquals(10000, player1.score)
     }
 }

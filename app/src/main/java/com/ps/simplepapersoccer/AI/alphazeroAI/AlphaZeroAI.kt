@@ -3,10 +3,12 @@ package com.ps.simplepapersoccer.ai.alphazeroAI
 import android.content.Context
 import android.util.Log
 import com.ps.simplepapersoccer.ai.abstraction.IGameAI
+import com.ps.simplepapersoccer.data.enums.NodeTypeEnum
 import com.ps.simplepapersoccer.gameObjects.game.GameHandler
 import com.ps.simplepapersoccer.gameObjects.move.PartialMove
 import com.ps.simplepapersoccer.gameObjects.move.PossibleMove
 import com.ps.simplepapersoccer.gameObjects.player.AIPlayer
+import com.ps.simplepapersoccer.helpers.MathHelper
 import com.ps.simplepapersoccer.helpers.PathFindingHelper
 import java.io.*
 import java.util.zip.Deflater
@@ -32,7 +34,7 @@ class AlphaZeroAI(private val context: Context?, private val aiPlayer: AIPlayer)
         return neuralNetwork!!.nextMove()
     }
 
-    class NeuralNetwork(private val context: Context?, var gameHandler: GameHandler, private val aiPlayer: AIPlayer) {
+    class NeuralNetwork(context: Context?, var gameHandler: GameHandler, private val aiPlayer: AIPlayer) {
         companion object {
             private const val POPULATION = 300
             private const val DELTA_DISJOINT = 2.0
@@ -242,7 +244,9 @@ class AlphaZeroAI(private val context: Context?, private val aiPlayer: AIPlayer)
             }
 
             var bestMove: PossibleMove? = null
-            val validMoves = gameHandler.gameBoard.allPossibleMovesFromNode(gameHandler.ballNode).toList().sortedBy { it.newNode.coords.x + it.newNode.coords.y }
+            val validMoves = gameHandler.gameBoard.allPossibleMovesFromNode(gameHandler.ballNode).toList().sortedBy {
+                it.newNode.coords.x + it.newNode.coords.y
+            }
 
             var highestValue = 0.0
 
@@ -770,7 +774,7 @@ class AlphaZeroAI(private val context: Context?, private val aiPlayer: AIPlayer)
                 }
             }
 
-            return PartialMove(current.oldNode, current.newNode, aiPlayer)
+            return PartialMove(current.oldNode, current.newNode, aiPlayer.playerNumber)
         }
 
         fun cutOff() {
@@ -798,16 +802,8 @@ class AlphaZeroAI(private val context: Context?, private val aiPlayer: AIPlayer)
         }
 
         private fun fitnessEvaluation(state: GameHandler): Double {
-            var score = if (state.winner?.winner == aiPlayer) 1000.0
-            else 30.0
-
-            val opponentsGoal = state.getOpponent(aiPlayer).goal!!.goalNode()
-            score -= PathFindingHelper.findPath(state.ballNode, opponentsGoal).size * 2
-
-            if (state.winner?.winner == aiPlayer) score -= state.numberOfTurns
-            else score += state.numberOfTurns
-
-            return score
+            return if (state.winner?.winner == aiPlayer) 1.0
+            else -1.0
         }
 
         private fun playTop() {

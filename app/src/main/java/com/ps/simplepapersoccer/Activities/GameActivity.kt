@@ -121,9 +121,9 @@ class GameActivity : AppCompatActivity() {
             }
         })
 
-        gameViewModel.drawPartialMoveLiveData.observe(this, Observer {
-            if (it != null) {
-                drawPartialMove(it)
+        gameViewModel.drawPartialMoveLiveData.observe(this, Observer { partialMove ->
+            if (partialMove != null) {
+                drawPartialMove(partialMove, gameViewModel.players.first { it.playerNumber == partialMove.madeTheMove})
                 gameViewModel.drawPartialMoveLiveData.value = null
             }
         })
@@ -163,13 +163,13 @@ class GameActivity : AppCompatActivity() {
         }
     }
 
-    private fun drawPartialMove(move: PartialMove) {
+    private fun drawPartialMove(move: PartialMove, madeTheMove: IPlayer) {
         val newLineCoords = game_view?.nodeToCoords(move.newNode)
         val oldNodeCoords = game_view?.nodeToCoords(move.oldNode)
 
         val linesToDraw = LinesToDraw(TwoDimensionalPointF(oldNodeCoords?.get(0)!!, oldNodeCoords[1]), TwoDimensionalPointF(newLineCoords?.get(0)!!, newLineCoords[1]),
-                move.madeTheMove.playerColor)
-        gameViewModel.addDrawDataToQueue(linesToDraw, move.newNode, move.madeTheMove)
+                madeTheMove.playerColor)
+        gameViewModel.addDrawDataToQueue(linesToDraw, move.newNode, madeTheMove)
     }
 
     private fun winner(victory: Victory) {
@@ -201,6 +201,9 @@ class GameActivity : AppCompatActivity() {
         player_winner.visibility = View.VISIBLE
         play_again_button.visibility = View.VISIBLE
         game_view?.isEnabled = false
+
+        play_again_button.visibility = View.INVISIBLE
+        recreate()
     }
 
     fun resetGame(view: View) {

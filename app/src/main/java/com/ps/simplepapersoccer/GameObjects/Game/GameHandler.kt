@@ -11,18 +11,19 @@ import com.ps.simplepapersoccer.gameObjects.player.AIPlayer
 import com.ps.simplepapersoccer.gameObjects.player.abstraction.IPlayer
 import kotlinx.coroutines.CoroutineDispatcher
 
-class GameHandler(private val listener: IGameHandlerListener?, gridX: Int, gridY: Int, players: ArrayList<IPlayer>,
+class GameHandler(private val listener: IGameHandlerListener?, gridX: Int, gridY: Int,
+                  private val players: ArrayList<IPlayer>,
                   private val dispatcher: CoroutineDispatcher, private val handler: Handler = Handler()): IGameAiHandlerListener {
 
     private val player1: IPlayer = players[0]
     private val player2: IPlayer = players[1]
 
-    var currentPlayersTurn: IPlayer; private set
+    val currentPlayersTurn: IPlayer get() = players.first { it.playerNumber == gameBoard.currentPlayersTurn }
 
     var winner: Victory? = null
 
     var numberOfTurns = 0
-    val gameBoard: GameBoard
+    val gameBoard = GameBoard(gridX, gridY)
     private var ongoingTurn = false
 
     val ballNode: Node get() = gameBoard.ballNode
@@ -32,9 +33,7 @@ class GameHandler(private val listener: IGameHandlerListener?, gridX: Int, gridY
     }
 
     init {
-        currentPlayersTurn = players[0]
-
-        gameBoard = GameBoard(gridX, gridY)
+        gameBoard.currentPlayersTurn = players[0].playerNumber
         player1.goal = gameBoard.goal1
         player2.goal = gameBoard.goal2
         listener?.reDrawLiveData?.value = true
@@ -60,7 +59,7 @@ class GameHandler(private val listener: IGameHandlerListener?, gridX: Int, gridY
     }
 
     fun playerMakeMove(node: Node, player: IPlayer) {
-        val partialMove = PartialMove(ballNode, node, player)
+        val partialMove = PartialMove(ballNode, node, player.playerNumber)
         if (isPartialMoveLegal(partialMove, player) && currentPlayersTurn == player && !ongoingTurn) {
             ongoingTurn = true
             makeMove(partialMove)
@@ -73,22 +72,10 @@ class GameHandler(private val listener: IGameHandlerListener?, gridX: Int, gridY
     }
 
     private fun makeMove(partialMove: PartialMove) {
-        makePartialMove(partialMove)
+        gameBoard.makePartialMove(partialMove)
         listener?.drawPartialMoveLiveData?.value = partialMove
         ++numberOfTurns
         updateGameState()
-    }
-
-    fun undoLastMove() {
-        currentPlayersTurn = gameBoard.undoLastMove().madeTheMove
-    }
-
-    fun makePartialMove(partialMove: PartialMove) {
-        gameBoard.makePartialMove(partialMove)
-
-        if (partialMove.newNode.nodeType == NodeTypeEnum.Empty) {
-            changeTurn()
-        }
     }
 
     val isGameOver: Boolean
@@ -121,11 +108,6 @@ class GameHandler(private val listener: IGameHandlerListener?, gridX: Int, gridY
             player2 -> player1
             else -> player2
         }
-    }
-
-    private fun changeTurn(): IPlayer {
-        currentPlayersTurn = getOpponent(currentPlayersTurn)
-        return currentPlayersTurn
     }
 
     private fun isPartialMoveLegal(partialMove: PartialMove, player: IPlayer): Boolean {

@@ -41,7 +41,7 @@ class JonasAI(): IGameAI {
                 goalFound = isGoal
 
                 val moveList = LinkedList<PartialMove>()
-                moveList.add(PartialMove(possibleMove.oldNode, possibleMove.newNode, gameHandler.currentPlayersTurn))
+                moveList.add(PartialMove(possibleMove.oldNode, possibleMove.newNode, gameHandler.gameBoard.currentPlayersTurn))
 
                 val newMoveSequence = MoveSequence(
                         moveList,
@@ -54,9 +54,9 @@ class JonasAI(): IGameAI {
             else{
                 val thisIdentifier = UUID.randomUUID()
 
-                val partialMove = PartialMove(possibleMove.oldNode, possibleMove.newNode, gameHandler.currentPlayersTurn)
-                partialMove.madeTheMove = gameHandler.currentPlayersTurn
-                gameHandler.makePartialMove(partialMove)
+                val partialMove = PartialMove(possibleMove.oldNode, possibleMove.newNode, gameHandler.gameBoard.currentPlayersTurn)
+                partialMove.madeTheMove = gameHandler.gameBoard.currentPlayersTurn
+                gameHandler.gameBoard.makePartialMove(partialMove)
 
                 val moves = followAllPossibleMoves(moveSequences, gameHandler, thisIdentifier)
 
@@ -67,7 +67,7 @@ class JonasAI(): IGameAI {
                     }
                 }
 
-                gameHandler.undoLastMove()
+                gameHandler.gameBoard.undoLastMove()
             }
         }
 

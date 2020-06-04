@@ -6,6 +6,8 @@ import com.ps.simplepapersoccer.gameObjects.move.PartialMove
 
 class RandomAI(): IGameAI {
     override suspend fun makeMove(gameHandler: GameHandler): PartialMove {
-        return PartialMove(gameHandler.ballNode, gameHandler.gameBoard.allPossibleMovesFromNode(gameHandler.ballNode).random().newNode, gameHandler.currentPlayersTurn)
+        return PartialMove(gameHandler.ballNode,
+                gameHandler.gameBoard.allPossibleMovesFromNode(gameHandler.ballNode).random().newNode,
+                gameHandler.gameBoard.currentPlayersTurn)
     }
 }

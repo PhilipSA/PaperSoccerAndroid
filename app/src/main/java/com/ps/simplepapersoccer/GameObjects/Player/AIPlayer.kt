@@ -5,6 +5,7 @@ import com.ps.simplepapersoccer.ai.abstraction.IGameAI
 import com.ps.simplepapersoccer.ai.euclideanAI.EuclideanAI
 import com.ps.simplepapersoccer.ai.GameAIHandler.Companion.AI_TIMEOUT_MS
 import com.ps.simplepapersoccer.ai.alphazeroAI.AlphaZeroAI
+import com.ps.simplepapersoccer.ai.alphazeroAI.AlphaZeroAI2
 import com.ps.simplepapersoccer.ai.jonasAI.JonasAI
 import com.ps.simplepapersoccer.ai.minimaxAI.MinimaxAI
 import com.ps.simplepapersoccer.ai.randomAI.RandomAI
@@ -19,6 +20,7 @@ class AIPlayer(context: Context?, playerName: String, playerNumber: Int, playerC
         MinimaxAI::class.java.simpleName -> MinimaxAI(AI_TIMEOUT_MS)
         JonasAI::class.java.simpleName -> JonasAI()
         AlphaZeroAI::class.java.simpleName -> AlphaZeroAI(context, this)
+        AlphaZeroAI2::class.java.simpleName -> AlphaZeroAI2()
         RandomAI::class.java.simpleName -> RandomAI()
         else -> {
             EuclideanAI()
@@ -30,6 +32,7 @@ class AIPlayer(context: Context?, playerName: String, playerNumber: Int, playerC
                 MinimaxAI::class.java.simpleName,
                 JonasAI::class.java.simpleName,
                 AlphaZeroAI::class.java.simpleName,
+                AlphaZeroAI2::class.java.simpleName,
                 RandomAI::class.java.simpleName)
     }
 }

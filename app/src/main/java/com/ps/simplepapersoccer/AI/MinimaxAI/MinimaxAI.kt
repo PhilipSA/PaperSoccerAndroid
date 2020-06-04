@@ -30,11 +30,11 @@ class MinimaxAI(private val timeLimitMilliSeconds: Long = AI_TIMEOUT_MS) : IGame
 
         for (move in moves) {
 
-            state.makePartialMove(move.returnMove as PartialMove)
+            state.gameBoard.makePartialMove(move.returnMove as PartialMove)
             val searchTimeLimit = ((timeLimitMilliSeconds - 1000) / moves.size)
             val score = iterativeDeepeningSearch(state, searchTimeLimit, maximPlayer)
             //val score = alphaBetaPruningNoTimeLimit(state, 0, maximPlayer, Integer.MIN_VALUE.toDouble(), Integer.MAX_VALUE.toDouble())
-            state.undoLastMove()
+            state.gameBoard.undoLastMove()
 
             if (score >= winCutoff) {
                 return move
@@ -97,9 +97,9 @@ class MinimaxAI(private val timeLimitMilliSeconds: Long = AI_TIMEOUT_MS) : IGame
         if (maximizingPlayer == state.currentPlayersTurn) {
             val possibleMoves = sortPossibleMovesByScore(SortOrderEnum.Descending, state, maximizingPlayer)
             for (possibleMove in possibleMoves) {
-                state.makePartialMove(possibleMove.returnMove!!)
+                state.gameBoard.makePartialMove(possibleMove.returnMove!!)
                 alpha = max(alpha, alphaBetaPruning(state, currentDepth - 1, maximizingPlayer, alpha, beta, startTime, timeLimit))
-                state.undoLastMove()
+                state.gameBoard.undoLastMove()
 
                 if (beta <= alpha) {
                     break // pruning
@@ -109,9 +109,9 @@ class MinimaxAI(private val timeLimitMilliSeconds: Long = AI_TIMEOUT_MS) : IGame
         } else {
             val possibleMoves = sortPossibleMovesByScore(SortOrderEnum.Ascending, state, maximizingPlayer)
             for (possibleMove in possibleMoves) {
-                state.makePartialMove(possibleMove.returnMove!!)
+                state.gameBoard.makePartialMove(possibleMove.returnMove!!)
                 beta = min(beta, alphaBetaPruning(state, currentDepth - 1, maximizingPlayer, alpha, beta, startTime, timeLimit))
-                state.undoLastMove()
+                state.gameBoard.undoLastMove()
 
                 if (beta <= alpha) {
                     break // pruning
@@ -127,16 +127,16 @@ class MinimaxAI(private val timeLimitMilliSeconds: Long = AI_TIMEOUT_MS) : IGame
     private fun sortPossibleMovesByScore(sortOrder: SortOrderEnum, state: GameHandler, maximzingPlayer: IPlayer): ArrayList<MoveData> {
         val newPossibleMoves = ArrayList<MoveData>()
         for (possibleMove in state.gameBoard.allPossibleMovesFromNode(state.ballNode)) {
-            val partialMove = PartialMove(possibleMove.oldNode, possibleMove.newNode, state.currentPlayersTurn)
-            partialMove.madeTheMove = state.currentPlayersTurn
-            state.makePartialMove(partialMove)
+            val partialMove = PartialMove(possibleMove.oldNode, possibleMove.newNode, state.gameBoard.currentPlayersTurn)
+            partialMove.madeTheMove = state.gameBoard.currentPlayersTurn
+            state.gameBoard.makePartialMove(partialMove)
 
             val moveData = MoveData(minmaxEvaluation(state, maximzingPlayer))
             moveData.returnMove = partialMove
 
             newPossibleMoves.add(moveData)
 
-            state.undoLastMove()
+            state.gameBoard.undoLastMove()
         }
 
         if (sortOrder == SortOrderEnum.Ascending) {

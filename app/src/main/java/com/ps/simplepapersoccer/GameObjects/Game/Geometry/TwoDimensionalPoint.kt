@@ -1,15 +1,7 @@
 package com.ps.simplepapersoccer.gameObjects.game.geometry
 
-class TwoDimensionalPoint() {
-    var x: Int = 0
-    var y: Int = 0
-
+data class TwoDimensionalPoint(var x: Int, var y: Int) {
     fun toAndroidPoint() = android.graphics.Point(x, y)
-
-    constructor(x: Int, y: Int) : this() {
-        this.x = x
-        this.y = y
-    }
 
     fun set(x: Int, y: Int) {
         this.x = x

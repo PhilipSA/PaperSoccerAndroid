@@ -1,6 +1,7 @@
 package com.ps.simplepapersoccer.gameObjects.game
 
 import com.ps.simplepapersoccer.data.enums.NodeTypeEnum
+import com.ps.simplepapersoccer.data.enums.VictoryConditionEnum
 import com.ps.simplepapersoccer.gameObjects.game.geometry.Abstraction.IntegerLine
 import com.ps.simplepapersoccer.gameObjects.game.geometry.Goal
 import com.ps.simplepapersoccer.gameObjects.game.geometry.Node
@@ -8,15 +9,18 @@ import com.ps.simplepapersoccer.gameObjects.game.geometry.TwoDimensionalPoint
 import com.ps.simplepapersoccer.gameObjects.move.PartialMove
 import com.ps.simplepapersoccer.gameObjects.move.PossibleMove
 import com.ps.simplepapersoccer.gameObjects.move.StoredMove
+import com.ps.simplepapersoccer.gameObjects.player.abstraction.IPlayer
 import com.ps.simplepapersoccer.helpers.MathHelper
 import java.util.*
 import kotlin.collections.HashSet
 import kotlin.math.roundToInt
 
-class GameBoard(private val gridSizeX: Int, private val gridSizeY: Int) {
+data class GameBoard(val gridSizeX: Int, val gridSizeY: Int) {
     var nodeHashSet = HashSet<Node>()
 
     val ballNode get() = nodeHashSet.first { it.containsBall }
+
+    var currentPlayersTurn: Int = 1
 
     lateinit var goal1: Goal
     lateinit var goal2: Goal
@@ -30,11 +34,37 @@ class GameBoard(private val gridSizeX: Int, private val gridSizeY: Int) {
             IntegerLine(TwoDimensionalPoint(gridSizeX / 2 - goalScalingX, gridSizeY), TwoDimensionalPoint(gridSizeX / 2 - goalScalingX, gridSizeY-1)),
             IntegerLine(TwoDimensionalPoint(gridSizeX / 2 + goalScalingX, gridSizeY), TwoDimensionalPoint(gridSizeX / 2 + goalScalingX, gridSizeY-1)))
 
-    private val allPartialMoves = Stack<StoredMove>()
+    var allPartialMoves = Stack<StoredMove>(); private set
+
+    val isGameOver: Boolean
+        get() {
+            return getWinner(ballNode)
+        }
 
     init {
         makeNodes(gridSizeX, gridSizeY)
         findNodeByCoords(TwoDimensionalPoint(gridSizeX / 2, gridSizeY / 2))?.containsBall = true
+    }
+
+    fun copy(board: GameBoard): GameBoard {
+        val newBoard = board.copy(gridSizeX = board.gridSizeX, gridSizeY = board.gridSizeY)
+        newBoard.nodeHashSet = board.nodeHashSet.map {
+            val coords = it.coords
+            Node(coords.copy(x = coords.x, y = coords.y), it.nodeType)
+        }.toHashSet()
+
+        newBoard.allPartialMoves = Stack<StoredMove>().apply {
+            board.allPartialMoves.forEach {
+                val oldNode = it.partialMove.oldNode
+                val newNode = it.partialMove.newNode
+                val copy = it.partialMove.copy(oldNode = oldNode.copy(coords = oldNode.coords, nodeType = oldNode.nodeType),
+                        newNode = newNode.copy(coords = newNode.coords, nodeType = newNode.nodeType))
+
+                add(StoredMove(PartialMove(copy.oldNode, copy.newNode, copy.madeTheMove), it.oldNodeTypeEnum, it.newNodeTypeEnum))
+            }
+        }
+
+        return newBoard
     }
 
     private fun isEdgeNode(point: TwoDimensionalPoint) : Boolean {
@@ -94,20 +124,38 @@ class GameBoard(private val gridSizeX: Int, private val gridSizeY: Int) {
         }
     }
 
+    private fun getWinner(node: Node): Boolean {
+        return when {
+            node.nodeType == NodeTypeEnum.Goal -> true
+            node.neighbors.size == 0 -> {
+                true
+            }
+            else -> {
+                false
+            }
+        }
+    }
+
     fun allPossibleMovesFromNode(node: Node): HashSet<PossibleMove> {
         return node.neighbors.map { PossibleMove(node, it) }.toHashSet()
     }
 
-    fun undoLastMove(): PartialMove {
-        val storedMove = allPartialMoves.pop()
-        storedMove.partialMove.newNode.addNeighbor(storedMove.partialMove.oldNode)
-        storedMove.partialMove.oldNode.addNeighbor(storedMove.partialMove.newNode)
-        storedMove.partialMove.newNode.nodeType = storedMove.newNodeTypeEnum
+    fun undoLastMove(): PartialMove? {
+        return if (allPartialMoves.isNotEmpty()) {
+            val storedMove = allPartialMoves.pop()
+            storedMove.partialMove.newNode.addNeighbor(storedMove.partialMove.oldNode)
+            storedMove.partialMove.oldNode.addNeighbor(storedMove.partialMove.newNode)
+            storedMove.partialMove.newNode.nodeType = storedMove.newNodeTypeEnum
 
-        storedMove.partialMove.oldNode.containsBall = true
-        storedMove.partialMove.newNode.containsBall = false
+            storedMove.partialMove.oldNode.containsBall = true
+            storedMove.partialMove.newNode.containsBall = false
 
-        return storedMove.partialMove
+            storedMove.partialMove
+
+            currentPlayersTurn = storedMove.partialMove.madeTheMove
+
+            storedMove.partialMove
+        } else null
     }
 
     fun makePartialMove(partialMove: PartialMove) {
@@ -120,6 +168,14 @@ class GameBoard(private val gridSizeX: Int, private val gridSizeY: Int) {
 
         partialMove.newNode.containsBall = true
         partialMove.oldNode.containsBall = false
+
+        if (partialMove.newNode.nodeType == NodeTypeEnum.Empty) {
+            changeTurn()
+        }
+    }
+
+    private fun changeTurn() {
+        currentPlayersTurn = 3 - currentPlayersTurn
     }
 
     fun findNodeByCoords(point: TwoDimensionalPoint): Node? {

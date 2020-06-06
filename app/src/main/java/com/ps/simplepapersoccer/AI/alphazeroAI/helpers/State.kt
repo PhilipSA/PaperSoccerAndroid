@@ -4,16 +4,20 @@ import com.ps.simplepapersoccer.gameObjects.game.GameBoard
 import com.ps.simplepapersoccer.gameObjects.game.GameHandler
 import com.ps.simplepapersoccer.gameObjects.move.PartialMove
 import com.ps.simplepapersoccer.gameObjects.move.PossibleMove
+import java.util.*
+import kotlin.collections.ArrayDeque
+import kotlin.collections.ArrayList
+import kotlin.collections.HashSet
 
 class State {
-    lateinit var board: GameBoard
-    var playerNo = 0
+    var board: GameBoard
+    val playerNo get() = board.currentPlayersTurn
     var visitCount = 0
     var winScore = 0.0
+    lateinit var move: PartialMove
 
     constructor(state: State) {
         board = state.board
-        playerNo = state.playerNo
         visitCount = state.visitCount
         winScore = state.winScore
     }
@@ -30,8 +34,8 @@ class State {
             val possibleStates: MutableList<State> = ArrayList()
             val availablePositions: HashSet<PossibleMove> = board.allPossibleMovesFromNode(board.ballNode)
             availablePositions.forEach { p ->
-                val newState = State(board.copy(board))
-                newState.board.makePartialMove(PartialMove(p, board.currentPlayersTurn))
+                val newState = State(board)
+                newState.move = PartialMove(p, board.currentPlayersTurn)
                 possibleStates.add(newState)
             }
             return possibleStates
@@ -48,9 +52,5 @@ class State {
     fun randomPlay() {
         val availablePositions: HashSet<PossibleMove> = board.allPossibleMovesFromNode(board.ballNode)
         board.makePartialMove(PartialMove(availablePositions.random(), board.currentPlayersTurn))
-    }
-
-    fun togglePlayer() {
-        playerNo = 3 - playerNo
     }
 }

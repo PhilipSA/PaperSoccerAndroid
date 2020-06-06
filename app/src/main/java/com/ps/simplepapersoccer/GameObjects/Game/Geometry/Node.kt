@@ -2,7 +2,7 @@ package com.ps.simplepapersoccer.gameObjects.game.geometry
 
 import com.ps.simplepapersoccer.data.enums.NodeTypeEnum
 
-data class Node(val coords: TwoDimensionalPoint, var nodeType: NodeTypeEnum) {
+class Node(val coords: TwoDimensionalPoint, var nodeType: NodeTypeEnum) {
     val neighbors: HashSet<Node> = hashSetOf()
     val coordNeighbors: HashSet<Node> = hashSetOf()
     var cameFrom: Node? = null

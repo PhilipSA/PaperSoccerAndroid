@@ -1,6 +1,7 @@
 import com.ps.simplepapersoccer.ai.alphazeroAI.helpers.Tree
 import com.ps.simplepapersoccer.ai.alphazeroAI.helpers.UCT
 import com.ps.simplepapersoccer.gameObjects.game.GameBoard
+import com.ps.simplepapersoccer.gameObjects.move.PartialMove
 
 class MonteCarloTreeSearch {
     var level = 3
@@ -9,14 +10,12 @@ class MonteCarloTreeSearch {
     private val millisForCurrentLevel: Int
         get() = 2 * (level - 1) + 1
 
-    fun findNextMove(gameBoard: GameBoard, playerNo: Int): GameBoard {
+    fun findNextMove(gameBoard: GameBoard): PartialMove {
         val start = System.currentTimeMillis()
         val end = start + 60 * millisForCurrentLevel
-        opponent = 3 - playerNo
         val tree = Tree(gameBoard)
         val rootNode = tree.root
         rootNode.state.board = gameBoard
-        rootNode.state.playerNo = opponent
         while (System.currentTimeMillis() < end) {
             // Phase 1 - Selection
             val promisingNode: MonteCarloNode = selectPromisingNode(rootNode)
@@ -34,7 +33,7 @@ class MonteCarloTreeSearch {
         }
         val winnerNode = rootNode.childWithMaxScore
         tree.root = winnerNode!!
-        return winnerNode.state.board
+        return winnerNode.state.move
     }
 
     private fun selectPromisingNode(rootNode: MonteCarloNode): MonteCarloNode {
@@ -48,10 +47,11 @@ class MonteCarloTreeSearch {
     private fun expandNode(node: MonteCarloNode) {
         val possibleStates = node.state.allPossibleStates
         possibleStates.forEach { state ->
+            state.board.makePartialMove(state.move)
             val newNode = MonteCarloNode(state)
             newNode.parent = node
-            newNode.state.playerNo = node.state.opponent
             node.childArray.add(newNode)
+            state.board.undoLastMove()
         }
     }
 
@@ -72,11 +72,19 @@ class MonteCarloTreeSearch {
             tempNode.parent?.state?.winScore = Double.MIN_VALUE
             return boardStatus
         }
+
+        var numberOfMoves = 0
+
         while (tempState.board.isGameOver.not()) {
-            tempState.togglePlayer()
             tempState.randomPlay()
+            ++numberOfMoves
             boardStatus = tempState.board.currentPlayersTurn
         }
+
+        for (x in 1..numberOfMoves) {
+            tempState.board.undoLastMove()
+        }
+
         return boardStatus
     }
 

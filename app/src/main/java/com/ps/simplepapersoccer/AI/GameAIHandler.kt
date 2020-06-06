@@ -3,6 +3,7 @@ package com.ps.simplepapersoccer.ai
 import android.os.Handler
 import com.ps.simplepapersoccer.ai.abstraction.IGameAiHandlerListener
 import com.ps.simplepapersoccer.gameObjects.game.GameHandler
+import com.ps.simplepapersoccer.gameObjects.move.PossibleMove
 import com.ps.simplepapersoccer.gameObjects.player.AIPlayer
 import kotlinx.coroutines.*
 import java.io.ByteArrayInputStream
@@ -36,7 +37,12 @@ class GameAIHandler(private val aiHandlerListener: IGameAiHandlerListener,
         val aiMove = aiPlayer.gameAI.makeMove(gameHandler)
 
         if (gameHandler.hashCode() != gameHandlerHashCode) {
-            throw Exception("The ai modified the GameHandler without reverting all changes")
+            throw Exception("The AI modified the GameHandler without reverting all changes")
+        }
+
+        if (aiMove != null && gameHandler.gameBoard.allPossibleMovesFromNode(gameHandler.ballNode)
+                        .contains(PossibleMove(aiMove.oldNode, aiMove.newNode)).not()) {
+            throw Exception("The AI returned an illegal move $aiMove")
         }
 
         handler.post {
@@ -45,6 +51,6 @@ class GameAIHandler(private val aiHandlerListener: IGameAiHandlerListener,
     }
 
     companion object {
-        const val AI_TIMEOUT_MS = 2000L
+        const val AI_TIMEOUT_MS = 200000L
     }
 }

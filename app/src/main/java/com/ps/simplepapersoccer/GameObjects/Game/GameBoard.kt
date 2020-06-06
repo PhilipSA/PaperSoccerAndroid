@@ -46,27 +46,6 @@ data class GameBoard(val gridSizeX: Int, val gridSizeY: Int) {
         findNodeByCoords(TwoDimensionalPoint(gridSizeX / 2, gridSizeY / 2))?.containsBall = true
     }
 
-    fun copy(board: GameBoard): GameBoard {
-        val newBoard = board.copy(gridSizeX = board.gridSizeX, gridSizeY = board.gridSizeY)
-        newBoard.nodeHashSet = board.nodeHashSet.map {
-            val coords = it.coords
-            Node(coords.copy(x = coords.x, y = coords.y), it.nodeType)
-        }.toHashSet()
-
-        newBoard.allPartialMoves = Stack<StoredMove>().apply {
-            board.allPartialMoves.forEach {
-                val oldNode = it.partialMove.oldNode
-                val newNode = it.partialMove.newNode
-                val copy = it.partialMove.copy(oldNode = oldNode.copy(coords = oldNode.coords, nodeType = oldNode.nodeType),
-                        newNode = newNode.copy(coords = newNode.coords, nodeType = newNode.nodeType))
-
-                add(StoredMove(PartialMove(copy.oldNode, copy.newNode, copy.madeTheMove), it.oldNodeTypeEnum, it.newNodeTypeEnum))
-            }
-        }
-
-        return newBoard
-    }
-
     private fun isEdgeNode(point: TwoDimensionalPoint) : Boolean {
         return (point.x == 0 || point.x == gridSizeX || point.y == 1 || point.y == gridSizeY - 1)
     }

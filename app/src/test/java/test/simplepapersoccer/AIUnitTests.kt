@@ -1,17 +1,10 @@
 package test.simplepapersoccer
 
-import android.app.Application
 import android.os.Handler
-import android.os.Message
-import androidx.test.core.app.ApplicationProvider
 import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
-import com.ps.simplepapersoccer.ai.alphazeroAI.AlphaZeroAI
-import com.ps.simplepapersoccer.ai.alphazeroAI.AlphaZeroAI2
+import com.ps.simplepapersoccer.ai.neuralnetworkAI.NeuralNetworkAI
 import com.ps.simplepapersoccer.ai.euclideanAI.EuclideanAI
-import com.ps.simplepapersoccer.ai.minimaxAI.MinimaxAI
-import com.ps.simplepapersoccer.ai.randomAI.RandomAI
 import com.ps.simplepapersoccer.gameObjects.game.GameHandler
 import com.ps.simplepapersoccer.gameObjects.player.AIPlayer
 import com.ps.simplepapersoccer.gameObjects.player.abstraction.IPlayer
@@ -45,8 +38,8 @@ class AIUnitTests {
             }
         }
 
-        val player1: IPlayer = AIPlayer(null, AlphaZeroAI2::class.java.simpleName, 1, 0, true)
-        val player2: IPlayer = AIPlayer(null, EuclideanAI::class.java.simpleName, 2, 0, true)
+        val player1: IPlayer = AIPlayer(null, NeuralNetworkAI::class.java.simpleName, 1, 0, true)
+        val player2: IPlayer = AIPlayer(null, EuclideanAI::class.java.simpleName, 2, 1, true)
         val players = arrayListOf(player1, player2)
 
         runTestGame(players, handler)

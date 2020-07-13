@@ -2,6 +2,8 @@ import com.ps.simplepapersoccer.ai.alphazeroAI.helpers.Tree
 import com.ps.simplepapersoccer.ai.alphazeroAI.helpers.UCT
 import com.ps.simplepapersoccer.gameObjects.game.GameBoard
 import com.ps.simplepapersoccer.gameObjects.move.PartialMove
+import org.tensorflow.lite.Tensor
+import org.tensorflow.lite.TensorFlowLite
 
 class MonteCarloTreeSearch {
     var level = 3

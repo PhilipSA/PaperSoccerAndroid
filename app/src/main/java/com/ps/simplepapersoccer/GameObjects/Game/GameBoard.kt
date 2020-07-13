@@ -115,8 +115,8 @@ data class GameBoard(val gridSizeX: Int, val gridSizeY: Int) {
         }
     }
 
-    fun allPossibleMovesFromNode(node: Node): HashSet<PossibleMove> {
-        return node.neighbors.map { PossibleMove(node, it) }.toHashSet()
+    fun allPossibleMovesFromNode(node: Node): List<PossibleMove> {
+        return node.neighbors.sortedBy { it.coords.x + it.coords.y }.map { PossibleMove(node, it) }
     }
 
     fun undoLastMove(): PartialMove? {

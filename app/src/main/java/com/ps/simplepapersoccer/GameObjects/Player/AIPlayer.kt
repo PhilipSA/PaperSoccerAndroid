@@ -4,7 +4,7 @@ import android.content.Context
 import com.ps.simplepapersoccer.ai.abstraction.IGameAI
 import com.ps.simplepapersoccer.ai.euclideanAI.EuclideanAI
 import com.ps.simplepapersoccer.ai.GameAIHandler.Companion.AI_TIMEOUT_MS
-import com.ps.simplepapersoccer.ai.alphazeroAI.AlphaZeroAI
+import com.ps.simplepapersoccer.ai.neuralnetworkAI.NeuralNetworkAI
 import com.ps.simplepapersoccer.ai.alphazeroAI.AlphaZeroAI2
 import com.ps.simplepapersoccer.ai.jonasAI.JonasAI
 import com.ps.simplepapersoccer.ai.minimaxAI.MinimaxAI
@@ -19,7 +19,7 @@ class AIPlayer(context: Context?, playerName: String, playerNumber: Int, playerC
         EuclideanAI::class.java.simpleName -> EuclideanAI()
         MinimaxAI::class.java.simpleName -> MinimaxAI(AI_TIMEOUT_MS)
         JonasAI::class.java.simpleName -> JonasAI()
-        AlphaZeroAI::class.java.simpleName -> AlphaZeroAI(context, this)
+        NeuralNetworkAI::class.java.simpleName -> NeuralNetworkAI(context, this)
         AlphaZeroAI2::class.java.simpleName -> AlphaZeroAI2()
         RandomAI::class.java.simpleName -> RandomAI()
         else -> {
@@ -31,7 +31,7 @@ class AIPlayer(context: Context?, playerName: String, playerNumber: Int, playerC
         val allAi = listOf(EuclideanAI::class.java.simpleName,
                 MinimaxAI::class.java.simpleName,
                 JonasAI::class.java.simpleName,
-                AlphaZeroAI::class.java.simpleName,
+                NeuralNetworkAI::class.java.simpleName,
                 AlphaZeroAI2::class.java.simpleName,
                 RandomAI::class.java.simpleName)
     }

@@ -110,6 +110,10 @@ class GameHandler(private val listener: IGameHandlerListener?, gridX: Int, gridY
         }
     }
 
+    fun getPlayerPosition(player: IPlayer): Int {
+        return players.indexOf(player)
+    }
+
     private fun isPartialMoveLegal(partialMove: PartialMove, player: IPlayer): Boolean {
         return gameBoard.allPossibleMovesFromNode(ballNode).any { x -> x.newNode == partialMove.newNode }
                 && player == currentPlayersTurn

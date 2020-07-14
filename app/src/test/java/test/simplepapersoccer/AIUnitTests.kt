@@ -5,6 +5,7 @@ import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.mock
 import com.ps.simplepapersoccer.ai.neuralnetworkAI.NeuralNetworkAI
 import com.ps.simplepapersoccer.ai.euclideanAI.EuclideanAI
+import com.ps.simplepapersoccer.ai.randomAI.RandomAI
 import com.ps.simplepapersoccer.gameObjects.game.GameHandler
 import com.ps.simplepapersoccer.gameObjects.player.AIPlayer
 import com.ps.simplepapersoccer.gameObjects.player.abstraction.IPlayer
@@ -25,6 +26,7 @@ class AIUnitTests {
                 System.gc()
                 System.runFinalization()
             }
+            println(gameHandler.gameBoard.toString())
         }
     }
 
@@ -39,7 +41,7 @@ class AIUnitTests {
         }
 
         val player1: IPlayer = AIPlayer(null, NeuralNetworkAI::class.java.simpleName, 1, 0, true)
-        val player2: IPlayer = AIPlayer(null, EuclideanAI::class.java.simpleName, 2, 1, true)
+        val player2: IPlayer = AIPlayer(null, RandomAI::class.java.simpleName, 2, 1, true)
         val players = arrayListOf(player1, player2)
 
         runTestGame(players, handler)

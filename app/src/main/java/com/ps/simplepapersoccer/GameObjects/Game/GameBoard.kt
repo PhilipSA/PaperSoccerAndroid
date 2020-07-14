@@ -116,7 +116,7 @@ data class GameBoard(val gridSizeX: Int, val gridSizeY: Int) {
     }
 
     fun allPossibleMovesFromNode(node: Node): List<PossibleMove> {
-        return node.neighbors.sortedBy { it.coords.x + it.coords.y }.map { PossibleMove(node, it) }
+        return node.neighbors.sortedBy { it.coords }.map { PossibleMove(node, it) }
     }
 
     fun undoLastMove(): PartialMove? {
@@ -159,5 +159,38 @@ data class GameBoard(val gridSizeX: Int, val gridSizeY: Int) {
 
     fun findNodeByCoords(point: TwoDimensionalPoint): Node? {
         return nodeHashSet.firstOrNull { it.coords == point }
+    }
+
+    override fun toString(): String {
+        val sortedNodes = nodeHashSet.sortedBy { it.coords }
+
+        var returnString = ""
+        var currentY = 0
+
+        for (i in sortedNodes.indices) {
+            val node = sortedNodes[i]
+
+            if (currentY != node.coords.y) {
+                returnString += "\n"
+                ++currentY
+            }
+
+            val nodeTypeSymbol = when (node.nodeType) {
+                NodeTypeEnum.ContainsBall -> "O"
+                NodeTypeEnum.Goal -> "G"
+                NodeTypeEnum.Empty -> "X"
+                NodeTypeEnum.Wall -> "|"
+                NodeTypeEnum.BounceAble -> "B"
+                else -> "?"
+            }
+
+            returnString = "$returnString $nodeTypeSymbol"
+
+            if (node.coords.x + node.coords.y != i) returnString += " "
+        }
+
+        returnString += "\n"
+
+        return returnString
     }
 }

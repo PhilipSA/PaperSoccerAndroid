@@ -1,6 +1,6 @@
 package com.ps.simplepapersoccer.gameObjects.game.geometry
 
-data class TwoDimensionalPoint(var x: Int, var y: Int) {
+data class TwoDimensionalPoint(var x: Int, var y: Int): Comparable<TwoDimensionalPoint> {
     fun toAndroidPoint() = android.graphics.Point(x, y)
 
     fun set(x: Int, y: Int) {
@@ -40,5 +40,14 @@ data class TwoDimensionalPoint(var x: Int, var y: Int) {
 
     override fun toString(): String {
         return "($x, $y) "
+    }
+
+    override fun compareTo(other: TwoDimensionalPoint): Int {
+        val xDiff = x - other.x
+        val yDiff = y - other.y
+        return if (other.x == x && other.y == y) 0
+        else if (yDiff > 0) 1
+        else if (xDiff > 0 && other.y == y) 1
+        else -1
     }
 }

@@ -6,4 +6,5 @@ interface INeuralNetworkController {
     val inputs: List<Int>
     val outputs: Int
     fun fitnessEvaluation(): Double
+    fun networkGuessOutput(output: List<Double>): List<Int>
 }

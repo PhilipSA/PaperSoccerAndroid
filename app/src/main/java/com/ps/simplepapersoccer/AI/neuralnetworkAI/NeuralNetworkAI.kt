@@ -15,7 +15,7 @@ class NeuralNetworkAI(private val context: Context?, private val aiPlayer: AIPla
 
         val neuralNetworkController = object: INeuralNetworkController {
             override val inputs: List<Int> get() {
-                val nodes = gameHandler.gameBoard.nodeHashSet.toList().sortedBy { it.coords.x + it.coords.y }.map { it.identifierHashCode() }
+                val nodes = gameHandler.gameBoard.nodeHashSet.toList().sortedBy { it.coords }.map { it.identifierHashCode() }
                 return if (gameHandler.getPlayerPosition(aiPlayer) != 0) nodes.reversed() else nodes
             }
             override val outputs: Int = 8
@@ -24,8 +24,11 @@ class NeuralNetworkAI(private val context: Context?, private val aiPlayer: AIPla
                 return if (gameHandler.winner?.winner == aiPlayer) 1.0
                 else -1.0
             }
-        }
 
+            override fun networkGuessOutput(output: List<Double>): List<Int> {
+                return listOf(output.indexOf(output.max()))
+            }
+        }
 
         if (neuralNetwork == null) {
             neuralNetwork = NeuralNetwork(context, neuralNetworkController, true)
@@ -39,7 +42,9 @@ class NeuralNetworkAI(private val context: Context?, private val aiPlayer: AIPla
             this.gameHandler = gameHandler
         }
 
-        val nextMove = gameHandler.gameBoard.allPossibleMovesFromNode(gameHandler.ballNode).getOrNull(neuralNetwork!!.nextStep() ?: -1)
+        val highestValue = neuralNetwork!!.nextStep()
+
+        val nextMove = gameHandler.gameBoard.allPossibleMovesFromNode(gameHandler.ballNode).getOrNull(neuralNetwork!!.nextStep().indexOf(highestValue.max()))
 
         return nextMove?.let { PartialMove(it, aiPlayer.playerNumber) }
     }

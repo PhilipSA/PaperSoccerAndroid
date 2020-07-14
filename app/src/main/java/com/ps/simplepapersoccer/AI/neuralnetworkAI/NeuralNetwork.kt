@@ -13,12 +13,12 @@ class NeuralNetwork(context: Context?,
                     private val neuralNetworkController: INeuralNetworkController,
                     private val networkBackupEnabled: Boolean) {
     companion object {
-        private const val POPULATION = 300
+        private const val POPULATION = 200
         private const val DELTA_DISJOINT = 2.0
         private const val DELTA_WEIGHTS = 0.4
         private const val DELTA_THRESHOLD = 1.0
 
-        private const val STALE_SPECIES = 15
+        private const val STALE_SPECIES = POPULATION * 0.05
 
         private const val MUTATE_CONNECTION_CHANCE = 0.25
         private const val PERTURB_CHANCE = 0.90
@@ -30,9 +30,7 @@ class NeuralNetwork(context: Context?,
         private const val DISABLE_MUTATION_CHANCE = 0.4
         private const val ENABLE_MUTATION_CHANCE = 0.2
 
-        private val timeoutConstant = 20
-
-        private const val MAX_NODES = 1000000
+        private const val MAX_NODES = 100000
 
         private const val FILE_NAME = "temp.pool"
     }
@@ -144,7 +142,7 @@ class NeuralNetwork(context: Context?,
 
     private fun basicGenome(): Genome {
         val genome = newGenome()
-        genome.maxNeuron = neuralNetworkController.inputs.size
+        genome.maxNeuron = neuralNetworkController.inputs.size - 1
         mutate(genome)
         return genome
     }
@@ -194,9 +192,9 @@ class NeuralNetwork(context: Context?,
         genome.network = network
     }
 
-    private fun evaluateNetwork(network: Network, inputsArg: List<Int>): Int? {
+    private fun evaluateNetwork(network: Network, inputsArg: List<Int>): List<Int> {
         if (inputsArg.size != neuralNetworkController.inputs.size) {
-            return null
+            throw(Exception("No"))
         }
 
         for (index in neuralNetworkController.inputs.indices) {
@@ -206,8 +204,7 @@ class NeuralNetwork(context: Context?,
         network.neurons.values.forEach { neuron ->
             var sum = 0.0
 
-            for ((j, x) in neuron.incoming.withIndex()) {
-                val incoming = neuron.incoming[j]
+            neuron.incoming.forEach { incoming ->
                 val other = network.neurons[incoming.into]
 
                 sum += incoming.weight * other!!.value
@@ -218,19 +215,14 @@ class NeuralNetwork(context: Context?,
             }
         }
 
-        var highestValue = 0.0
-        var highestIndex: Int? = null
+        val allOutputNeurons = mutableListOf<Double>()
 
         for (index in 0 until neuralNetworkController.outputs) {
-            val neuronValue = network.neurons[MAX_NODES + index]?.value ?: 0.0
-
-            if (neuronValue > highestValue) {
-                highestIndex = index
-                highestValue = neuronValue
-            }
+            val neuronValue = network.neurons[MAX_NODES + index]!!.value
+            allOutputNeurons.add(neuronValue)
         }
 
-        return highestIndex
+        return neuralNetworkController.networkGuessOutput(allOutputNeurons)
     }
 
     private fun crossover(genome1: Genome, genome2: Genome): Genome {
@@ -251,8 +243,7 @@ class NeuralNetwork(context: Context?,
             innovations2[gene.innovation] = gene
         }
 
-        for ((i, _) in genome1.genes.withIndex()) {
-            val gene1 = genome1.genes[i]
+        genome1.genes.forEach { gene1 ->
             val gene2 = innovations2[gene1.innovation]
 
             if (gene2 != null && Random.nextBoolean() && gene2.enabled) {
@@ -291,21 +282,21 @@ class NeuralNetwork(context: Context?,
         }
 
         for (i in 0 until genes.size) {
-            if (nonInput.not() || genes[i].into > neuralNetworkController.inputs.size - 1) {
+            if (nonInput.not() || genes[i].into > neuralNetworkController.inputs.size) {
                 neurons[genes[i].into] = true
             }
 
-            if (nonInput.not() || genes[i].out > neuralNetworkController.inputs.size - 1) {
+            if (nonInput.not() || genes[i].out > neuralNetworkController.inputs.size) {
                 neurons[genes[i].out] = true
             }
         }
 
         val count = neurons.size
-        var n = if (count <= 1) 1 else Random.nextInt(1, count)
+        var n = if (count <= 1) 1 else Random.nextInt(0, count)
 
         for ((k, _) in neurons) {
             n -= 1
-            if (n == 0) return k
+            if (n == -1) return k
         }
 
         return 0
@@ -338,11 +329,12 @@ class NeuralNetwork(context: Context?,
 
         val newLink = newGene()
 
-        if (neuron1 <= neuralNetworkController.inputs.size && neuron2 <= neuralNetworkController.inputs.size) {
+        if (neuron1 < neuralNetworkController.inputs.size && neuron2 < neuralNetworkController.inputs.size) {
+            //Both input nodes
             return
         }
 
-        if (neuron2 <= neuralNetworkController.inputs.size) {
+        if (neuron2 < neuralNetworkController.inputs.size) {
             val temp = neuron1
             neuron1 = neuron2
             neuron2 = temp
@@ -351,7 +343,7 @@ class NeuralNetwork(context: Context?,
         newLink.into = neuron1
         newLink.out = neuron2
 
-        if (forceBias) newLink.into = neuralNetworkController.inputs.size
+        if (forceBias) newLink.into = neuralNetworkController.inputs.size - 1
 
         if (containsLink(genome.genes, newLink)) return
 
@@ -693,10 +685,9 @@ class NeuralNetwork(context: Context?,
         val species = pool.species[pool.currentSpecies]
         val genome = species.genomes[pool.currentGenome]
         generateNetwork(genome)
-        evaluateCurrent()
     }
 
-    private fun evaluateCurrent(): Int? {
+    private fun evaluateCurrent(): List<Int> {
         val species = pool.species[pool.currentSpecies]
         val genome = species.genomes[pool.currentGenome]
 
@@ -769,8 +760,8 @@ class NeuralNetwork(context: Context?,
         initRun()
     }
 
-    fun nextStep(): Int? {
-        val current = evaluateCurrent() ?: return null
+    fun nextStep(): List<Int> {
+        val current = evaluateCurrent()
 
         var measured = 0
         var total = 0

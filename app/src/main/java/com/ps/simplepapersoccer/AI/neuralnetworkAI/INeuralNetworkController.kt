@@ -1,10 +1,8 @@
 package com.ps.simplepapersoccer.ai.neuralnetworkAI
 
-import com.ps.simplepapersoccer.gameObjects.game.GameHandler
-
-interface INeuralNetworkController {
+interface INeuralNetworkController<T> {
     val inputs: List<Int>
     val outputs: Int
     fun fitnessEvaluation(): Double
-    fun networkGuessOutput(output: List<Double>): List<Int>
+    fun networkGuessOutput(output: List<Double>): T?
 }

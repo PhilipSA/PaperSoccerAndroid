@@ -6,11 +6,12 @@ import com.ps.simplepapersoccer.data.enums.NodeTypeEnum
 import com.ps.simplepapersoccer.gameObjects.game.GameHandler
 import com.ps.simplepapersoccer.gameObjects.game.geometry.Node
 import com.ps.simplepapersoccer.gameObjects.move.PartialMove
+import com.ps.simplepapersoccer.gameObjects.player.AIPlayer
 import com.ps.simplepapersoccer.helpers.PathFindingHelper
 import java.util.*
 import kotlin.collections.ArrayList
 
-class JonasAI(): IGameAI {
+class JonasAI(playerName: String, playerNumber: Int, playerColor: Int): IGameAI, AIPlayer(playerName, playerNumber, playerColor) {
     var goalFound: Boolean = false
 
     override suspend fun makeMove(gameHandler: GameHandler): PartialMove {

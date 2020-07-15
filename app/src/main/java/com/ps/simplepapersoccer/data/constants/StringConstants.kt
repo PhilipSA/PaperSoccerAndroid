@@ -7,4 +7,6 @@ object StringConstants {
     const val PREF_GRID_SIZE_Y = "gridsize_y"
 
     const val MULTIPLAYER_MODE = "MULTIPLAYER_MODE"
+
+    const val NEURAL_NETWORK_FILE_NAME = "temp.pool"
 }

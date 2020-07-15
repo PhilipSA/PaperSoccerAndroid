@@ -34,15 +34,10 @@ class GameAIHandler(private val aiHandlerListener: IGameAiHandlerListener,
 
     private suspend fun makeAIMoveAsync(aiPlayer: AIPlayer, gameHandler: GameHandler) {
         val gameHandlerHashCode = gameHandler.hashCode()
-        val aiMove = aiPlayer.gameAI.makeMove(gameHandler)
+        val aiMove = aiPlayer.makeMove(gameHandler)
 
         if (gameHandler.hashCode() != gameHandlerHashCode) {
             throw Exception("The AI modified the GameHandler without reverting all changes")
-        }
-
-        if (aiMove != null && gameHandler.gameBoard.allPossibleMovesFromNode(gameHandler.ballNode)
-                        .contains(PossibleMove(aiMove.oldNode, aiMove.newNode)).not()) {
-            throw Exception("The AI returned an illegal move $aiMove")
         }
 
         handler.post {

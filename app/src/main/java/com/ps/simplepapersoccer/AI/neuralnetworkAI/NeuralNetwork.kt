@@ -2,54 +2,32 @@ package com.ps.simplepapersoccer.ai.neuralnetworkAI
 
 import android.content.Context
 import android.util.Log
-import com.ps.simplepapersoccer.gameObjects.player.AIPlayer
 import java.io.*
 import java.util.zip.Deflater
 import java.util.zip.Inflater
 import kotlin.math.*
 import kotlin.random.Random
 
-class NeuralNetwork(context: Context?,
-                    private val neuralNetworkController: INeuralNetworkController,
-                    private val networkBackupEnabled: Boolean) {
-    companion object {
-        private const val POPULATION = 200
-        private const val DELTA_DISJOINT = 2.0
-        private const val DELTA_WEIGHTS = 0.4
-        private const val DELTA_THRESHOLD = 1.0
-
-        private const val STALE_SPECIES = POPULATION * 0.05
-
-        private const val MUTATE_CONNECTION_CHANCE = 0.25
-        private const val PERTURB_CHANCE = 0.90
-        private const val CROSSOVER_CHANCE = 0.75
-        private const val LINK_MUTATION_CHANCE = 2.0
-        private const val NODE_MUTATION_CHANCE = 0.50
-        private const val BIAS_MUTATION_CHANCE = 0.40
-        private const val STEP_SIZE = 0.1
-        private const val DISABLE_MUTATION_CHANCE = 0.4
-        private const val ENABLE_MUTATION_CHANCE = 0.2
-
-        private const val MAX_NODES = 100000
-
-        private const val FILE_NAME = "temp.pool"
-    }
+class NeuralNetwork<T>(context: Context?,
+                    private val neuralNetworkController: INeuralNetworkController<T>,
+                    private val networkBackupEnabled: Boolean,
+                    private val neuralNetworkParameters: NeuralNetworkParameters = NeuralNetworkParameters()) {
 
     data class Neuron(
             val incoming: MutableList<Gene>,
             var value: Double
-    ): Serializable
+    ) : Serializable
 
     data class MutationRates(
             var mutation: Double = 0.0,
-            var connections: Double = MUTATE_CONNECTION_CHANCE,
-            var link: Double = LINK_MUTATION_CHANCE,
-            var bias: Double = BIAS_MUTATION_CHANCE,
-            var node: Double = NODE_MUTATION_CHANCE,
-            var enable: Double = ENABLE_MUTATION_CHANCE,
-            var disable: Double = DISABLE_MUTATION_CHANCE,
-            var step: Double = STEP_SIZE
-    ): Serializable {
+            var connections: Double,
+            var link: Double,
+            var bias: Double,
+            var node: Double,
+            var enable: Double,
+            var disable: Double,
+            var step: Double
+    ) : Serializable {
         fun getValues() = listOf(connections, link, bias, node, enable, disable, step)
     }
 
@@ -61,14 +39,14 @@ class NeuralNetwork(context: Context?,
             var maxNeuron: Int,
             var globalRank: Int,
             val mutationRates: MutationRates
-    ): Serializable
+    ) : Serializable
 
     data class Species(
             var topFitness: Double,
             var staleness: Int,
             val genomes: MutableList<Genome>,
             var averageFitness: Int
-    ): Serializable
+    ) : Serializable
 
     data class Pool(
             var species: MutableList<Species>,
@@ -77,7 +55,7 @@ class NeuralNetwork(context: Context?,
             var currentGenome: Int,
             var maxFitness: Double,
             var innovation: Int
-    ): Serializable
+    ) : Serializable
 
     data class Gene(
             var into: Int,
@@ -85,16 +63,16 @@ class NeuralNetwork(context: Context?,
             var weight: Double,
             var enabled: Boolean,
             var innovation: Int
-    ): Serializable
+    ) : Serializable
 
     data class Network(
             val neurons: MutableMap<Int, Neuron>
-    ): Serializable
+    ) : Serializable
 
     data class PoolDto(
             val uncompressedSize: Int,
             val pool: ByteArray
-    ): Serializable
+    ) : Serializable
 
     lateinit var pool: Pool
 
@@ -123,7 +101,15 @@ class NeuralNetwork(context: Context?,
     }
 
     private fun newGenome(): Genome {
-        return Genome(arrayListOf(), 0.0, 0, Network(hashMapOf()), 0, 0, MutationRates())
+        return Genome(arrayListOf(), 0.0, 0, Network(hashMapOf()), 0, 0,
+                MutationRates(0.0,
+                        neuralNetworkParameters.MUTATE_CONNECTION_CHANCE,
+                        neuralNetworkParameters.LINK_MUTATION_CHANCE,
+                        neuralNetworkParameters.BIAS_MUTATION_CHANCE,
+                        neuralNetworkParameters.NODE_MUTATION_CHANCE,
+                        neuralNetworkParameters.ENABLE_MUTATION_CHANCE,
+                        neuralNetworkParameters.DISABLE_MUTATION_CHANCE,
+                        neuralNetworkParameters.STEP_SIZE))
     }
 
     private fun copyGenome(genome: Genome): Genome {
@@ -171,7 +157,7 @@ class NeuralNetwork(context: Context?,
         }
 
         for (index in 0 until neuralNetworkController.outputs) {
-            network.neurons[MAX_NODES + index] = newNeuron()
+            network.neurons[neuralNetworkParameters.MAX_NODES + index] = newNeuron()
         }
 
         genome.genes.sortBy { it.out }
@@ -192,7 +178,7 @@ class NeuralNetwork(context: Context?,
         genome.network = network
     }
 
-    private fun evaluateNetwork(network: Network, inputsArg: List<Int>): List<Int> {
+    private fun evaluateNetwork(network: Network, inputsArg: List<Int>): T? {
         if (inputsArg.size != neuralNetworkController.inputs.size) {
             throw(Exception("No"))
         }
@@ -218,7 +204,7 @@ class NeuralNetwork(context: Context?,
         val allOutputNeurons = mutableListOf<Double>()
 
         for (index in 0 until neuralNetworkController.outputs) {
-            val neuronValue = network.neurons[MAX_NODES + index]!!.value
+            val neuronValue = network.neurons[neuralNetworkParameters.MAX_NODES + index]!!.value
             allOutputNeurons.add(neuronValue)
         }
 
@@ -278,7 +264,7 @@ class NeuralNetwork(context: Context?,
         }
 
         for (i in 0 until neuralNetworkController.outputs) {
-            neurons[MAX_NODES + i] = true
+            neurons[neuralNetworkParameters.MAX_NODES + i] = true
         }
 
         for (i in 0 until genes.size) {
@@ -315,7 +301,7 @@ class NeuralNetwork(context: Context?,
         val step = genome.mutationRates.step
 
         genome.genes.forEach { gene ->
-            if (Random.nextDouble(0.0, 1.0) < PERTURB_CHANCE) {
+            if (Random.nextDouble(0.0, 1.0) < neuralNetworkParameters.PERTURB_CHANCE) {
                 gene.weight = gene.weight + Random.nextDouble(0.0, 1.0) * step * 2 - step
             } else {
                 gene.weight = Random.nextDouble(0.0, 1.0) * 4 - 2
@@ -514,9 +500,9 @@ class NeuralNetwork(context: Context?,
     }
 
     private fun sameSpecies(genome1: Genome, genome2: Genome): Boolean {
-        val dd = DELTA_DISJOINT * disjoint(genome1.genes, genome2.genes)
-        val dw = DELTA_WEIGHTS * weights(genome1.genes, genome2.genes)
-        return dd + dw < DELTA_THRESHOLD
+        val dd = neuralNetworkParameters.DELTA_DISJOINT * disjoint(genome1.genes, genome2.genes)
+        val dw = neuralNetworkParameters.DELTA_WEIGHTS * weights(genome1.genes, genome2.genes)
+        return dd + dw < neuralNetworkParameters.DELTA_THRESHOLD
     }
 
     private fun rankGlobally() {
@@ -569,7 +555,7 @@ class NeuralNetwork(context: Context?,
     }
 
     private fun breedChild(species: Species): Genome {
-        val child = if (Random.nextDouble(0.0, 1.0) < CROSSOVER_CHANCE) {
+        val child = if (Random.nextDouble(0.0, 1.0) < neuralNetworkParameters.CROSSOVER_CHANCE) {
             val g1 = species.genomes.random()
             val g2 = species.genomes.random()
             crossover(g1, g2)
@@ -595,7 +581,7 @@ class NeuralNetwork(context: Context?,
                 ++species.staleness
             }
 
-            if (species.staleness < STALE_SPECIES || species.topFitness >= pool.maxFitness) {
+            if (species.staleness < neuralNetworkParameters.STALE_SPECIES || species.topFitness >= pool.maxFitness) {
                 survived.add(species)
             }
         }
@@ -609,7 +595,7 @@ class NeuralNetwork(context: Context?,
         val sum = totalAverageFitness()
 
         pool.species.forEach { species ->
-            val breed = floor((species.averageFitness / sum * POPULATION).toDouble())
+            val breed = floor((species.averageFitness / sum * neuralNetworkParameters.POPULATION).toDouble())
             if (breed > 1) survived.add(species)
         }
 
@@ -646,14 +632,14 @@ class NeuralNetwork(context: Context?,
         val children = mutableListOf<Genome>()
 
         pool.species.forEach { species ->
-            val breed = floor((species.averageFitness / sum * POPULATION).toDouble()).toInt() - 1
+            val breed = floor((species.averageFitness / sum * neuralNetworkParameters.POPULATION).toDouble()).toInt() - 1
             for (i in 0..breed) {
                 children.add(breedChild(species))
             }
         }
         cullSpecies(true)
 
-        while (children.size + pool.species.size < POPULATION) {
+        while (children.size + pool.species.size < neuralNetworkParameters.POPULATION) {
             if (pool.species.isNotEmpty()) {
                 val species = pool.species.random()
                 children.add(breedChild(species))
@@ -673,7 +659,7 @@ class NeuralNetwork(context: Context?,
         if (loadFile().not()) {
             pool = newPool()
 
-            for (x in 0..POPULATION) {
+            for (x in 0..neuralNetworkParameters.POPULATION) {
                 addToSpecies(basicGenome())
             }
 
@@ -687,7 +673,7 @@ class NeuralNetwork(context: Context?,
         generateNetwork(genome)
     }
 
-    private fun evaluateCurrent(): List<Int> {
+    private fun evaluateCurrent(): T? {
         val species = pool.species[pool.currentSpecies]
         val genome = species.genomes[pool.currentGenome]
 
@@ -760,7 +746,7 @@ class NeuralNetwork(context: Context?,
         initRun()
     }
 
-    fun nextStep(): List<Int> {
+    fun nextStep(): T? {
         val current = evaluateCurrent()
 
         var measured = 0
@@ -781,7 +767,7 @@ class NeuralNetwork(context: Context?,
     private fun writeFile() {
         if (networkBackupEnabled.not()) return
 
-        val file = File(poolCacheDirectory, FILE_NAME)
+        val file = File(poolCacheDirectory, neuralNetworkParameters.FILE_NAME)
         try {
             file.createNewFile()
 
@@ -818,7 +804,9 @@ class NeuralNetwork(context: Context?,
     }
 
     private fun loadFile(): Boolean {
-        val file = File(poolCacheDirectory, FILE_NAME)
+        if (networkBackupEnabled.not()) return false
+
+        val file = File(poolCacheDirectory, neuralNetworkParameters.FILE_NAME)
 
         return if (file.exists()) {
 

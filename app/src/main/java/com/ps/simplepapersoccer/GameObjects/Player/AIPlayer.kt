@@ -9,23 +9,12 @@ import com.ps.simplepapersoccer.ai.alphazeroAI.AlphaZeroAI2
 import com.ps.simplepapersoccer.ai.jonasAI.JonasAI
 import com.ps.simplepapersoccer.ai.minimaxAI.MinimaxAI
 import com.ps.simplepapersoccer.ai.randomAI.RandomAI
+import com.ps.simplepapersoccer.data.constants.StringConstants.NEURAL_NETWORK_FILE_NAME
 import com.ps.simplepapersoccer.gameObjects.player.abstraction.IPlayer
 import java.io.Serializable
 
-class AIPlayer(context: Context?, playerName: String, playerNumber: Int, playerColor: Int, isAi: Boolean) :
-        IPlayer(playerName, playerNumber, playerColor, isAi), Serializable {
-
-    val gameAI: IGameAI = when (playerName) {
-        EuclideanAI::class.java.simpleName -> EuclideanAI()
-        MinimaxAI::class.java.simpleName -> MinimaxAI(AI_TIMEOUT_MS)
-        JonasAI::class.java.simpleName -> JonasAI()
-        NeuralNetworkAI::class.java.simpleName -> NeuralNetworkAI(context, this)
-        AlphaZeroAI2::class.java.simpleName -> AlphaZeroAI2()
-        RandomAI::class.java.simpleName -> RandomAI()
-        else -> {
-            EuclideanAI()
-        }
-    }
+abstract class AIPlayer(playerName: String, playerNumber: Int, playerColor: Int) :
+        IPlayer(playerName, playerNumber, playerColor, true), Serializable, IGameAI {
 
     companion object {
         val allAi = listOf(EuclideanAI::class.java.simpleName,
@@ -34,5 +23,21 @@ class AIPlayer(context: Context?, playerName: String, playerNumber: Int, playerC
                 NeuralNetworkAI::class.java.simpleName,
                 AlphaZeroAI2::class.java.simpleName,
                 RandomAI::class.java.simpleName)
+
+        fun createAi(context: Context?,
+                     playerName: String,
+                     playerNumber: Int,
+                     playerColor: Int): AIPlayer = when (playerName) {
+            EuclideanAI::class.java.simpleName -> EuclideanAI(playerName, playerNumber, playerColor)
+            MinimaxAI::class.java.simpleName -> MinimaxAI(AI_TIMEOUT_MS, playerName, playerNumber, playerColor)
+            JonasAI::class.java.simpleName -> JonasAI(playerName, playerNumber, playerColor)
+            NeuralNetworkAI::class.java.simpleName -> NeuralNetworkAI(context, playerName, playerNumber, playerColor, NEURAL_NETWORK_FILE_NAME)
+            AlphaZeroAI2::class.java.simpleName -> AlphaZeroAI2(playerName, playerNumber, playerColor)
+            RandomAI::class.java.simpleName -> RandomAI(playerName, playerNumber, playerColor)
+            else -> {
+                EuclideanAI(playerName, playerNumber, playerColor)
+            }
+        }
     }
 }
+

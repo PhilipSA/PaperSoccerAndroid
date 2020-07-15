@@ -44,11 +44,11 @@ class GameViewModel(application: Application): AndroidViewModel(application), IG
         }
 
         if (player1Arg == "Player") players.add(Player(playerName, 1, player1Color, false)) else {
-            players.add(AIPlayer(getApplication(), player1Arg, 1, player1Color, true))
+            players.add(AIPlayer.createAi(getApplication(), player1Arg, 1, player1Color))
         }
 
         if (player2Arg == "Player") players.add(Player("Player2", 2, player2Color, false)) else {
-            players.add(AIPlayer(getApplication(), player2Arg, 2, player2Color, true))
+            players.add(AIPlayer.createAi(getApplication(), player2Arg, 2, player2Color))
         }
     }
 

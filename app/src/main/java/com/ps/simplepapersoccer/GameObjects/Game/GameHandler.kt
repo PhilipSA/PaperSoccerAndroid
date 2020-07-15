@@ -51,8 +51,8 @@ class GameHandler(private val listener: IGameHandlerListener?, gridX: Int, gridY
     }
 
     override fun aiMove(partialMove: PartialMove?, timedOut: Boolean) {
-        if (timedOut || partialMove == null) {
-            winner(Victory(getOpponent(currentPlayersTurn), VictoryConditionEnum.TimedOut))
+        if (timedOut || partialMove == null || isPartialMoveLegal(partialMove, currentPlayersTurn).not()) {
+            winner(Victory(getOpponent(currentPlayersTurn), if (partialMove == null) VictoryConditionEnum.IllegalMove else VictoryConditionEnum.TimedOut))
         } else {
             aiMakeMove(partialMove)
         }

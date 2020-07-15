@@ -119,6 +119,12 @@ data class GameBoard(val gridSizeX: Int, val gridSizeY: Int) {
         return node.neighbors.sortedBy { it.coords }.map { PossibleMove(node, it) }
     }
 
+    fun allPossibleMovesFromNodeCoords(node: Node): Map<PossibleMove, Boolean> {
+        return node.coordNeighbors.sortedBy { it.coords }.associateBy (
+                {PossibleMove(node, it)}, {node.neighbors.contains(it)}
+        )
+    }
+
     fun undoLastMove(): PartialMove? {
         return if (allPartialMoves.isNotEmpty()) {
             val storedMove = allPartialMoves.pop()

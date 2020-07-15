@@ -2,25 +2,28 @@ package test.simplepapersoccer
 
 import com.ps.simplepapersoccer.ai.neuralnetworkAI.INeuralNetworkController
 import com.ps.simplepapersoccer.ai.neuralnetworkAI.NeuralNetwork
+import com.ps.simplepapersoccer.ai.neuralnetworkAI.NeuralNetworkParameters
 import junit.framework.TestCase
 import org.junit.Test
 import kotlin.random.Random
 
 class NeuralNetworkTests {
 
+    private val andOperationNeuralNetworkParameters = NeuralNetworkParameters(MAX_NODES = 2)
+
     @Test
     fun neuralNetworkLearnsAndOperation() {
 
         var scoreCounter = 0
         var lastGuess = -1
-        val numberOfRuns = 500
+        val numberOfRuns = 5000
         var inputs = listOf(Random.nextInt(0, 2), Random.nextInt(0, 2))
 
-        val neuralNetwork = NeuralNetwork(null, object : INeuralNetworkController {
+        val neuralNetwork = NeuralNetwork(null, object : INeuralNetworkController<Int> {
             override val inputs: List<Int>
                 get() = inputs
 
-            override val outputs: Int = 1
+            override val outputs = 1
 
             override fun fitnessEvaluation(): Double {
                 return if (lastGuess == inputs[0].and(inputs[1])) {
@@ -29,16 +32,16 @@ class NeuralNetworkTests {
                 } else -1.0
             }
 
-            override fun networkGuessOutput(output: List<Double>): List<Int> {
+            override fun networkGuessOutput(output: List<Double>): Int {
                 return output.map {
                     if (it >= 0.5) 1 else 0
-                }
+                }.first()
             }
-        }, false)
+        }, false, andOperationNeuralNetworkParameters)
 
         for (i in 0 until numberOfRuns) {
             val nextStep = neuralNetwork.nextStep()
-            lastGuess = nextStep.first()
+            lastGuess = nextStep ?: -1
             neuralNetwork.cutOff()
             inputs = listOf(Random.nextInt(0, 2), Random.nextInt(0, 2))
         }

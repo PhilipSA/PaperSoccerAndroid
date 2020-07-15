@@ -6,6 +6,7 @@ import com.ps.simplepapersoccer.data.enums.NodeTypeEnum
 import com.ps.simplepapersoccer.data.enums.SortOrderEnum
 import com.ps.simplepapersoccer.gameObjects.game.GameHandler
 import com.ps.simplepapersoccer.gameObjects.move.PartialMove
+import com.ps.simplepapersoccer.gameObjects.player.AIPlayer
 import com.ps.simplepapersoccer.gameObjects.player.abstraction.IPlayer
 import com.ps.simplepapersoccer.helpers.PathFindingHelper
 import java.util.*
@@ -13,7 +14,8 @@ import kotlin.math.max
 import kotlin.math.min
 
 //Philips AI
-class MinimaxAI(private val timeLimitMilliSeconds: Long = AI_TIMEOUT_MS) : IGameAI {
+class MinimaxAI(private val timeLimitMilliSeconds: Long = AI_TIMEOUT_MS, playerName: String, playerNumber: Int, playerColor: Int) :
+        IGameAI, AIPlayer(playerName, playerNumber, playerColor) {
 
     override suspend fun makeMove(gameHandler: GameHandler): PartialMove {
         val bestMove = chooseMove(gameHandler)

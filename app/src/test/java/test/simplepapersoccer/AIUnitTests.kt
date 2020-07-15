@@ -25,8 +25,8 @@ class AIUnitTests {
             if (i == testRuns/2) {
                 System.gc()
                 System.runFinalization()
+                println(gameHandler.gameBoard.toString())
             }
-            println(gameHandler.gameBoard.toString())
         }
     }
 
@@ -40,8 +40,8 @@ class AIUnitTests {
             }
         }
 
-        val player1: IPlayer = AIPlayer(null, NeuralNetworkAI::class.java.simpleName, 1, 0, true)
-        val player2: IPlayer = AIPlayer(null, RandomAI::class.java.simpleName, 2, 1, true)
+        val player1: IPlayer = NeuralNetworkAI(null, NeuralNetworkAI::class.java.simpleName, 1, 0, "temp.pool")
+        val player2: IPlayer = RandomAI(RandomAI::class.java.simpleName, 2, 1)
         val players = arrayListOf(player1, player2)
 
         runTestGame(players, handler)

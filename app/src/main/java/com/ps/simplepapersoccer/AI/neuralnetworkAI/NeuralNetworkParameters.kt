@@ -5,7 +5,7 @@ data class NeuralNetworkParameters(
         val DELTA_DISJOINT: Double = 2.0,
         val DELTA_WEIGHTS: Double = 0.4,
         val DELTA_THRESHOLD: Double = 1.0,
-        val STALE_SPECIES: Double = POPULATION * 0.05,
+        val STALE_SPECIES: Double = POPULATION * 0.075,
         val MUTATE_CONNECTION_CHANCE: Double = 0.25,
         val PERTURB_CHANCE: Double = 0.90,
         val CROSSOVER_CHANCE: Double = 0.75,

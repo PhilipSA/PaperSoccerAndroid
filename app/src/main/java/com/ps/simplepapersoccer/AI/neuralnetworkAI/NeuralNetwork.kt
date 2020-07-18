@@ -2,6 +2,9 @@ package com.ps.simplepapersoccer.ai.neuralnetworkAI
 
 import android.content.Context
 import android.util.Log
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.io.*
 import java.util.zip.Deflater
 import java.util.zip.Inflater
@@ -14,22 +17,9 @@ class NeuralNetwork<T>(context: Context?,
                     private val neuralNetworkParameters: NeuralNetworkParameters = NeuralNetworkParameters()) {
 
     data class Neuron(
-            val incoming: MutableList<Gene>,
+            val incoming: HashSet<Gene>,
             var value: Double
     ) : Serializable
-
-    data class MutationRates(
-            var mutation: Double = 0.0,
-            var connections: Double,
-            var link: Double,
-            var bias: Double,
-            var node: Double,
-            var enable: Double,
-            var disable: Double,
-            var step: Double
-    ) : Serializable {
-        fun getValues() = listOf(connections, link, bias, node, enable, disable, step)
-    }
 
     data class Genome(
             val genes: MutableList<Gene>,
@@ -38,21 +28,21 @@ class NeuralNetwork<T>(context: Context?,
             var network: Network,
             var maxNeuron: Int,
             var globalRank: Int,
-            val mutationRates: MutationRates
+            val mutationRates: HashMap<String, Double>
     ) : Serializable
 
     data class Species(
             var topFitness: Double,
             var staleness: Int,
             val genomes: MutableList<Genome>,
-            var averageFitness: Int
+            var averageFitness: Double
     ) : Serializable
 
     data class Pool(
             var species: MutableList<Species>,
             var generation: Int,
-            var currentSpecies: Int,
-            var currentGenome: Int,
+            var currentSpecies: Species?,
+            var currentGenome: Genome?,
             var maxFitness: Double,
             var innovation: Int
     ) : Serializable
@@ -66,7 +56,7 @@ class NeuralNetwork<T>(context: Context?,
     ) : Serializable
 
     data class Network(
-            val neurons: MutableMap<Int, Neuron>
+            val neurons: HashMap<Int, Neuron>
     ) : Serializable
 
     data class PoolDto(
@@ -75,6 +65,16 @@ class NeuralNetwork<T>(context: Context?,
     ) : Serializable
 
     lateinit var pool: Pool
+
+    private val currentSpecies get() = if (pool.currentSpecies == null) {
+        pool.currentSpecies = pool.species.first()
+        pool.currentSpecies!!
+    } else pool.currentSpecies!!
+
+    private val currentGenome get() = if (pool.currentGenome == null) {
+        pool.currentGenome = currentSpecies.genomes.first()
+        pool.currentGenome!!
+    } else pool.currentGenome!!
 
     private val poolCacheDirectory = context?.filesDir?.toString()
             ?: "C:\\Users\\Admin\\Documents\\AlphaZero"
@@ -93,23 +93,22 @@ class NeuralNetwork<T>(context: Context?,
     }
 
     private fun newPool(): Pool {
-        return Pool(mutableListOf(), 0, 0, 0, 0.0, neuralNetworkController.outputs)
+        return Pool(mutableListOf(), 0, null, null, 0.0, neuralNetworkController.outputs)
     }
 
     private fun newSpecies(): Species {
-        return Species(0.0, 0, mutableListOf(), 0)
+        return Species(0.0, 0, mutableListOf(), 0.0)
     }
 
     private fun newGenome(): Genome {
-        return Genome(arrayListOf(), 0.0, 0, Network(hashMapOf()), 0, 0,
-                MutationRates(0.0,
-                        neuralNetworkParameters.MUTATE_CONNECTION_CHANCE,
-                        neuralNetworkParameters.LINK_MUTATION_CHANCE,
-                        neuralNetworkParameters.BIAS_MUTATION_CHANCE,
-                        neuralNetworkParameters.NODE_MUTATION_CHANCE,
-                        neuralNetworkParameters.ENABLE_MUTATION_CHANCE,
-                        neuralNetworkParameters.DISABLE_MUTATION_CHANCE,
-                        neuralNetworkParameters.STEP_SIZE))
+        return Genome(mutableListOf(), 0.0, 0, Network(hashMapOf()), 0, 0,
+                hashMapOf("connections" to neuralNetworkParameters.MUTATE_CONNECTION_CHANCE,
+                    "link" to neuralNetworkParameters.LINK_MUTATION_CHANCE,
+                    "bias" to neuralNetworkParameters.BIAS_MUTATION_CHANCE,
+                    "node" to neuralNetworkParameters.NODE_MUTATION_CHANCE,
+                    "enable" to neuralNetworkParameters.ENABLE_MUTATION_CHANCE,
+                    "disable" to neuralNetworkParameters.DISABLE_MUTATION_CHANCE,
+                    "step" to neuralNetworkParameters.STEP_SIZE))
     }
 
     private fun copyGenome(genome: Genome): Genome {
@@ -146,7 +145,7 @@ class NeuralNetwork<T>(context: Context?,
     }
 
     private fun newNeuron(): Neuron {
-        return Neuron(mutableListOf(), 0.0)
+        return Neuron(hashSetOf(), 0.0)
     }
 
     private fun generateNetwork(genome: Genome) {
@@ -241,14 +240,8 @@ class NeuralNetwork<T>(context: Context?,
 
         child.maxNeuron = max(genome1.maxNeuron, genome2.maxNeuron)
 
-        for ((mutation, rate) in genome1.mutationRates.getValues().withIndex()) {
-            if (mutation == 0) child.mutationRates.connections = rate
-            if (mutation == 1) child.mutationRates.link = rate
-            if (mutation == 2) child.mutationRates.bias = rate
-            if (mutation == 3) child.mutationRates.node = rate
-            if (mutation == 4) child.mutationRates.enable = rate
-            if (mutation == 5) child.mutationRates.disable = rate
-            if (mutation == 6) child.mutationRates.step = rate
+        for ((mutation, rate) in genome1.mutationRates) {
+            child.mutationRates[mutation] = rate
         }
 
         return child
@@ -267,13 +260,13 @@ class NeuralNetwork<T>(context: Context?,
             neurons[neuralNetworkParameters.MAX_NODES + i] = true
         }
 
-        for (i in 0 until genes.size) {
-            if (nonInput.not() || genes[i].into > neuralNetworkController.inputs.size) {
-                neurons[genes[i].into] = true
+        genes.forEach {
+            if (nonInput.not() || it.into > neuralNetworkController.inputs.size) {
+                neurons[it.into] = true
             }
 
-            if (nonInput.not() || genes[i].out > neuralNetworkController.inputs.size) {
-                neurons[genes[i].out] = true
+            if (nonInput.not() || it.out > neuralNetworkController.inputs.size) {
+                neurons[it.out] = true
             }
         }
 
@@ -298,7 +291,7 @@ class NeuralNetwork<T>(context: Context?,
     }
 
     private fun pointMutate(genome: Genome) {
-        val step = genome.mutationRates.step
+        val step = genome.mutationRates.getValue("step")
 
         genome.genes.forEach { gene ->
             if (Random.nextDouble(0.0, 1.0) < neuralNetworkParameters.PERTURB_CHANCE) {
@@ -344,7 +337,7 @@ class NeuralNetwork<T>(context: Context?,
 
         ++genome.maxNeuron
 
-        val gene = genome.genes[Random.nextInt(0, genome.genes.size)]
+        val gene = genome.genes.random()
 
         if (gene.enabled.not()) return
         gene.enabled = false
@@ -387,23 +380,16 @@ class NeuralNetwork<T>(context: Context?,
     }
 
     private fun mutate(genome: Genome) {
-        for ((mutation, rate) in genome.mutationRates.getValues().withIndex()) {
+        for ((mutation, rate) in genome.mutationRates) {
             val value = mutateHelper(rate)
-
-            if (mutation == 0) genome.mutationRates.connections = value
-            if (mutation == 1) genome.mutationRates.link = value
-            if (mutation == 2) genome.mutationRates.bias = value
-            if (mutation == 3) genome.mutationRates.node = value
-            if (mutation == 4) genome.mutationRates.enable = value
-            if (mutation == 5) genome.mutationRates.disable = value
-            if (mutation == 6) genome.mutationRates.step = value
+            genome.mutationRates[mutation] = value
         }
 
-        if (Random.nextDouble(0.0, 1.0) < genome.mutationRates.connections) {
+        if (Random.nextDouble(0.0, 1.0) < genome.mutationRates.getValue("connections")) {
             pointMutate(genome)
         }
 
-        var p = genome.mutationRates.link
+        var p = genome.mutationRates.getValue("link")
 
         while (p > 0) {
             if (Random.nextDouble(0.0, 1.0) < p) {
@@ -412,7 +398,7 @@ class NeuralNetwork<T>(context: Context?,
             --p
         }
 
-        p = genome.mutationRates.bias
+        p = genome.mutationRates.getValue("bias")
         while (p > 0) {
             if (Random.nextDouble(0.0, 1.0) < p) {
                 linkMutate(genome, true)
@@ -420,7 +406,7 @@ class NeuralNetwork<T>(context: Context?,
             --p
         }
 
-        p = genome.mutationRates.node
+        p = genome.mutationRates.getValue("node")
         while (p > 0) {
             if (Random.nextDouble(0.0, 1.0) < p) {
                 nodeMutate(genome)
@@ -429,7 +415,7 @@ class NeuralNetwork<T>(context: Context?,
         }
 
 
-        p = genome.mutationRates.enable
+        p = genome.mutationRates.getValue("enable")
         while (p > 0) {
             if (Random.nextDouble(0.0, 1.0) < p) {
                 enableDisableMutate(genome, true)
@@ -437,7 +423,7 @@ class NeuralNetwork<T>(context: Context?,
             --p
         }
 
-        p = genome.mutationRates.disable
+        p = genome.mutationRates.getValue("disable")
         while (p > 0) {
             if (Random.nextDouble(0.0, 1.0) < p) {
                 enableDisableMutate(genome, false)
@@ -522,17 +508,17 @@ class NeuralNetwork<T>(context: Context?,
     }
 
     private fun calculateAverageFitness(species: Species) {
-        var total = 0
+        var total = 0.0
 
         species.genomes.forEach {
             total += it.globalRank
         }
 
-        species.averageFitness = if (species.genomes.size == 0) 0 else total / species.genomes.size
+        species.averageFitness = if (species.genomes.size == 0) 0.0 else total / species.genomes.size
     }
 
-    private fun totalAverageFitness(): Int {
-        var total = 0
+    private fun totalAverageFitness(): Double {
+        var total = 0.0
 
         pool.species.forEach { species ->
             total += species.averageFitness
@@ -595,7 +581,7 @@ class NeuralNetwork<T>(context: Context?,
         val sum = totalAverageFitness()
 
         pool.species.forEach { species ->
-            val breed = floor((species.averageFitness / sum * neuralNetworkParameters.POPULATION).toDouble())
+            val breed = floor(species.averageFitness / sum * neuralNetworkParameters.POPULATION)
             if (breed > 1) survived.add(species)
         }
 
@@ -632,8 +618,8 @@ class NeuralNetwork<T>(context: Context?,
         val children = mutableListOf<Genome>()
 
         pool.species.forEach { species ->
-            val breed = floor((species.averageFitness / sum * neuralNetworkParameters.POPULATION).toDouble()).toInt() - 1
-            for (i in 0..breed) {
+            val breed = floor((species.averageFitness / sum * neuralNetworkParameters.POPULATION)).toInt() - 1
+            for (i in 0 until breed) {
                 children.add(breedChild(species))
             }
         }
@@ -659,7 +645,7 @@ class NeuralNetwork<T>(context: Context?,
         if (loadFile().not()) {
             pool = newPool()
 
-            for (x in 0..neuralNetworkParameters.POPULATION) {
+            for (x in 0 until neuralNetworkParameters.POPULATION) {
                 addToSpecies(basicGenome())
             }
 
@@ -668,55 +654,49 @@ class NeuralNetwork<T>(context: Context?,
     }
 
     private fun initRun() {
-        val species = pool.species[pool.currentSpecies]
-        val genome = species.genomes[pool.currentGenome]
-        generateNetwork(genome)
+        generateNetwork(currentGenome)
     }
 
     private fun evaluateCurrent(): T? {
-        val species = pool.species[pool.currentSpecies]
-        val genome = species.genomes[pool.currentGenome]
-
-        return evaluateNetwork(genome.network, neuralNetworkController.inputs)
+        return evaluateNetwork(currentGenome.network, neuralNetworkController.inputs)
     }
 
     private fun nextGenome() {
-        pool.currentGenome = pool.currentGenome + 1
+        val currentGenomeIndex = currentSpecies.genomes.indexOf(currentGenome)
 
-        if (pool.currentGenome > pool.species.getOrNull(pool.currentSpecies)?.genomes?.size ?: 0) {
-            pool.currentGenome = 0
-            pool.currentSpecies = pool.currentSpecies + 1
+        if (currentGenomeIndex + 1 >= currentSpecies.genomes.size) {
+            pool.currentGenome = null
 
-            if (pool.currentSpecies > pool.species.size) {
+            val currentSpeciesIndex = pool.species.indexOf(pool.currentSpecies!!)
+
+            if (currentSpeciesIndex + 1 >= pool.species.size) {
                 newGeneration()
-                pool.currentSpecies = 0
+                pool.currentSpecies = null
+            } else {
+                pool.currentSpecies = pool.species[currentSpeciesIndex + 1]
             }
+        } else {
+            pool.currentGenome = currentSpecies.genomes[currentGenomeIndex + 1]
         }
     }
 
     private fun fitnessAlreadyMeasured(): Boolean {
-        val species = pool.species.getOrNull(pool.currentSpecies)
-        val genome = species?.genomes?.getOrNull(pool.currentGenome)
-
-        return genome?.fitness != 0.0
+        return currentGenome.fitness != 0.0
     }
 
     fun cutOff() {
-        val species = pool.species.getOrNull(pool.currentSpecies)
-        val genome = species?.genomes?.getOrNull(pool.currentGenome)
-
         val fitness = neuralNetworkController.fitnessEvaluation()
 
-        genome?.fitness = fitness
+        currentGenome.fitness = fitness
 
         if (fitness > pool.maxFitness) {
-            println("Max fitness: ${pool.maxFitness} Gen ${pool.generation} species ${pool.species.sumBy { it.averageFitness }} genome: ${pool.currentGenome}")
+            println("Max fitness: ${pool.maxFitness} Gen ${pool.generation} species ${pool.species.sumBy { it.averageFitness.toInt() }} genome: ${pool.currentGenome}")
             pool.maxFitness = fitness
             writeFile()
         }
 
-        pool.currentSpecies = 0
-        pool.currentGenome = 0
+        pool.currentSpecies = pool.species.first()
+        pool.currentGenome = pool.currentSpecies!!.genomes.first()
 
         while (fitnessAlreadyMeasured()) {
             nextGenome()
@@ -727,21 +707,21 @@ class NeuralNetwork<T>(context: Context?,
 
     private fun playTop() {
         var maxfitness = 0.0
-        var maxs = 0
-        var maxg = 0
+        var maxs: Species? = null
+        var maxg: Genome? = null
 
-        pool.species.withIndex().forEach { species ->
-            species.value.genomes.withIndex().forEach { genome ->
-                if (genome.value.fitness > maxfitness) {
-                    maxfitness = genome.value.fitness
-                    maxs = species.index
-                    maxg = genome.index
+        pool.species.forEach { species ->
+            species.genomes.forEach { genome ->
+                if (genome.fitness > maxfitness) {
+                    maxfitness = genome.fitness
+                    maxs = species
+                    maxg = genome
                 }
             }
         }
 
-        pool.currentSpecies = maxs
-        pool.currentGenome = maxg
+        pool.currentSpecies = maxs!!
+        pool.currentGenome = maxg!!
         pool.maxFitness = maxfitness
         initRun()
     }

@@ -9,9 +9,9 @@ import com.ps.simplepapersoccer.gameObjects.move.PossibleMove
 import com.ps.simplepapersoccer.gameObjects.player.AIPlayer
 
 class NeuralNetworkAI(private val context: Context?,
-                      playerName: String,
                       playerNumber: Int,
                       playerColor: Int,
+                      playerName: String = NeuralNetworkAI::class.java.simpleName,
                       private val backupFileName: String = NEURAL_NETWORK_FILE_NAME) : IGameAI, AIPlayer(playerName, playerNumber, playerColor) {
 
     private var neuralNetwork: NeuralNetwork<PossibleMove>? = null

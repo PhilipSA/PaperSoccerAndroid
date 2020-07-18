@@ -8,7 +8,9 @@ import com.ps.simplepapersoccer.gameObjects.player.abstraction.IPlayer
 import com.ps.simplepapersoccer.helpers.PathFindingHelper
 
 //Dumb AI to use as test opponent
-class EuclideanAI(playerName: String, playerNumber: Int, playerColor: Int) : IGameAI, AIPlayer(playerName, playerNumber, playerColor) {
+class EuclideanAI(playerNumber: Int,
+                  playerColor: Int,
+                  playerName: String = EuclideanAI::class.java.simpleName) : IGameAI, AIPlayer(playerName, playerNumber, playerColor) {
 
     override suspend fun makeMove(gameHandler: GameHandler): PartialMove {
         var manhattanMove: PartialMove? = null

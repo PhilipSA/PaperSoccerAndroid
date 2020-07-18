@@ -5,9 +5,7 @@ import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.mock
 import com.ps.simplepapersoccer.ai.neuralnetworkAI.NeuralNetworkAI
 import com.ps.simplepapersoccer.ai.euclideanAI.EuclideanAI
-import com.ps.simplepapersoccer.ai.randomAI.RandomAI
 import com.ps.simplepapersoccer.gameObjects.game.GameHandler
-import com.ps.simplepapersoccer.gameObjects.player.AIPlayer
 import com.ps.simplepapersoccer.gameObjects.player.abstraction.IPlayer
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.Dispatchers
@@ -18,16 +16,28 @@ class AIUnitTests {
     private val testRuns = 1000
 
     private fun runTestGame(players: ArrayList<IPlayer>, handler: Handler) {
+        val totalNumberOfTurns = mutableListOf<Int>()
+
         for (i in 0 until testRuns) {
             players.shuffle()
             val gameHandler = GameHandler(null, 10, 12, players, Dispatchers.Unconfined, handler)
             gameHandler.updateGameState()
-            if (i == testRuns/2) {
+            if (i == testRuns / 2) {
                 System.gc()
                 System.runFinalization()
+            }
+
+            if (gameHandler.winner?.winner?.playerName == NeuralNetworkAI::class.java.simpleName) {
+                println(gameHandler.winner?.winner?.playerName)
+                println(gameHandler.winner?.victoryConditionEnum?.name)
                 println(gameHandler.gameBoard.toString())
             }
+
+            totalNumberOfTurns.add(gameHandler.numberOfTurns)
         }
+
+        println("Average number of turns = ${totalNumberOfTurns.sum() / testRuns}")
+        println("Max number of turns = ${totalNumberOfTurns.max()}")
     }
 
     @Test
@@ -40,8 +50,8 @@ class AIUnitTests {
             }
         }
 
-        val player1: IPlayer = NeuralNetworkAI(null, NeuralNetworkAI::class.java.simpleName, 1, 0, "temp.pool")
-        val player2: IPlayer = RandomAI(RandomAI::class.java.simpleName, 2, 1)
+        val player1: IPlayer = NeuralNetworkAI(null, 1, 0)
+        val player2: IPlayer = EuclideanAI(2, 1)
         val players = arrayListOf(player1, player2)
 
         runTestGame(players, handler)

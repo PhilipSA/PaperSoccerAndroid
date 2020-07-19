@@ -1,16 +1,18 @@
 package com.ps.simplepapersoccer.gameObjects.game.geometry
 
 import com.ps.simplepapersoccer.data.enums.NodeTypeEnum
+import com.ps.simplepapersoccer.gameObjects.game.geometry.abstraction.BaseNode
 
-class Node(val coords: TwoDimensionalPoint, var nodeType: NodeTypeEnum) {
-    val neighbors: HashSet<Node> = hashSetOf()
+class Node(coords: TwoDimensionalPoint,
+           var nodeType: NodeTypeEnum): BaseNode(coords) {
+    val neighbors: HashSet<ConnectionNode> = hashSetOf()
     val coordNeighbors: HashSet<Node> = hashSetOf()
     var cameFrom: Node? = null
     var nodeValue: Double = 0.0
     var costSoFar: Double = 0.0
     var containsBall: Boolean = false
 
-    fun identifierHashCode(): Int {
+    override fun identifierHashCode(): Int {
         return nodeType.ordinal + if (containsBall) 10 else 0
     }
 
@@ -22,20 +24,20 @@ class Node(val coords: TwoDimensionalPoint, var nodeType: NodeTypeEnum) {
         return coords.y != other.coords.y && other.coords.x != this.coords.x
     }
 
-    fun removeNeighborPair(other: Node) {
-        neighbors.remove(other)
-        other.neighbors.remove(this)
-    }
-
-    fun addNeighbor(other: Node) {
+    fun addNeighbor(other: ConnectionNode) {
         neighbors.add(other)
-    }
-
-    fun addCoordNeighbor(other: Node) {
-        coordNeighbors.add(other)
     }
 
     override fun toString(): String {
         return coords.toString() + nodeType.toString()
+    }
+
+    fun connectedNodeNeighbors(): HashSet<Node> {
+        return neighbors.flatMap { connectionNode ->
+            connectionNode.nonConnectedNodes.filter {
+                (connectionNode.coords.x == coords.x || connectionNode.coords.y == coords.y) ||
+                        (connectionNode.coords.x != coords.x && connectionNode.coords.y != coords.y && it.coords.x != coords.x && it.coords.y != coords.y)
+            }
+        }.filter { it != this }.toHashSet()
     }
 }

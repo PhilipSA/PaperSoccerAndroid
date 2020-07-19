@@ -5,6 +5,7 @@ import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.mock
 import com.ps.simplepapersoccer.ai.neuralnetworkAI.NeuralNetworkAI
 import com.ps.simplepapersoccer.ai.euclideanAI.EuclideanAI
+import com.ps.simplepapersoccer.ai.randomAI.RandomAI
 import com.ps.simplepapersoccer.gameObjects.game.GameHandler
 import com.ps.simplepapersoccer.gameObjects.player.abstraction.IPlayer
 import junit.framework.TestCase.assertEquals
@@ -30,7 +31,6 @@ class AIUnitTests {
             if (gameHandler.winner?.winner?.playerName == NeuralNetworkAI::class.java.simpleName) {
                 println(gameHandler.winner?.winner?.playerName)
                 println(gameHandler.winner?.victoryConditionEnum?.name)
-                println(gameHandler.gameBoard.toString())
             }
 
             totalNumberOfTurns.add(gameHandler.numberOfTurns)

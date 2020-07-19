@@ -24,7 +24,7 @@ class NeuralNetworkAI(private val context: Context?,
 
         val neuralNetworkController = object: INeuralNetworkController<PossibleMove> {
             override val inputs: List<Int> get() {
-                val nodes = this@NeuralNetworkAI.gameHandler!!.gameBoard.nodeHashSet.toList().sortedBy { it.coords }.map { it.identifierHashCode() }
+                val nodes = this@NeuralNetworkAI.gameHandler!!.gameBoard.allNodesHashSet.toList().sortedBy { it.coords }.map { it.identifierHashCode() }
                 return if (this@NeuralNetworkAI.gameHandler!!.getPlayerPosition(this@NeuralNetworkAI) != 0) nodes.reversed() else nodes
             }
 
@@ -37,13 +37,14 @@ class NeuralNetworkAI(private val context: Context?,
 
             override fun networkGuessOutput(output: List<Double>): PossibleMove? {
                 val possibleOutputs = this@NeuralNetworkAI.gameHandler!!.gameBoard.allPossibleMovesFromNodeCoords(this@NeuralNetworkAI.gameHandler!!.ballNode)
+                val alignedOutputs = if (this@NeuralNetworkAI.gameHandler!!.getPlayerPosition(this@NeuralNetworkAI) != 0) possibleOutputs.reversed() else possibleOutputs
 
                 val outputs = mutableListOf<PossibleMove>()
 
                 for (i in output.indices) {
                     val currentOutput = output[i]
-                    val possibleOutput = possibleOutputs.toList().getOrNull(i)?.first
-                    if (currentOutput > 0 && possibleOutput != null) {
+                    val possibleOutput = alignedOutputs.getOrNull(i)
+                    if (currentOutput == output.max() && possibleOutput != null) {
                         outputs.add(possibleOutput)
                     }
                 }

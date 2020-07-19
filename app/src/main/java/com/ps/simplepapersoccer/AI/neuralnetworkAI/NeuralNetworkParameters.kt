@@ -1,7 +1,7 @@
 package com.ps.simplepapersoccer.ai.neuralnetworkAI
 
 data class NeuralNetworkParameters(
-        val POPULATION: Int = 200,
+        val POPULATION: Int = 100,
         val DELTA_DISJOINT: Double = 2.0,
         val DELTA_WEIGHTS: Double = 0.4,
         val DELTA_THRESHOLD: Double = 1.0,

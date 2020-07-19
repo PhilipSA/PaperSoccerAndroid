@@ -23,7 +23,7 @@ class GameHandler(private val listener: IGameHandlerListener?, gridX: Int, gridY
     var winner: Victory? = null
 
     var numberOfTurns = 0
-    val gameBoard = GameBoard(gridX, gridY)
+    val gameBoard = GameBoard(gridX * 2, gridY * 2)
     private var ongoingTurn = false
 
     val ballNode: Node get() = gameBoard.ballNode

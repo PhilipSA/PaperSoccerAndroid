@@ -1,4 +1,4 @@
-package com.ps.simplepapersoccer.gameObjects.game.geometry.Abstraction
+package com.ps.simplepapersoccer.gameObjects.game.geometry.abstraction
 
 import com.ps.simplepapersoccer.gameObjects.game.geometry.TwoDimensionalPoint
 import com.ps.simplepapersoccer.helpers.MathHelper.euclideanDistance

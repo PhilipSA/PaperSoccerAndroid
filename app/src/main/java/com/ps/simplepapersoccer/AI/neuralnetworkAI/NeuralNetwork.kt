@@ -2,9 +2,6 @@ package com.ps.simplepapersoccer.ai.neuralnetworkAI
 
 import android.content.Context
 import android.util.Log
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import java.io.*
 import java.util.zip.Deflater
 import java.util.zip.Inflater
@@ -41,11 +38,14 @@ class NeuralNetwork<T>(context: Context?,
     data class Pool(
             var species: MutableList<Species>,
             var generation: Int,
-            var currentSpecies: Species?,
-            var currentGenome: Genome?,
+            var currentSpeciesIndex: Int,
+            var currentGenomeIndex: Int,
             var maxFitness: Double,
             var innovation: Int
-    ) : Serializable
+    ) : Serializable {
+        val currentSpecies get() = species.getOrNull(currentSpeciesIndex)
+        val currentGenome get() = currentSpecies?.genomes?.getOrNull(currentGenomeIndex)
+    }
 
     data class Gene(
             var into: Int,
@@ -66,16 +66,6 @@ class NeuralNetwork<T>(context: Context?,
 
     lateinit var pool: Pool
 
-    private val currentSpecies get() = if (pool.currentSpecies == null) {
-        pool.currentSpecies = pool.species.first()
-        pool.currentSpecies!!
-    } else pool.currentSpecies!!
-
-    private val currentGenome get() = if (pool.currentGenome == null) {
-        pool.currentGenome = currentSpecies.genomes.first()
-        pool.currentGenome!!
-    } else pool.currentGenome!!
-
     private val poolCacheDirectory = context?.filesDir?.toString()
             ?: "C:\\Users\\Admin\\Documents\\AlphaZero"
 
@@ -93,7 +83,7 @@ class NeuralNetwork<T>(context: Context?,
     }
 
     private fun newPool(): Pool {
-        return Pool(mutableListOf(), 0, null, null, 0.0, neuralNetworkController.outputs)
+        return Pool(mutableListOf(), 0, 0, 0, 0.0, neuralNetworkController.outputs)
     }
 
     private fun newSpecies(): Species {
@@ -271,7 +261,7 @@ class NeuralNetwork<T>(context: Context?,
         }
 
         val count = neurons.size
-        var n = if (count <= 1) 1 else Random.nextInt(0, count)
+        var n = Random.nextInt(0, count)
 
         for ((k, _) in neurons) {
             n -= 1
@@ -654,49 +644,44 @@ class NeuralNetwork<T>(context: Context?,
     }
 
     private fun initRun() {
-        generateNetwork(currentGenome)
+        generateNetwork(pool.currentGenome!!)
     }
 
     private fun evaluateCurrent(): T? {
-        return evaluateNetwork(currentGenome.network, neuralNetworkController.inputs)
+        return evaluateNetwork(pool.currentGenome!!.network, neuralNetworkController.inputs)
     }
 
     private fun nextGenome() {
-        val currentGenomeIndex = currentSpecies.genomes.indexOf(currentGenome)
+        ++pool.currentGenomeIndex
 
-        if (currentGenomeIndex + 1 >= currentSpecies.genomes.size) {
-            pool.currentGenome = null
+        if (pool.currentGenomeIndex + 1 > pool.currentSpecies?.genomes?.size ?: 0) {
+            pool.currentGenomeIndex = 0
+            ++pool.currentSpeciesIndex
 
-            val currentSpeciesIndex = pool.species.indexOf(pool.currentSpecies!!)
-
-            if (currentSpeciesIndex + 1 >= pool.species.size) {
+            if (pool.currentSpeciesIndex + 1 > pool.species.size) {
                 newGeneration()
-                pool.currentSpecies = null
-            } else {
-                pool.currentSpecies = pool.species[currentSpeciesIndex + 1]
+                pool.currentSpeciesIndex = 0
             }
-        } else {
-            pool.currentGenome = currentSpecies.genomes[currentGenomeIndex + 1]
         }
     }
 
     private fun fitnessAlreadyMeasured(): Boolean {
-        return currentGenome.fitness != 0.0
+        return pool.currentGenome?.fitness ?: -1 != 0.0
     }
 
     fun cutOff() {
         val fitness = neuralNetworkController.fitnessEvaluation()
 
-        currentGenome.fitness = fitness
+        pool.currentGenome?.fitness = fitness
 
         if (fitness > pool.maxFitness) {
-            println("Max fitness: ${pool.maxFitness} Gen ${pool.generation} species ${pool.species.sumBy { it.averageFitness.toInt() }} genome: ${pool.currentGenome}")
+            println("Max fitness: ${pool.maxFitness} Gen ${pool.generation} species ${pool.species.sumBy { it.averageFitness.toInt() }} genome: ${pool.currentGenomeIndex}")
             pool.maxFitness = fitness
             writeFile()
         }
 
-        pool.currentSpecies = pool.species.first()
-        pool.currentGenome = pool.currentSpecies!!.genomes.first()
+        pool.currentSpeciesIndex = 0
+        pool.currentGenomeIndex = 0
 
         while (fitnessAlreadyMeasured()) {
             nextGenome()
@@ -707,21 +692,21 @@ class NeuralNetwork<T>(context: Context?,
 
     private fun playTop() {
         var maxfitness = 0.0
-        var maxs: Species? = null
-        var maxg: Genome? = null
+        var maxs: Int = 0
+        var maxg: Int = 0
 
         pool.species.forEach { species ->
             species.genomes.forEach { genome ->
                 if (genome.fitness > maxfitness) {
                     maxfitness = genome.fitness
-                    maxs = species
-                    maxg = genome
+                    maxs = pool.species.indexOf(species)
+                    maxg = pool.currentSpecies!!.genomes.indexOf(genome)
                 }
             }
         }
 
-        pool.currentSpecies = maxs!!
-        pool.currentGenome = maxg!!
+        pool.currentSpeciesIndex = maxs
+        pool.currentGenomeIndex = maxg
         pool.maxFitness = maxfitness
         initRun()
     }

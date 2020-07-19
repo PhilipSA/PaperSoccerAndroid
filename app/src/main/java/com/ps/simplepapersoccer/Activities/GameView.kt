@@ -11,7 +11,7 @@ import android.view.View
 import com.ps.simplepapersoccer.data.enums.NodeTypeEnum
 import com.ps.simplepapersoccer.gameObjects.game.GameBoard
 import com.ps.simplepapersoccer.gameObjects.game.GameViewDrawData
-import com.ps.simplepapersoccer.gameObjects.game.geometry.Abstraction.IntegerLine
+import com.ps.simplepapersoccer.gameObjects.game.geometry.abstraction.IntegerLine
 import com.ps.simplepapersoccer.gameObjects.game.geometry.LinesToDraw
 import com.ps.simplepapersoccer.gameObjects.game.geometry.Node
 import com.ps.simplepapersoccer.R
@@ -139,10 +139,10 @@ class GameView : View {
 
         paint.color = gridColor
 
-        for (node in gameBoard?.nodeHashSet!!) {
-            node.coordNeighbors
+        for (node in gameBoard?.allNodesHashSet!!) {
+/*            node.coordNeighbors
                     .filterNot { node.coords.x != it.coords.x && node.coords.y != it.coords.y }
-                    .forEach { canvas.drawLine(nodeToCoords(node)[0], nodeToCoords(node)[1], nodeToCoords(it)[0], nodeToCoords(it)[1], paint) }
+                    .forEach { canvas.drawLine(nodeToCoords(node)[0], nodeToCoords(node)[1], nodeToCoords(it)[0], nodeToCoords(it)[1], paint) }*/
         }
 
         drawGoalLine(topEdge, paint, Color.RED, gameBoard!!.topGoalLines.goalLine)
@@ -197,11 +197,11 @@ class GameView : View {
     }
 
     private fun drawWalls(paint: Paint) {
-        gameBoard?.nodeHashSet?.filter { otherNode -> otherNode.nodeType == NodeTypeEnum.Wall }?.forEach{
+        gameBoard?.nodesHashSet?.filter { otherNode -> otherNode.nodeType == NodeTypeEnum.Wall }?.forEach{
             it.coordNeighbors.filter { otherNode -> otherNode.nodeType == NodeTypeEnum.Wall }.forEach{
                 otherNode -> if (!it.isDiagonalNeighbor(otherNode)) canvas?.drawLine(nodeToCoords(it)[0], nodeToCoords(it)[1], nodeToCoords(otherNode)[0], nodeToCoords(otherNode)[1], paint) } }
 
-        gameBoard?.nodeHashSet?.filter { otherNode -> otherNode.nodeType == NodeTypeEnum.Wall }?.forEach{
+        gameBoard?.nodesHashSet?.filter { otherNode -> otherNode.nodeType == NodeTypeEnum.Wall }?.forEach{
             it.coordNeighbors.filter { otherNode -> otherNode.nodeType == NodeTypeEnum.Post }.forEach{
                 otherNode -> if (!it.isDiagonalNeighbor(otherNode)) canvas?.drawLine(nodeToCoords(it)[0], nodeToCoords(it)[1], nodeToCoords(otherNode)[0], nodeToCoords(otherNode)[1], paint) } }
     }

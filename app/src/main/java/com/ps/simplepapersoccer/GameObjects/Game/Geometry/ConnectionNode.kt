@@ -40,15 +40,15 @@ class ConnectionNode(coords: TwoDimensionalPoint) : BaseNode(coords) {
     }
 
     fun connectNodes(node: Node, node2: Node) {
-        connectedNodes.firstOrNull { it.node1 == node && it.node2 == node2 }?.openConnection = true
+        getNodeConnection(node, node2)?.openConnection = true
     }
 
     fun disconnectNode(node: Node, node2: Node) {
-        connectedNodes.firstOrNull { it.node1 == node && it.node2 == node2 }?.openConnection = false
+        getNodeConnection(node, node2)?.openConnection = false
     }
 
-    private fun hasNodeConnection(node1: Node, node2: Node): Boolean {
-        return connectedNodes.any {
+    fun getNodeConnection(node1: Node, node2: Node): NodeConnection? {
+        return connectedNodes.firstOrNull {
             (it.node1 == node1 && it.node2 == node2) || (it.node1 == node2 && it.node2 == node1)
         }
     }
@@ -57,7 +57,7 @@ class ConnectionNode(coords: TwoDimensionalPoint) : BaseNode(coords) {
         for (firstNode in neighbors) {
             for (secondNode in neighbors) {
                 if (firstNode == secondNode) continue
-                if (hasNodeConnection(firstNode, secondNode)) continue
+                if (getNodeConnection(firstNode, secondNode) != null) continue
                 if (firstNode.isDiagonalNeighbor(this) && secondNode.isDiagonalNeighbor(this) && firstNode.isDiagonalNeighbor(secondNode).not()) continue
 
                 if (firstNode.pairMatchesType(secondNode, NodeTypeEnum.Wall, NodeTypeEnum.Wall)) {
@@ -65,7 +65,7 @@ class ConnectionNode(coords: TwoDimensionalPoint) : BaseNode(coords) {
                 } else if (firstNode.pairMatchesType(secondNode, NodeTypeEnum.Post, NodeTypeEnum.Wall) ||
                         firstNode.pairMatchesType(secondNode, NodeTypeEnum.Wall, NodeTypeEnum.Goal) ||
                         firstNode.pairMatchesType(secondNode, NodeTypeEnum.Goal, NodeTypeEnum.Goal) ||
-                        firstNode.pairMatchesType(secondNode, NodeTypeEnum.Post, NodeTypeEnum.Goal)) {
+                        (firstNode.pairMatchesType(secondNode, NodeTypeEnum.Post, NodeTypeEnum.Goal) && firstNode.isDiagonalNeighbor(secondNode).not()) ) {
                     connectedNodes.add(NodeConnection(firstNode, secondNode, false))
                 } else {
                     connectedNodes.add(NodeConnection(firstNode, secondNode, true))

@@ -17,6 +17,7 @@ import com.ps.simplepapersoccer.gameObjects.game.geometry.Node
 import com.ps.simplepapersoccer.R
 import com.ps.simplepapersoccer.viewmodel.GameViewModel
 import kotlin.collections.HashSet
+import kotlin.math.roundToInt
 
 class GameView : View {
 
@@ -98,13 +99,13 @@ class GameView : View {
     }
 
     //Converts screen coordinates to node coordinates
-    fun coordsToNode(argX: Float, argY: Float): FloatArray {
+    fun coordsToNode(argX: Float, argY: Float): IntArray {
         val x = (argX + gridXdraw.div(2)) / gridXdraw * gridXdraw
         val y = (argY + gridYdraw.div(2)) / gridYdraw * gridYdraw - topEdge
 
-        val coords = FloatArray(2)
-        coords[0] = x / gridXdraw
-        coords[1] = y / gridYdraw
+        val coords = IntArray(2)
+        coords[0] = (x / gridXdraw).roundToInt() - 1
+        coords[1] = (y / gridYdraw).roundToInt() - 2
         return coords
     }
 

@@ -141,7 +141,7 @@ class GameActivity : AppCompatActivity() {
 
     private fun nodeCoordsToNode(x: Float, y: Float): Node? {
         val coordsArray = game_view?.coordsToNode(x, y)
-        return gameViewModel.gameHandler.gameBoard.findNodeByCoords(TwoDimensionalPoint(coordsArray!![0].toInt(), coordsArray[1].toInt()))
+        return gameViewModel.gameHandler.gameBoard.findNodeByCoords(TwoDimensionalPoint(coordsArray!![0], coordsArray[1]))
     }
 
     private fun setPlayerTurnTextViewText() {

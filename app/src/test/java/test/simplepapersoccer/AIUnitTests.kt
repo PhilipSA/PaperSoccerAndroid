@@ -21,7 +21,7 @@ class AIUnitTests {
 
         for (i in 0 until testRuns) {
             players.shuffle()
-            val gameHandler = GameHandler(null, 10, 12, players, Dispatchers.Unconfined, handler)
+            val gameHandler = GameHandler(null, 8, 11, players, Dispatchers.Unconfined, handler)
             gameHandler.updateGameState()
             if (i == testRuns / 2) {
                 System.gc()

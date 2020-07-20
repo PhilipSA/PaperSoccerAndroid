@@ -115,7 +115,7 @@ data class GameBoard(val gridSizeX: Int, val gridSizeY: Int) {
     private fun getWinner(node: Node): Boolean {
         return when {
             node.nodeType == NodeTypeEnum.Goal -> true
-            node.neighbors.size == 0 -> {
+            node.getNodeNeighbors(true).size == 0 -> {
                 true
             }
             else -> {
@@ -179,10 +179,7 @@ data class GameBoard(val gridSizeX: Int, val gridSizeY: Int) {
     }
 
     private fun getConnectionNodeBetweenNodes(node: Node, node2: Node): ConnectionNode? {
-        return node.neighbors
-                .filter { node1 ->
-                    node2.neighbors.any { node1.coords == it.coords }
-                }.sortedBy { it.coords }.getOrNull(1)
+        return node.neighbors.first { it.getNodeConnection(node, node2) != null }
     }
 
     override fun toString(): String {

@@ -12,6 +12,9 @@ class Node(coords: TwoDimensionalPoint,
     var costSoFar: Double = 0.0
     var containsBall: Boolean = false
 
+    override val getVisibleCoords: TwoDimensionalPoint
+        get() = TwoDimensionalPoint(coords.x / 2, coords.y / 2)
+
     override fun identifierHashCode(): Int {
         return nodeType.ordinal + if (containsBall) 10 else 0
     }
@@ -20,7 +23,7 @@ class Node(coords: TwoDimensionalPoint,
         return (nodeType == firstNodeType && other.nodeType == otherNodeType) || (nodeType == otherNodeType && other.nodeType == firstNodeType)
     }
 
-    fun isDiagonalNeighbor(other: Node): Boolean {
+    fun isDiagonalNeighbor(other: BaseNode): Boolean {
         return coords.y != other.coords.y && other.coords.x != this.coords.x
     }
 
@@ -32,12 +35,9 @@ class Node(coords: TwoDimensionalPoint,
         return coords.toString() + nodeType.toString()
     }
 
-    fun connectedNodeNeighbors(): HashSet<Node> {
+    fun openConnectionNodeNeighbors(): HashSet<Node> {
         return neighbors.flatMap { connectionNode ->
-            connectionNode.nonConnectedNodes.filter {
-                (connectionNode.coords.x == coords.x || connectionNode.coords.y == coords.y) ||
-                        (connectionNode.coords.x != coords.x && connectionNode.coords.y != coords.y && it.coords.x != coords.x && it.coords.y != coords.y)
-            }
+            connectionNode.connectedNodes.filter { (it.node1 == this || it.node2 == this) && it.openConnection }.map { if (it.node1 == this) it.node2 else it.node2 }
         }.filter { it != this }.toHashSet()
     }
 }

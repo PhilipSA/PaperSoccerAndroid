@@ -25,15 +25,19 @@ data class GameBoard(val gridSizeX: Int, val gridSizeY: Int) {
 
     var currentPlayersTurn: Int = 1
 
+    val visibleGridSizeX = gridSizeX / 2
+    val visibleGridSizeY = gridSizeY / 2
+
     lateinit var goal1: Goal
     lateinit var goal2: Goal
-    private val goalScalingX = (gridSizeX / 6).toDouble().roundToInt()
-    val goalScalingY = (gridSizeX / 6).toDouble().roundToInt()
+    private val goalScalingX = (visibleGridSizeX / 6).toDouble().roundToInt()
 
-    var topGoalLines: Goal = Goal(IntegerLine(TwoDimensionalPoint(gridSizeX / 2 - goalScalingX, 0), TwoDimensionalPoint(gridSizeX / 2 + goalScalingX, 0)),
+    var topGoalLines: Goal = Goal(IntegerLine(TwoDimensionalPoint(gridSizeX / 2 - goalScalingX, 0),
+            TwoDimensionalPoint(gridSizeX / 2 + goalScalingX, 0)),
             IntegerLine(TwoDimensionalPoint(gridSizeX / 2 - goalScalingX, 0), TwoDimensionalPoint(gridSizeX / 2 - goalScalingX, 1)),
             IntegerLine(TwoDimensionalPoint(gridSizeX / 2 + goalScalingX, 0), TwoDimensionalPoint(gridSizeX / 2 + goalScalingX, 1)))
-    var bottomGoalLines: Goal = Goal(IntegerLine(TwoDimensionalPoint(gridSizeX / 2 - goalScalingX, gridSizeY), TwoDimensionalPoint(gridSizeX / 2 + goalScalingX, gridSizeY)),
+    var bottomGoalLines: Goal = Goal(IntegerLine(TwoDimensionalPoint(gridSizeX / 2 - goalScalingX, gridSizeY),
+            TwoDimensionalPoint(gridSizeX / 2 + goalScalingX, gridSizeY)),
             IntegerLine(TwoDimensionalPoint(gridSizeX / 2 - goalScalingX, gridSizeY), TwoDimensionalPoint(gridSizeX / 2 - goalScalingX, gridSizeY - 1)),
             IntegerLine(TwoDimensionalPoint(gridSizeX / 2 + goalScalingX, gridSizeY), TwoDimensionalPoint(gridSizeX / 2 + goalScalingX, gridSizeY - 1)))
 
@@ -46,7 +50,7 @@ data class GameBoard(val gridSizeX: Int, val gridSizeY: Int) {
 
     init {
         makeNodes(gridSizeX, gridSizeY)
-        findNodeByCoords(TwoDimensionalPoint(gridSizeX / 2, gridSizeY / 2))?.containsBall = true
+        nodesHashSet.sortedBy { it.coords }[nodesHashSet.size / 2].containsBall = true
     }
 
     private fun isEdgeNode(point: TwoDimensionalPoint): Boolean {
@@ -59,17 +63,16 @@ data class GameBoard(val gridSizeX: Int, val gridSizeY: Int) {
                     .filter { !topGoalLines.contains(TwoDimensionalPoint(it, y)) && !bottomGoalLines.contains(TwoDimensionalPoint(it, y)) }
                     .forEach {
                         when {
-                            isEdgeNode(TwoDimensionalPoint(it, y)) -> {
-                                allNodesHashSet.add(Node(TwoDimensionalPoint(it, y), NodeTypeEnum.Wall))
-                            }
-                            it % 2 == 0 -> {
+                            it % 2 == 1 -> {
                                 allNodesHashSet.add(ConnectionNode(TwoDimensionalPoint(it, y)))
                             }
                             y % 2 == 0 -> {
                                 allNodesHashSet.add(ConnectionNode(TwoDimensionalPoint(it, y)))
                             }
-                            else -> {
-                                allNodesHashSet.add(Node(TwoDimensionalPoint(it, y), NodeTypeEnum.Empty))
+                            it % 2 != 1 && y % 2 != 0 -> {
+                                if (isEdgeNode(TwoDimensionalPoint(it, y))) {
+                                    allNodesHashSet.add(Node(TwoDimensionalPoint(it, y), NodeTypeEnum.Wall))
+                                } else allNodesHashSet.add(Node(TwoDimensionalPoint(it, y), NodeTypeEnum.Empty))
                             }
                         }
                     }
@@ -98,9 +101,15 @@ data class GameBoard(val gridSizeX: Int, val gridSizeY: Int) {
                     val euclideanDistance = MathHelper.euclideanDistance(node.coords, otherNode.coords)
                     if (euclideanDistance.toInt() < 2) {
                         node.addNeighbor(otherNode)
-                        otherNode.nonConnectedNodes.add(node)
+                        otherNode.neighbors.add(node)
                     }
                 }
+            }
+        }
+
+        for (node in allNodesHashSet) {
+            if (node is ConnectionNode) {
+                node.createNodeConnections()
             }
         }
     }
@@ -118,7 +127,7 @@ data class GameBoard(val gridSizeX: Int, val gridSizeY: Int) {
     }
 
     fun allPossibleMovesFromNode(node: Node): List<PossibleMove> {
-        return node.connectedNodeNeighbors().sortedBy { it.coords }.map { PossibleMove(node, it) }
+        return node.openConnectionNodeNeighbors().sortedBy { it.coords }.map { PossibleMove(node, it) }
     }
 
     //Not all moves might be legal

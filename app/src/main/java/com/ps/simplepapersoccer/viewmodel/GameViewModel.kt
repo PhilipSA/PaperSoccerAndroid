@@ -4,7 +4,6 @@ import android.app.Application
 import android.graphics.Color
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import com.ps.simplepapersoccer.gameObjects.game.GameHandler
 import com.ps.simplepapersoccer.gameObjects.game.GameViewDrawData
 import com.ps.simplepapersoccer.gameObjects.game.IGameHandlerListener
@@ -57,7 +56,7 @@ class GameViewModel(application: Application): AndroidViewModel(application), IG
     }
 
     fun getAllNodeNeighbors(node: Node): HashSet<Node> {
-        return node.connectedNodeNeighbors().toHashSet()
+        return node.openConnectionNodeNeighbors().toHashSet()
     }
 
     fun updatePlayerTurnText() {

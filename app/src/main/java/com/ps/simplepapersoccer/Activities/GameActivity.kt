@@ -81,7 +81,7 @@ class GameActivity : AppCompatActivity() {
         if (gameViewModel.player1Arg == "Player" || gameViewModel.player2Arg == "Player") {
             game_view?.setOnTouchListener { view, motionEvent ->
                 if (motionEvent.action == MotionEvent.ACTION_DOWN) {
-                    val touchedNode = nodeCoordsToNode(motionEvent.x.roundToLong().toFloat(), motionEvent.y.roundToLong().toFloat())
+                    val touchedNode = nodeCoordsToNode(motionEvent.x.roundToLong().toFloat() * 2, motionEvent.y.roundToLong().toFloat() * 2)
                     if (touchedNode != null) {
                         gameViewModel.gameHandler.playerMakeMove(touchedNode, getNonAIPlayer())
                     }

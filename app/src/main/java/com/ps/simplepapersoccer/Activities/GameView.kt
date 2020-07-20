@@ -87,8 +87,8 @@ class GameView : View {
     //Converts node coordinates to screen coordinates
     fun nodeToCoords(n: Node): FloatArray {
         val coords = FloatArray(2)
-        coords[0] = n.coords.x * gridXdraw + leftEdge
-        coords[1] = n.coords.y * gridYdraw + topEdge
+        coords[0] = n.getVisibleCoords.x * gridXdraw + leftEdge
+        coords[1] = n.getVisibleCoords.y * gridYdraw + topEdge
         return coords
     }
 
@@ -139,10 +139,10 @@ class GameView : View {
 
         paint.color = gridColor
 
-        for (node in gameBoard?.allNodesHashSet!!) {
-/*            node.coordNeighbors
+        for (node in gameBoard?.nodesHashSet!!) {
+            node.openConnectionNodeNeighbors()
                     .filterNot { node.coords.x != it.coords.x && node.coords.y != it.coords.y }
-                    .forEach { canvas.drawLine(nodeToCoords(node)[0], nodeToCoords(node)[1], nodeToCoords(it)[0], nodeToCoords(it)[1], paint) }*/
+                    .forEach { canvas.drawLine(nodeToCoords(node)[0], nodeToCoords(node)[1], nodeToCoords(it)[0], nodeToCoords(it)[1], paint) }
         }
 
         drawGoalLine(topEdge, paint, Color.RED, gameBoard!!.topGoalLines.goalLine)
@@ -166,7 +166,7 @@ class GameView : View {
 
         var image = resources.getDrawable(R.drawable.football)
         image = ScaleDrawable(image, 0, ballSize.toFloat(), ballSize.toFloat()).drawable
-        val ballNodeCoords = pointsCoordsToCoords(gameViewDrawData?.ballNode?.coords!!)
+        val ballNodeCoords = pointsCoordsToCoords(gameViewDrawData?.ballNode?.getVisibleCoords!!)
         image.setBounds(ballNodeCoords[0].toInt() - ballSize / 2, ballNodeCoords[1].toInt() - ballSize / 2, ballNodeCoords[0].toInt() + ballSize / 2, ballNodeCoords[1].toInt() + ballSize / 2)
         image.draw(canvas)
     }

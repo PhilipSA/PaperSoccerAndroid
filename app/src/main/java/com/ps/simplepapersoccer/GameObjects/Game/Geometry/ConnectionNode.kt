@@ -61,10 +61,11 @@ class ConnectionNode(coords: TwoDimensionalPoint) : BaseNode(coords) {
                 if (firstNode.isDiagonalNeighbor(this) && secondNode.isDiagonalNeighbor(this) && firstNode.isDiagonalNeighbor(secondNode).not()) continue
 
                 if (firstNode.pairMatchesType(secondNode, NodeTypeEnum.Wall, NodeTypeEnum.Wall)) {
-                  connectedNodes.add(NodeConnection(firstNode, secondNode, firstNode.isDiagonalNeighbor(secondNode)))
+                    connectedNodes.add(NodeConnection(firstNode, secondNode, firstNode.isDiagonalNeighbor(secondNode)))
                 } else if (firstNode.pairMatchesType(secondNode, NodeTypeEnum.Post, NodeTypeEnum.Wall) ||
-                        firstNode.pairMatchesType(secondNode, NodeTypeEnum.Wall, NodeTypeEnum.Post) ||
-                        firstNode.pairMatchesType(secondNode, NodeTypeEnum.Wall, NodeTypeEnum.Goal)) {
+                        firstNode.pairMatchesType(secondNode, NodeTypeEnum.Wall, NodeTypeEnum.Goal) ||
+                        firstNode.pairMatchesType(secondNode, NodeTypeEnum.Goal, NodeTypeEnum.Goal) ||
+                        firstNode.pairMatchesType(secondNode, NodeTypeEnum.Post, NodeTypeEnum.Goal)) {
                     connectedNodes.add(NodeConnection(firstNode, secondNode, false))
                 } else {
                     connectedNodes.add(NodeConnection(firstNode, secondNode, true))

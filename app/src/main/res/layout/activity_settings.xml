@@ -28,7 +28,7 @@
         android:id="@+id/settings_grid_size_y"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="10"
+        android:text="11"
         android:hint="Grid size Y"
         android:inputType="number" />
 

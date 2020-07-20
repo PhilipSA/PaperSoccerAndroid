@@ -6,11 +6,12 @@ import com.ps.simplepapersoccer.gameObjects.game.geometry.abstraction.BaseNode
 class Node(coords: TwoDimensionalPoint,
            var nodeType: NodeTypeEnum): BaseNode(coords) {
     val neighbors: HashSet<ConnectionNode> = hashSetOf()
-    val coordNeighbors: HashSet<Node> = hashSetOf()
     var cameFrom: Node? = null
     var nodeValue: Double = 0.0
     var costSoFar: Double = 0.0
     var containsBall: Boolean = false
+
+    val coordNeighbors: HashSet<Node> get() = getNodeNeighbors(false)
 
     override val getVisibleCoords: TwoDimensionalPoint
         get() = TwoDimensionalPoint(coords.x / 2, coords.y / 2)
@@ -35,9 +36,9 @@ class Node(coords: TwoDimensionalPoint,
         return coords.toString() + nodeType.toString()
     }
 
-    fun openConnectionNodeNeighbors(): HashSet<Node> {
+    fun getNodeNeighbors(filterOpenConnection: Boolean = true): HashSet<Node> {
         return neighbors.flatMap { connectionNode ->
-            connectionNode.connectedNodes.filter { (it.node1 == this || it.node2 == this) && it.openConnection }.map { if (it.node1 == this) it.node2 else it.node2 }
-        }.filter { it != this }.toHashSet()
+            connectionNode.connectedNodes.filter { (it.node1 == this || it.node2 == this) && if (filterOpenConnection) it.openConnection else true }.map { if (it.node1 == this) it.node2 else it.node1 }
+        }.toHashSet()
     }
 }

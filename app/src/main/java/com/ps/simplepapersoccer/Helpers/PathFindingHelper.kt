@@ -21,7 +21,7 @@ object PathFindingHelper {
                 return path
             }
             explored.add(node)
-            val nodeNeighbors = node.openConnectionNodeNeighbors()
+            val nodeNeighbors = node.getNodeNeighbors()
             for (nextNode in nodeNeighbors) {
                 val costSoFar = node.costSoFar + MathHelper.euclideanDistance(node.coords, nextNode.coords)
 

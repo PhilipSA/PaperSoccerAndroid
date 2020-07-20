@@ -3,6 +3,7 @@ package test.simplepapersoccer
 import com.ps.simplepapersoccer.ai.neuralnetworkAI.INeuralNetworkController
 import com.ps.simplepapersoccer.ai.neuralnetworkAI.NeuralNetwork
 import com.ps.simplepapersoccer.ai.neuralnetworkAI.NeuralNetworkParameters
+import com.ps.simplepapersoccer.gameObjects.game.GameBoard
 import junit.framework.TestCase
 import org.junit.Test
 import kotlin.random.Random
@@ -13,6 +14,8 @@ class NeuralNetworkTests {
 
     @Test
     fun neuralNetworkLearnsAndOperation() {
+
+        val gameBoard = GameBoard(8 * 2, 11 * 2)
 
         var scoreCounter = 0
         var lastGuess = -1

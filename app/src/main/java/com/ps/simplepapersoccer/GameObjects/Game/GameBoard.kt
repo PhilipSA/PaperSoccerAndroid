@@ -16,7 +16,6 @@ import java.util.*
 import kotlin.collections.HashSet
 import kotlin.math.roundToInt
 
-
 data class GameBoard(val gridSizeX: Int, val gridSizeY: Int) {
     var allNodesHashSet = HashSet<BaseNode>()
     val nodesHashSet get() = allNodesHashSet.filterIsInstance<Node>()
@@ -25,21 +24,20 @@ data class GameBoard(val gridSizeX: Int, val gridSizeY: Int) {
 
     var currentPlayersTurn: Int = 1
 
-    val visibleGridSizeX = gridSizeX / 2
-    val visibleGridSizeY = gridSizeY / 2
-
     lateinit var goal1: Goal
     lateinit var goal2: Goal
-    private val goalScalingX = (visibleGridSizeX / 6).toDouble().roundToInt()
+    private val goalScalingX = (gridSizeX / 6).toDouble().roundToInt()
 
     var topGoalLines: Goal = Goal(IntegerLine(TwoDimensionalPoint(gridSizeX / 2 - goalScalingX, 0),
             TwoDimensionalPoint(gridSizeX / 2 + goalScalingX, 0)),
-            IntegerLine(TwoDimensionalPoint(gridSizeX / 2 - goalScalingX, 0), TwoDimensionalPoint(gridSizeX / 2 - goalScalingX, 1)),
-            IntegerLine(TwoDimensionalPoint(gridSizeX / 2 + goalScalingX, 0), TwoDimensionalPoint(gridSizeX / 2 + goalScalingX, 1)))
-    var bottomGoalLines: Goal = Goal(IntegerLine(TwoDimensionalPoint(gridSizeX / 2 - goalScalingX, gridSizeY),
-            TwoDimensionalPoint(gridSizeX / 2 + goalScalingX, gridSizeY)),
-            IntegerLine(TwoDimensionalPoint(gridSizeX / 2 - goalScalingX, gridSizeY), TwoDimensionalPoint(gridSizeX / 2 - goalScalingX, gridSizeY - 1)),
-            IntegerLine(TwoDimensionalPoint(gridSizeX / 2 + goalScalingX, gridSizeY), TwoDimensionalPoint(gridSizeX / 2 + goalScalingX, gridSizeY - 1)))
+            IntegerLine(TwoDimensionalPoint(gridSizeX / 2 - goalScalingX, 0), TwoDimensionalPoint(gridSizeX / 2 - goalScalingX, 2)),
+            IntegerLine(TwoDimensionalPoint(gridSizeX / 2 + goalScalingX, 0), TwoDimensionalPoint(gridSizeX / 2 + goalScalingX, 2)),
+            IntegerLine(TwoDimensionalPoint(gridSizeX / 2 - goalScalingX, 1), TwoDimensionalPoint(gridSizeX / 2 + goalScalingX, 1)))
+    var bottomGoalLines: Goal = Goal(IntegerLine(TwoDimensionalPoint(gridSizeX / 2 - goalScalingX, gridSizeY + 2),
+            TwoDimensionalPoint(gridSizeX / 2 + goalScalingX, gridSizeY + 2)),
+            IntegerLine(TwoDimensionalPoint(gridSizeX / 2 - goalScalingX, gridSizeY + 2), TwoDimensionalPoint(gridSizeX / 2 - goalScalingX, gridSizeY)),
+            IntegerLine(TwoDimensionalPoint(gridSizeX / 2 + goalScalingX, gridSizeY + 2), TwoDimensionalPoint(gridSizeX / 2 + goalScalingX, gridSizeY)),
+            IntegerLine(TwoDimensionalPoint(gridSizeX / 2 - goalScalingX, gridSizeY + 1), TwoDimensionalPoint(gridSizeX / 2 + goalScalingX, gridSizeY + 1)))
 
     var allPartialMoves = Stack<StoredMove>(); private set
 
@@ -54,11 +52,11 @@ data class GameBoard(val gridSizeX: Int, val gridSizeY: Int) {
     }
 
     private fun isEdgeNode(point: TwoDimensionalPoint): Boolean {
-        return (point.x == 0 || point.x == gridSizeX || point.y == 1 || point.y == gridSizeY - 1)
+        return (point.x == 0 || point.x == gridSizeX || point.y == 2 || point.y == gridSizeY)
     }
 
     private fun makeNodes(gridSizeX: Int, gridSizeY: Int) {
-        for (y in 1 until gridSizeY) {
+        for (y in 2..gridSizeY) {
             (0..gridSizeX)
                     .filter { !topGoalLines.contains(TwoDimensionalPoint(it, y)) && !bottomGoalLines.contains(TwoDimensionalPoint(it, y)) }
                     .forEach {
@@ -66,10 +64,10 @@ data class GameBoard(val gridSizeX: Int, val gridSizeY: Int) {
                             it % 2 == 1 -> {
                                 allNodesHashSet.add(ConnectionNode(TwoDimensionalPoint(it, y)))
                             }
-                            y % 2 == 0 -> {
+                            y % 2 == 1 -> {
                                 allNodesHashSet.add(ConnectionNode(TwoDimensionalPoint(it, y)))
                             }
-                            it % 2 != 1 && y % 2 != 0 -> {
+                            it % 2 != 1 && y % 2 != 1 -> {
                                 if (isEdgeNode(TwoDimensionalPoint(it, y))) {
                                     allNodesHashSet.add(Node(TwoDimensionalPoint(it, y), NodeTypeEnum.Wall))
                                 } else allNodesHashSet.add(Node(TwoDimensionalPoint(it, y), NodeTypeEnum.Empty))
@@ -127,7 +125,7 @@ data class GameBoard(val gridSizeX: Int, val gridSizeY: Int) {
     }
 
     fun allPossibleMovesFromNode(node: Node): List<PossibleMove> {
-        return node.openConnectionNodeNeighbors().sortedBy { it.coords }.map { PossibleMove(node, it) }
+        return node.getNodeNeighbors().sortedBy { it.coords }.map { PossibleMove(node, it) }
     }
 
     //Not all moves might be legal

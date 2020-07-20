@@ -2,6 +2,7 @@ package com.ps.simplepapersoccer.gameObjects.game.geometry.abstraction
 
 import com.ps.simplepapersoccer.gameObjects.game.geometry.TwoDimensionalPoint
 import com.ps.simplepapersoccer.helpers.MathHelper.euclideanDistance
+import kotlin.math.abs
 
 class IntegerLine(var fromPoint: TwoDimensionalPoint, var toPoint: TwoDimensionalPoint) {
     var allPoints: HashSet<TwoDimensionalPoint> = hashSetOf()
@@ -19,11 +20,11 @@ class IntegerLine(var fromPoint: TwoDimensionalPoint, var toPoint: TwoDimensiona
         if (w < 0) dx1 = -1 else if (w > 0) dx1 = 1
         if (h < 0) dy1 = -1 else if (h > 0) dy1 = 1
         if (w < 0) dx2 = -1 else if (w > 0) dx2 = 1
-        var longest = Math.abs(w)
-        var shortest = Math.abs(h)
+        var longest = abs(w)
+        var shortest = abs(h)
         if (longest <= shortest) {
-            longest = Math.abs(h)
-            shortest = Math.abs(w)
+            longest = abs(h)
+            shortest = abs(w)
             if (h < 0) dy2 = -1 else if (h > 0) dy2 = 1
             dx2 = 0
         }

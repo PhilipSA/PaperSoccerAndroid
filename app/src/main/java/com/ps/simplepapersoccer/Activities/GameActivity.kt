@@ -55,7 +55,7 @@ class GameActivity : AppCompatActivity() {
         val playerName = sharedPreferences.getString(PREF_PLAYER_NAME, "Player")!!
 
         val gridSizeX = intent.getIntExtra(ARG_GRID_SIZE_X, 8)
-        val gridSizeY = intent.getIntExtra(ARG_GRID_SIZE_Y, 10)
+        val gridSizeY = intent.getIntExtra(ARG_GRID_SIZE_Y, 11)
 
         myName = playerName
 

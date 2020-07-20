@@ -30,8 +30,6 @@ class GameView : View {
     private var canvas: Canvas? = null
     private var paint = Paint()
 
-    private val nodeSize = 20
-
     private var leftEdge = 50f
     private var topEdge = 100f
 
@@ -94,8 +92,8 @@ class GameView : View {
 
     private fun pointsCoordsToCoords(point: TwoDimensionalPoint): FloatArray {
         val newCoords = FloatArray(2)
-        newCoords[0] = point.x * gridXdraw + leftEdge
-        newCoords[1] = point.y * gridYdraw + topEdge
+        newCoords[0] = point.x / 2 * gridXdraw + leftEdge
+        newCoords[1] = point.y / 2 * gridYdraw + topEdge
         return newCoords
     }
 
@@ -140,7 +138,7 @@ class GameView : View {
         paint.color = gridColor
 
         for (node in gameBoard?.nodesHashSet!!) {
-            node.openConnectionNodeNeighbors()
+            node.coordNeighbors
                     .filterNot { node.coords.x != it.coords.x && node.coords.y != it.coords.y }
                     .forEach { canvas.drawLine(nodeToCoords(node)[0], nodeToCoords(node)[1], nodeToCoords(it)[0], nodeToCoords(it)[1], paint) }
         }
@@ -166,7 +164,7 @@ class GameView : View {
 
         var image = resources.getDrawable(R.drawable.football)
         image = ScaleDrawable(image, 0, ballSize.toFloat(), ballSize.toFloat()).drawable
-        val ballNodeCoords = pointsCoordsToCoords(gameViewDrawData?.ballNode?.getVisibleCoords!!)
+        val ballNodeCoords = pointsCoordsToCoords(gameViewDrawData?.ballNode?.coords!!)
         image.setBounds(ballNodeCoords[0].toInt() - ballSize / 2, ballNodeCoords[1].toInt() - ballSize / 2, ballNodeCoords[0].toInt() + ballSize / 2, ballNodeCoords[1].toInt() + ballSize / 2)
         image.draw(canvas)
     }
@@ -176,7 +174,9 @@ class GameView : View {
         if (gameViewDrawData?.currentPlayerTurn?.isAi!!) return
         gameViewDrawData?.nodeNeighbors!!
                 .map { nodeToCoords(it) }
-                .forEach { canvas?.drawCircle(it[0], it[1], 20f, paint) }
+                .forEach {
+                    canvas?.drawCircle(it[0], it[1], 20f, paint)
+                }
     }
 
     private fun drawGoalLine(edge: Float, paint: Paint, color: Int, line: IntegerLine) {
@@ -198,11 +198,15 @@ class GameView : View {
 
     private fun drawWalls(paint: Paint) {
         gameBoard?.nodesHashSet?.filter { otherNode -> otherNode.nodeType == NodeTypeEnum.Wall }?.forEach{
-            it.coordNeighbors.filter { otherNode -> otherNode.nodeType == NodeTypeEnum.Wall }.forEach{
-                otherNode -> if (!it.isDiagonalNeighbor(otherNode)) canvas?.drawLine(nodeToCoords(it)[0], nodeToCoords(it)[1], nodeToCoords(otherNode)[0], nodeToCoords(otherNode)[1], paint) } }
+            it.coordNeighbors.filter { otherNode -> otherNode.nodeType == NodeTypeEnum.Wall }.forEach {
+                otherNode -> if (!it.isDiagonalNeighbor(otherNode)) canvas?.drawLine(nodeToCoords(it)[0], nodeToCoords(it)[1], nodeToCoords(otherNode)[0], nodeToCoords(otherNode)[1], paint)
+            }
+        }
 
         gameBoard?.nodesHashSet?.filter { otherNode -> otherNode.nodeType == NodeTypeEnum.Wall }?.forEach{
             it.coordNeighbors.filter { otherNode -> otherNode.nodeType == NodeTypeEnum.Post }.forEach{
-                otherNode -> if (!it.isDiagonalNeighbor(otherNode)) canvas?.drawLine(nodeToCoords(it)[0], nodeToCoords(it)[1], nodeToCoords(otherNode)[0], nodeToCoords(otherNode)[1], paint) } }
+                otherNode -> if (!it.isDiagonalNeighbor(otherNode)) canvas?.drawLine(nodeToCoords(it)[0], nodeToCoords(it)[1], nodeToCoords(otherNode)[0], nodeToCoords(otherNode)[1], paint)
+            }
+        }
     }
 }

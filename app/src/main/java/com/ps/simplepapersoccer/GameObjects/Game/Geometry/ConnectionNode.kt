@@ -3,6 +3,7 @@ package com.ps.simplepapersoccer.gameObjects.game.geometry
 import com.ps.simplepapersoccer.data.enums.ConnectionTypeEnum
 import com.ps.simplepapersoccer.data.enums.NodeTypeEnum
 import com.ps.simplepapersoccer.gameObjects.game.geometry.abstraction.BaseNode
+import kotlin.math.atan2
 
 //Keeps track of how other nodes are connected
 class ConnectionNode(coords: TwoDimensionalPoint) : BaseNode(coords) {
@@ -21,13 +22,19 @@ class ConnectionNode(coords: TwoDimensionalPoint) : BaseNode(coords) {
                 2 -> ConnectionTypeEnum.Open
                 0 -> ConnectionTypeEnum.Blocked
                 1 -> {
-                    val node1 = connectedNodes.first().node1
-                    val node2 = connectedNodes.first().node2
+                    val openConnection = connectedNodes.filter { it.openConnection }
+                    val node1 = openConnection.first().node1
+                    val node2 = openConnection.first().node2
+
+                    val deltaY = node1.coords.y - node2.coords.y
+                    val deltaX = node2.coords.x - node1.coords.x
+                    val result = Math.toDegrees(atan2(deltaY.toDouble(), deltaX.toDouble()));
+
                     when {
                         node1.coords.y == node2.coords.y -> ConnectionTypeEnum.Open
                         node1.coords.x == node2.coords.x -> ConnectionTypeEnum.Open
-                        node1.coords.x < node2.coords.x -> ConnectionTypeEnum.LineTiltedLeft
-                        node1.coords.x > node2.coords.x -> ConnectionTypeEnum.LineTiltedRight
+                        result == 45.0 || result == -135.0 -> ConnectionTypeEnum.LineTiltedLeft
+                        result == -45.0 || result == 135.0 -> ConnectionTypeEnum.LineTiltedRight
                         else -> ConnectionTypeEnum.Blocked
                     }
                 }

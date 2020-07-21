@@ -26,6 +26,8 @@ class AIUnitTests {
             if (i == testRuns / 2) {
                 System.gc()
                 System.runFinalization()
+
+                println(gameHandler.gameBoard)
             }
 
             if (gameHandler.winner?.winner?.playerName == NeuralNetworkAI::class.java.simpleName) {

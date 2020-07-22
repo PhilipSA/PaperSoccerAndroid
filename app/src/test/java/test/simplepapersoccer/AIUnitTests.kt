@@ -5,6 +5,7 @@ import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.mock
 import com.ps.simplepapersoccer.ai.neuralnetworkAI.NeuralNetworkAI
 import com.ps.simplepapersoccer.ai.euclideanAI.EuclideanAI
+import com.ps.simplepapersoccer.ai.minimaxAI.MinimaxAI
 import com.ps.simplepapersoccer.ai.randomAI.RandomAI
 import com.ps.simplepapersoccer.gameObjects.game.GameHandler
 import com.ps.simplepapersoccer.gameObjects.player.abstraction.IPlayer
@@ -48,7 +49,7 @@ class AIUnitTests {
         }
 
         val player1: IPlayer = NeuralNetworkAI(null, 1, 0)
-        val player2: IPlayer = EuclideanAI(2, 1)
+        val player2: IPlayer = MinimaxAI(2, 1)
         val players = arrayListOf(player1, player2)
 
         runTestGame(players, handler)

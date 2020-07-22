@@ -14,7 +14,10 @@ import kotlin.math.max
 import kotlin.math.min
 
 //Philips AI
-class MinimaxAI(private val timeLimitMilliSeconds: Long = AI_TIMEOUT_MS, playerName: String, playerNumber: Int, playerColor: Int) :
+class MinimaxAI(playerNumber: Int,
+                playerColor: Int,
+                playerName: String = MinimaxAI::class.java.simpleName,
+                private val timeLimitMilliSeconds: Long = AI_TIMEOUT_MS) :
         IGameAI, AIPlayer(playerName, playerNumber, playerColor) {
 
     override suspend fun makeMove(gameHandler: GameHandler): PartialMove {

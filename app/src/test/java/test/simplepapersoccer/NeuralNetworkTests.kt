@@ -23,8 +23,8 @@ class NeuralNetworkTests {
         var inputs = listOf(Random.nextInt(0, 2), Random.nextInt(0, 2))
 
         val neuralNetwork = NeuralNetwork(null, object : INeuralNetworkController<Int> {
-            override val inputs: List<Int>
-                get() = inputs
+            override val inputs: List<Double>
+                get() = inputs.map { it.toDouble() }
 
             override val outputs = 1
 

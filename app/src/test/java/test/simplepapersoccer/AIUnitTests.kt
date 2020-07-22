@@ -30,11 +30,6 @@ class AIUnitTests {
                 println(gameHandler.gameBoard)
             }
 
-            if (gameHandler.winner?.winner?.playerName == NeuralNetworkAI::class.java.simpleName) {
-                println(gameHandler.winner?.winner?.playerName)
-                println(gameHandler.winner?.victoryConditionEnum?.name)
-            }
-
             totalNumberOfTurns.add(gameHandler.numberOfTurns)
         }
 

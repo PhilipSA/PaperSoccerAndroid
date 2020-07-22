@@ -128,10 +128,11 @@ data class GameBoard(val gridSizeX: Int, val gridSizeY: Int) {
         return node.getNodeNeighbors().sortedBy { it.coords }.map { PossibleMove(node, it) }
     }
 
-    //Not all moves might be legal
-    fun allPossibleMovesFromNodeCoords(node: Node): List<PossibleMove> {
-        return node.coordNeighbors.sortedBy { it.coords }.map {
-            PossibleMove(node, it)
+    fun allPossibleMovesFromNodeCoords(node: Node): List<Pair<PossibleMove, Boolean>> {
+        val legalMoves = allPossibleMovesFromNode(node)
+
+        return node.coordNeighbors.sortedBy { it.coords }.map { neighborNode ->
+            Pair(PossibleMove(node, neighborNode), legalMoves.any { it.newNode == neighborNode })
         }
     }
 

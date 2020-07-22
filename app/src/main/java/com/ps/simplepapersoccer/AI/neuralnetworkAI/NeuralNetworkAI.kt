@@ -3,6 +3,7 @@ package com.ps.simplepapersoccer.ai.neuralnetworkAI
 import android.content.Context
 import com.ps.simplepapersoccer.ai.abstraction.IGameAI
 import com.ps.simplepapersoccer.data.constants.StringConstants.NEURAL_NETWORK_FILE_NAME
+import com.ps.simplepapersoccer.data.enums.VictoryConditionEnum
 import com.ps.simplepapersoccer.gameObjects.game.GameHandler
 import com.ps.simplepapersoccer.gameObjects.move.PartialMove
 import com.ps.simplepapersoccer.gameObjects.move.PossibleMove
@@ -32,25 +33,30 @@ class NeuralNetworkAI(private val context: Context?,
             override val outputs = 8
 
             override fun fitnessEvaluation(): Double {
-                return if (this@NeuralNetworkAI.gameHandler!!.winner?.winner == this@NeuralNetworkAI) 1.0
-                else this@NeuralNetworkAI.gameHandler!!.numberOfTurns.toDouble() / 100
+                val winner = this@NeuralNetworkAI.gameHandler!!.winner
+
+                return if (winner?.winner == this@NeuralNetworkAI &&
+                        (winner.victoryConditionEnum == VictoryConditionEnum.Goal || winner.victoryConditionEnum == VictoryConditionEnum.OpponentOutOfMoves)) 1.0
+                else this@NeuralNetworkAI.gameHandler!!.numberOfTurns.toDouble() / 200
             }
 
             override fun networkGuessOutput(output: List<Double>): PossibleMove? {
                 val possibleOutputs = this@NeuralNetworkAI.gameHandler!!.gameBoard.allPossibleMovesFromNodeCoords(this@NeuralNetworkAI.gameHandler!!.ballNode)
                 val alignedOutputs = if (this@NeuralNetworkAI.gameHandler!!.getPlayerPosition(this@NeuralNetworkAI) != 0) possibleOutputs.reversed() else possibleOutputs
 
-                val outputs = mutableListOf<PossibleMove>()
+                val outputs = mutableListOf<Pair<PossibleMove, Double>>()
+                var maxScore = Double.NEGATIVE_INFINITY
 
                 for (i in output.indices) {
                     val currentOutput = output[i]
                     val possibleOutput = alignedOutputs.getOrNull(i)
-                    if (currentOutput == output.max() && possibleOutput != null) {
-                        outputs.add(possibleOutput)
+                    if (currentOutput > maxScore && possibleOutput?.second == true) {
+                        maxScore = currentOutput
+                        outputs.add(Pair(possibleOutput.first, currentOutput))
                     }
                 }
 
-                return outputs.randomOrNull()
+                return outputs.maxBy { it.second }?.first
             }
         }
 

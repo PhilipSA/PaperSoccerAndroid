@@ -167,13 +167,13 @@ class NeuralNetwork<T>(context: Context?,
         genome.network = network
     }
 
-    private fun evaluateNetwork(network: Network, inputsArg: List<Int>): T? {
+    private fun evaluateNetwork(network: Network, inputsArg: List<Double>): T? {
         if (inputsArg.size != neuralNetworkController.inputs.size) {
             throw(Exception("No"))
         }
 
         for (index in neuralNetworkController.inputs.indices) {
-            network.neurons[index]?.value = inputsArg[index].toDouble()
+            network.neurons[index]?.value = inputsArg[index]
         }
 
         network.neurons.values.forEach { neuron ->

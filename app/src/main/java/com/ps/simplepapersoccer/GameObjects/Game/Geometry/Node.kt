@@ -16,8 +16,8 @@ class Node(coords: TwoDimensionalPoint,
     override val getVisibleCoords: TwoDimensionalPoint
         get() = TwoDimensionalPoint(coords.x / 2, coords.y / 2)
 
-    override fun identifierHashCode(): Int {
-        return nodeType.ordinal + if (containsBall) 10 else 0
+    override fun normalizedIdentifierHashCode(): Double {
+        return nodeType.normalizedIdentiferValue + if (containsBall) 0.05 else 0.0
     }
 
     fun pairMatchesType(other: Node, firstNodeType: NodeTypeEnum, otherNodeType: NodeTypeEnum): Boolean {

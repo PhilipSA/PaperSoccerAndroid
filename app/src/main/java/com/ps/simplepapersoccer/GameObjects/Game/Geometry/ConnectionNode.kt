@@ -42,8 +42,8 @@ class ConnectionNode(coords: TwoDimensionalPoint) : BaseNode(coords) {
             }
         }
 
-    override fun identifierHashCode(): Int {
-        return connectionTypeEnum.identiferValue
+    override fun normalizedIdentifierHashCode(): Double {
+        return connectionTypeEnum.normalizedIdentiferValue
     }
 
     fun connectNodes(node: Node, node2: Node) {

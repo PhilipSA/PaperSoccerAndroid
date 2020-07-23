@@ -4,9 +4,9 @@ import com.ps.simplepapersoccer.gameObjects.game.geometry.TwoDimensionalPoint
 import com.ps.simplepapersoccer.helpers.MathHelper.euclideanDistance
 import kotlin.math.abs
 
-class IntegerLine(var fromPoint: TwoDimensionalPoint, var toPoint: TwoDimensionalPoint) {
+class IntegerLine(val fromPoint: TwoDimensionalPoint, val toPoint: TwoDimensionalPoint) {
     var allPoints: HashSet<TwoDimensionalPoint> = hashSetOf()
-    val length: Int get() = euclideanDistance(fromPoint, toPoint).toInt()
+    val length = euclideanDistance(fromPoint, toPoint).toInt()
 
     init {
         var x = fromPoint.x

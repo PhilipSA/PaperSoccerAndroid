@@ -49,7 +49,7 @@ class AIUnitTests {
         }
 
         val player1: IPlayer = NeuralNetworkAI(null, 1, 0)
-        val player2: IPlayer = MinimaxAI(2, 1)
+        val player2: IPlayer = EuclideanAI(2, 1)
         val players = arrayListOf(player1, player2)
 
         runTestGame(players, handler)

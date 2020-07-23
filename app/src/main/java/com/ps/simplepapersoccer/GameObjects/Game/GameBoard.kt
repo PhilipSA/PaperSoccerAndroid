@@ -17,10 +17,10 @@ import kotlin.collections.HashSet
 import kotlin.math.roundToInt
 
 data class GameBoard(val gridSizeX: Int, val gridSizeY: Int) {
-    var allNodesHashSet = HashSet<BaseNode>()
-    val nodesHashSet get() = allNodesHashSet.filterIsInstance<Node>()
+    val allBaseNodes = mutableListOf<BaseNode>()
+    val allNodes: HashSet<Node>
 
-    val ballNode: Node get() = nodesHashSet.first { it.containsBall }
+    lateinit var ballNode: Node
 
     var currentPlayersTurn: Int = 1
 
@@ -48,7 +48,11 @@ data class GameBoard(val gridSizeX: Int, val gridSizeY: Int) {
 
     init {
         makeNodes(gridSizeX, gridSizeY)
-        nodesHashSet.sortedBy { it.coords }[nodesHashSet.size / 2].containsBall = true
+        allNodes = allBaseNodes.filterIsInstance<Node>().toHashSet()
+
+        val startingBallNode = allNodes.toList().sortedBy { it.coords }[allNodes.size / 2]
+        startingBallNode.containsBall = true
+        ballNode = startingBallNode
     }
 
     private fun isEdgeNode(point: TwoDimensionalPoint): Boolean {
@@ -62,37 +66,38 @@ data class GameBoard(val gridSizeX: Int, val gridSizeY: Int) {
                     .forEach {
                         when {
                             it % 2 == 1 -> {
-                                allNodesHashSet.add(ConnectionNode(TwoDimensionalPoint(it, y)))
+                                allBaseNodes.add(ConnectionNode(TwoDimensionalPoint(it, y)))
                             }
                             y % 2 == 1 -> {
-                                allNodesHashSet.add(ConnectionNode(TwoDimensionalPoint(it, y)))
+                                allBaseNodes.add(ConnectionNode(TwoDimensionalPoint(it, y)))
                             }
                             it % 2 != 1 && y % 2 != 1 -> {
                                 if (isEdgeNode(TwoDimensionalPoint(it, y))) {
-                                    allNodesHashSet.add(Node(TwoDimensionalPoint(it, y), NodeTypeEnum.Wall))
-                                } else allNodesHashSet.add(Node(TwoDimensionalPoint(it, y), NodeTypeEnum.Empty))
+                                    allBaseNodes.add(Node(TwoDimensionalPoint(it, y), NodeTypeEnum.Wall))
+                                } else allBaseNodes.add(Node(TwoDimensionalPoint(it, y), NodeTypeEnum.Empty))
                             }
                         }
                     }
         }
 
         topGoalLines.allNodes.forEach {
-            allNodesHashSet.add(it)
+            allBaseNodes.add(it)
         }
 
         bottomGoalLines.allNodes.forEach {
-            allNodesHashSet.add(it)
+            allBaseNodes.add(it)
         }
 
         goal1 = bottomGoalLines
         goal2 = topGoalLines
 
         generateAllNeighbors()
+        allBaseNodes.sortBy { it.coords }
     }
 
     private fun generateAllNeighbors() {
-        for (node in allNodesHashSet) {
-            for (otherNode in allNodesHashSet) {
+        for (node in allBaseNodes) {
+            for (otherNode in allBaseNodes) {
                 if (node == otherNode) continue
 
                 if (node is Node && otherNode is ConnectionNode) {
@@ -105,7 +110,7 @@ data class GameBoard(val gridSizeX: Int, val gridSizeY: Int) {
             }
         }
 
-        for (node in allNodesHashSet) {
+        for (node in allBaseNodes) {
             if (node is ConnectionNode) {
                 node.createNodeConnections()
             }
@@ -146,6 +151,7 @@ data class GameBoard(val gridSizeX: Int, val gridSizeY: Int) {
 
             storedMove.partialMove.oldNode.containsBall = true
             storedMove.partialMove.newNode.containsBall = false
+            ballNode = storedMove.partialMove.oldNode
 
             storedMove.partialMove
 
@@ -165,6 +171,7 @@ data class GameBoard(val gridSizeX: Int, val gridSizeY: Int) {
 
         partialMove.newNode.containsBall = true
         partialMove.oldNode.containsBall = false
+        ballNode = partialMove.newNode
 
         if (partialMove.newNode.nodeType == NodeTypeEnum.Empty) {
             changeTurn()
@@ -176,7 +183,7 @@ data class GameBoard(val gridSizeX: Int, val gridSizeY: Int) {
     }
 
     fun findNodeByCoords(point: TwoDimensionalPoint): Node? {
-        return nodesHashSet.firstOrNull { it.coords == point }
+        return allNodes.firstOrNull { it.coords == point }
     }
 
     private fun getConnectionNodeBetweenNodes(node: Node, node2: Node): ConnectionNode? {
@@ -184,13 +191,11 @@ data class GameBoard(val gridSizeX: Int, val gridSizeY: Int) {
     }
 
     override fun toString(): String {
-        val sortedNodes = allNodesHashSet.sortedBy { it.coords }
-
         var returnString = ""
         var currentY = 0
 
-        for (i in sortedNodes.indices) {
-            val node = sortedNodes[i]
+        for (i in allBaseNodes.indices) {
+            val node = allBaseNodes[i]
 
             if (currentY != node.coords.y) {
                 returnString += "\n"

@@ -24,11 +24,7 @@ class NeuralNetworkAI(private val context: Context?,
         if (this.gameHandler == null) this.gameHandler = gameHandler
 
         val neuralNetworkController = object : INeuralNetworkController<PossibleMove> {
-            override val inputs: List<Double>
-                get() {
-                    val nodes = this@NeuralNetworkAI.gameHandler!!.gameBoard.allNodesHashSet.toList().sortedBy { it.coords }.map { it.normalizedIdentifierHashCode() }
-                    return if (this@NeuralNetworkAI.gameHandler!!.getPlayerPosition(this@NeuralNetworkAI) != 0) nodes.reversed() else nodes
-                }
+            override lateinit var inputs: List<Double>
 
             override val outputs = 8
 
@@ -58,7 +54,15 @@ class NeuralNetworkAI(private val context: Context?,
 
                 return outputs.maxBy { it.second }?.first
             }
+
+            override fun updateInputs() {
+                val nodes = this@NeuralNetworkAI.gameHandler!!.gameBoard.allBaseNodes.map { it.normalizedIdentifierHashCode() }
+                val sortedNodes = if (this@NeuralNetworkAI.gameHandler!!.getPlayerPosition(this@NeuralNetworkAI) != 0) nodes.reversed() else nodes
+                inputs = sortedNodes
+            }
         }
+
+        neuralNetworkController.updateInputs()
 
         if (neuralNetwork == null) {
             neuralNetwork = NeuralNetwork(context, neuralNetworkController, true, NeuralNetworkParameters(FILE_NAME = backupFileName))

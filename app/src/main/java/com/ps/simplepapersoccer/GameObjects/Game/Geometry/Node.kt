@@ -4,7 +4,7 @@ import com.ps.simplepapersoccer.data.enums.NodeTypeEnum
 import com.ps.simplepapersoccer.gameObjects.game.geometry.abstraction.BaseNode
 
 class Node(coords: TwoDimensionalPoint,
-           var nodeType: NodeTypeEnum): BaseNode(coords) {
+           var nodeType: NodeTypeEnum) : BaseNode(coords) {
     val neighbors: HashSet<ConnectionNode> = hashSetOf()
     var cameFrom: Node? = null
     var nodeValue: Double = 0.0
@@ -38,7 +38,8 @@ class Node(coords: TwoDimensionalPoint,
 
     fun getNodeNeighbors(filterOpenConnection: Boolean = true): HashSet<Node> {
         return neighbors.flatMap { connectionNode ->
-            connectionNode.connectedNodes.filter { (it.node1 == this || it.node2 == this) && if (filterOpenConnection) it.openConnection else true }.map { if (it.node1 == this) it.node2 else it.node1 }
+            connectionNode.connectedNodes.filter { (it.node1 == this || it.node2 == this) && if (filterOpenConnection) it.openConnection else true }
+                    .map { if (it.node1 == this) it.node2 else it.node1 }
         }.toHashSet()
     }
 }

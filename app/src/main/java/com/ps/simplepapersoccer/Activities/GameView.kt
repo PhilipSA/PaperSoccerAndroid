@@ -138,7 +138,7 @@ class GameView : View {
 
         paint.color = gridColor
 
-        for (node in gameBoard?.nodesHashSet!!) {
+        for (node in gameBoard?.allNodes!!) {
             node.coordNeighbors
                     .filterNot { node.coords.x != it.coords.x && node.coords.y != it.coords.y }
                     .forEach { canvas.drawLine(nodeToCoords(node)[0], nodeToCoords(node)[1], nodeToCoords(it)[0], nodeToCoords(it)[1], paint) }
@@ -198,13 +198,13 @@ class GameView : View {
     }
 
     private fun drawWalls(paint: Paint) {
-        gameBoard?.nodesHashSet?.filter { otherNode -> otherNode.nodeType == NodeTypeEnum.Wall }?.forEach{
+        gameBoard?.allNodes?.filter { otherNode -> otherNode.nodeType == NodeTypeEnum.Wall }?.forEach{
             it.coordNeighbors.filter { otherNode -> otherNode.nodeType == NodeTypeEnum.Wall }.forEach {
                 otherNode -> if (!it.isDiagonalNeighbor(otherNode)) canvas?.drawLine(nodeToCoords(it)[0], nodeToCoords(it)[1], nodeToCoords(otherNode)[0], nodeToCoords(otherNode)[1], paint)
             }
         }
 
-        gameBoard?.nodesHashSet?.filter { otherNode -> otherNode.nodeType == NodeTypeEnum.Wall }?.forEach{
+        gameBoard?.allNodes?.filter { otherNode -> otherNode.nodeType == NodeTypeEnum.Wall }?.forEach{
             it.coordNeighbors.filter { otherNode -> otherNode.nodeType == NodeTypeEnum.Post }.forEach{
                 otherNode -> if (!it.isDiagonalNeighbor(otherNode)) canvas?.drawLine(nodeToCoords(it)[0], nodeToCoords(it)[1], nodeToCoords(otherNode)[0], nodeToCoords(otherNode)[1], paint)
             }

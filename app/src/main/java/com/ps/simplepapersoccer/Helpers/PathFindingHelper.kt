@@ -8,7 +8,7 @@ object PathFindingHelper {
         val frontier = hashSetOf(startNode)
         val explored = HashSet<Node>()
         while (frontier.isNotEmpty()) {
-            val node = frontier.sortedBy { x -> x.nodeValue }.first()
+            val node = frontier.minBy { x -> x.nodeValue }!!
             frontier.remove(node)
 
             if (node == goalNode) {
@@ -28,10 +28,7 @@ object PathFindingHelper {
                 if (explored.contains(nextNode)) {
                     continue
                 }
-                if (!frontier.contains(nextNode)) {
-                    frontier.add(nextNode)
-                }
-                else if (costSoFar >= nextNode.costSoFar) continue
+                if (frontier.add(nextNode).not() && costSoFar >= nextNode.costSoFar) continue
 
                 nextNode.cameFrom = node
                 nextNode.costSoFar = costSoFar

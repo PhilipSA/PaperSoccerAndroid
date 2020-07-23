@@ -40,6 +40,10 @@ class NeuralNetworkTests {
                     if (it >= 0.5) 1 else 0
                 }.first()
             }
+
+            override fun updateInputs() {
+
+            }
         }, false, andOperationNeuralNetworkParameters)
 
         for (i in 0 until numberOfRuns) {

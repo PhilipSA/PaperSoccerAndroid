@@ -52,7 +52,7 @@ data class GameBoard(val gridSizeX: Int, val gridSizeY: Int) {
 
         val startingBallNode = allNodes.toList().sortedBy { it.coords }[allNodes.size / 2]
         startingBallNode.containsBall = true
-        ballNode = startingBallNode
+        currentBallNode = startingBallNode
     }
 
     private fun isEdgeNode(point: TwoDimensionalPoint): Boolean {
@@ -151,7 +151,7 @@ data class GameBoard(val gridSizeX: Int, val gridSizeY: Int) {
 
             storedMove.partialMove.oldNode.containsBall = true
             storedMove.partialMove.newNode.containsBall = false
-            ballNode = storedMove.partialMove.oldNode
+            currentBallNode = storedMove.partialMove.oldNode
 
             storedMove.partialMove
 
@@ -171,7 +171,7 @@ data class GameBoard(val gridSizeX: Int, val gridSizeY: Int) {
 
         partialMove.newNode.containsBall = true
         partialMove.oldNode.containsBall = false
-        ballNode = partialMove.newNode
+        currentBallNode = partialMove.newNode
 
         if (partialMove.newNode.nodeType == NodeTypeEnum.Empty) {
             changeTurn()

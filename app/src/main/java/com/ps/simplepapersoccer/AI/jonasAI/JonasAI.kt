@@ -26,7 +26,7 @@ class JonasAI(playerName: String, playerNumber: Int, playerColor: Int): IGameAI,
     }
 
     private fun followAllPossibleMoves(moveSequences: ArrayList<MoveSequence>, gameHandler: GameHandler, calledBy: UUID ) : ArrayList<MoveSequence>? {
-        val possibleMoves = gameHandler.gameBoard.allPossibleMovesFromNode(gameHandler.ballNode)
+        val possibleMoves = gameHandler.gameBoard.allLegalMovesFromBallNode
 
         for (possibleMove in possibleMoves){
 

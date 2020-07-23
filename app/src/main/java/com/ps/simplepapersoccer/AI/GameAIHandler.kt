@@ -46,6 +46,6 @@ class GameAIHandler(private val aiHandlerListener: IGameAiHandlerListener,
     }
 
     companion object {
-        const val AI_TIMEOUT_MS = 200000L
+        const val AI_TIMEOUT_MS = 2000L
     }
 }

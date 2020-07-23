@@ -8,7 +8,7 @@ import com.ps.simplepapersoccer.gameObjects.player.AIPlayer
 class RandomAI(playerNumber: Int, playerColor: Int, playerName: String = RandomAI::class.java.simpleName): IGameAI, AIPlayer(playerName, playerNumber, playerColor) {
     override suspend fun makeMove(gameHandler: GameHandler): PartialMove {
         return PartialMove(gameHandler.ballNode,
-                gameHandler.gameBoard.allPossibleMovesFromNode(gameHandler.ballNode).random().newNode,
+                gameHandler.gameBoard.allLegalMovesFromBallNode.random().newNode,
                 gameHandler.gameBoard.currentPlayersTurn)
     }
 }

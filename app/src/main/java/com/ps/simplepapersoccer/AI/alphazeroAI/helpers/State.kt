@@ -32,7 +32,7 @@ class State {
     val allPossibleStates: List<State>
         get() {
             val possibleStates: MutableList<State> = ArrayList()
-            val availablePositions = board.allPossibleMovesFromNode(board.ballNode)
+            val availablePositions = board.allLegalMovesFromBallNode
             availablePositions.forEach { p ->
                 val newState = State(board)
                 newState.move = PartialMove(p, board.currentPlayersTurn)
@@ -50,7 +50,7 @@ class State {
     }
 
     fun randomPlay() {
-        val availablePositions = board.allPossibleMovesFromNode(board.ballNode)
+        val availablePositions = board.allLegalMovesFromBallNode
         board.makePartialMove(PartialMove(availablePositions.random(), board.currentPlayersTurn))
     }
 }

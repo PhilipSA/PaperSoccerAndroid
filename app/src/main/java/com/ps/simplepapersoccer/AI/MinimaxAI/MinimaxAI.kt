@@ -131,7 +131,7 @@ class MinimaxAI(playerNumber: Int,
 
     private fun sortPossibleMovesByScore(sortOrder: SortOrderEnum, state: GameHandler, maximzingPlayer: IPlayer): ArrayList<MoveData> {
         val newPossibleMoves = ArrayList<MoveData>()
-        for (possibleMove in state.gameBoard.allPossibleMovesFromNode(state.ballNode)) {
+        for (possibleMove in state.gameBoard.allLegalMovesFromBallNode) {
             val partialMove = PartialMove(possibleMove.oldNode, possibleMove.newNode, state.gameBoard.currentPlayersTurn)
             partialMove.madeTheMove = state.gameBoard.currentPlayersTurn
             state.gameBoard.makePartialMove(partialMove)
@@ -164,7 +164,7 @@ class MinimaxAI(playerNumber: Int,
         score += -PathFindingHelper.findPath(state.ballNode, opponentsGoal).size * 2
 
         //Neighbors are bounceable
-        state.gameBoard.allPossibleMovesFromNode(state.ballNode).forEach{
+        state.gameBoard.allLegalMovesFromBallNode.forEach{
             if (it.newNode.nodeType == NodeTypeEnum.BounceAble && state.currentPlayersTurn === maximizingPlayer) ++score
             else if (it.newNode.nodeType == NodeTypeEnum.BounceAble) {
                 --score

@@ -17,7 +17,7 @@ class EuclideanAI(playerNumber: Int,
         var manhattanDistance = Integer.MAX_VALUE.toDouble()
         var tempManhattan: Double
 
-        for (possibleMove in gameHandler.gameBoard.allPossibleMovesFromNode(gameHandler.ballNode)) {
+        for (possibleMove in gameHandler.gameBoard.allLegalMovesFromBallNode) {
             tempManhattan = PathFindingHelper.findPath(possibleMove.newNode, gameHandler.getOpponent(gameHandler.currentPlayersTurn).goal!!.goalNode()).size.toDouble()
             if (tempManhattan < manhattanDistance) {
                 manhattanDistance = tempManhattan

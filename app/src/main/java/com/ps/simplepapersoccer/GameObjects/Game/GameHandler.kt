@@ -91,7 +91,7 @@ class GameHandler(private val listener: IGameHandlerListener?, gridX: Int, gridY
         if (node.nodeType == NodeTypeEnum.Goal) {
             if (player1.goal!!.isGoalNode(node)) return Victory(player2, VictoryConditionEnum.Goal)
             else if (player2.goal!!.isGoalNode(node)) return Victory(player1, VictoryConditionEnum.Goal)
-        } else if (node.connectedNodes.size == 0) {
+        } else if (node.openConnectionNodes.size == 0) {
             return Victory(getOpponent(currentPlayersTurn), VictoryConditionEnum.OpponentOutOfMoves)
         }
         return null

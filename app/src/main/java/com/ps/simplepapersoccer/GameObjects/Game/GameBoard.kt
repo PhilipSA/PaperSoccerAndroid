@@ -23,7 +23,7 @@ data class GameBoard(val gridSizeX: Int, val gridSizeY: Int) {
     private var currentBallNode: Node? = null
         set(value) {
             field = value
-            allLegalMovesFromBallNode = ballNode.connectedNodes.sortedBy { it.coords }.map { PossibleMove(ballNode, it) }
+            allLegalMovesFromBallNode = ballNode.openConnectionNodes.sortedBy { it.coords }.map { PossibleMove(ballNode, it) }
         }
 
     val ballNode: Node get() = currentBallNode!!
@@ -128,7 +128,7 @@ data class GameBoard(val gridSizeX: Int, val gridSizeY: Int) {
     private fun getWinner(node: Node): Boolean {
         return when {
             node.nodeType == NodeTypeEnum.Goal -> true
-            node.connectedNodes.size == 0 -> {
+            node.openConnectionNodes.size == 0 -> {
                 true
             }
             else -> {
@@ -138,7 +138,7 @@ data class GameBoard(val gridSizeX: Int, val gridSizeY: Int) {
     }
 
     private fun allPossibleMovesFromNode(node: Node): List<PossibleMove> {
-        return node.connectedNodes.sortedBy { it.coords }.map { PossibleMove(node, it) }
+        return node.openConnectionNodes.sortedBy { it.coords }.map { PossibleMove(node, it) }
     }
 
     fun allPossibleMovesFromNodeCoords(node: Node): List<Pair<PossibleMove, Boolean>> {
@@ -152,6 +152,7 @@ data class GameBoard(val gridSizeX: Int, val gridSizeY: Int) {
     fun undoLastMove(): PartialMove? {
         return if (allPartialMoves.isNotEmpty()) {
             val storedMove = allPartialMoves.pop()
+
             getConnectionNodeBetweenNodes(storedMove.partialMove.oldNode, storedMove.partialMove.newNode)
                     ?.connectNodes(storedMove.partialMove.oldNode, storedMove.partialMove.newNode)
 
@@ -195,7 +196,7 @@ data class GameBoard(val gridSizeX: Int, val gridSizeY: Int) {
     }
 
     private fun getConnectionNodeBetweenNodes(node: Node, node2: Node): ConnectionNode? {
-        return node.neighbors.first { it.getNodeConnection(node, node2) != null }
+        return node.connectedNodesMap[node2]
     }
 
     override fun toString(): String {

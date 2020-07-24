@@ -9,7 +9,7 @@ import com.ps.simplepapersoccer.helpers.PathFindingHelper
 import java.util.*
 import kotlin.collections.ArrayList
 
-class JonasAI(playerName: String, playerNumber: Int, playerColor: Int): IGameAI, AIPlayer(playerName, playerNumber, playerColor) {
+class JonasAI(playerName: String, playerNumber: Int, playerColor: Int) : IGameAI, AIPlayer(playerName, playerNumber, playerColor) {
     var goalFound: Boolean = false
 
     override suspend fun makeMove(gameHandler: GameHandler): PartialMove {
@@ -23,20 +23,20 @@ class JonasAI(playerName: String, playerNumber: Int, playerColor: Int): IGameAI,
         return bestMoveSequence.moveList.pollLast()!!
     }
 
-    private fun followAllPossibleMoves(moveSequences: ArrayList<MoveSequence>, gameHandler: GameHandler, calledBy: UUID ) : ArrayList<MoveSequence>? {
+    private fun followAllPossibleMoves(moveSequences: ArrayList<MoveSequence>, gameHandler: GameHandler, calledBy: UUID): ArrayList<MoveSequence>? {
         val possibleMoves = gameHandler.gameBoard.allLegalMovesFromBallNode
 
-        for (possibleMove in possibleMoves){
+        for (possibleMove in possibleMoves) {
 
-            if(goalFound){
+            if (goalFound) {
                 break
             }
 
-            val isGoal = gameHandler.getOpponent(gameHandler.currentPlayersTurn).goal?.isGoalNode(possibleMove.newNode) ?: false
+            val isGoal = gameHandler.getOpponent(gameHandler.currentPlayersTurn).goal?.isGoalNode(possibleMove.newNode)
+                    ?: false
 
-            if(possibleMove.newNode.nodeType == NodeTypeEnum.Empty
-                    || isGoal
-            ){
+            if (possibleMove.newNode.nodeType == NodeTypeEnum.Empty
+                    || isGoal) {
                 goalFound = isGoal
 
                 val moveList = LinkedList<PartialMove>()
@@ -49,8 +49,7 @@ class JonasAI(playerName: String, playerNumber: Int, playerColor: Int): IGameAI,
                         isGoal)
 
                 moveSequences.add(newMoveSequence)
-            }
-            else{
+            } else {
                 val thisIdentifier = UUID.randomUUID()
 
                 val partialMove = PartialMove(possibleMove.oldNode, possibleMove.newNode, gameHandler.gameBoard.currentPlayersTurn)
@@ -59,8 +58,8 @@ class JonasAI(playerName: String, playerNumber: Int, playerColor: Int): IGameAI,
 
                 val moves = followAllPossibleMoves(moveSequences, gameHandler, thisIdentifier)
 
-                for(sequences in moves!!){
-                    if(sequences.originIdentifier == thisIdentifier){
+                for (sequences in moves!!) {
+                    if (sequences.originIdentifier == thisIdentifier) {
                         sequences.moveList.add(partialMove)
                         sequences.originIdentifier = calledBy
                     }
@@ -73,17 +72,17 @@ class JonasAI(playerName: String, playerNumber: Int, playerColor: Int): IGameAI,
         return moveSequences
     }
 
-    private fun evaluateNodes(sequences: ArrayList<MoveSequence>, gameHandler: GameHandler) : MoveSequence {
+    private fun evaluateNodes(sequences: ArrayList<MoveSequence>, gameHandler: GameHandler): MoveSequence {
         var manhattanDistance = Integer.MAX_VALUE.toDouble()
         var tempManhattan: Double
         var manhattanSequence: MoveSequence? = null
 
-        if(goalFound){
+        if (goalFound) {
             val goalMaker = sequences.first { it.goal }
             return goalMaker
         }
 
-        for(sequence in sequences){
+        for (sequence in sequences) {
             tempManhattan = PathFindingHelper.findPathGreedyBestFirstSearchBiDirectional(sequence.endNode, gameHandler.getOpponent(gameHandler.currentPlayersTurn).goal!!.goalNode()).size.toDouble()
             if (tempManhattan < manhattanDistance) {
                 manhattanDistance = tempManhattan

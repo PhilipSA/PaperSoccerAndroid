@@ -3,8 +3,10 @@ package test.simplepapersoccer
 import android.os.Handler
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.mock
+import com.ps.simplepapersoccer.ai.alphazeroAI.AlphaZeroAI2
 import com.ps.simplepapersoccer.ai.neuralnetworkAI.NeuralNetworkAI
 import com.ps.simplepapersoccer.ai.euclideanAI.EuclideanAI
+import com.ps.simplepapersoccer.ai.jonasAI.JonasAI
 import com.ps.simplepapersoccer.ai.minimaxAI.MinimaxAI
 import com.ps.simplepapersoccer.ai.randomAI.RandomAI
 import com.ps.simplepapersoccer.gameObjects.game.GameHandler
@@ -15,7 +17,7 @@ import org.junit.Test
 
 class AIUnitTests {
 
-    private val testRuns = 1000
+    private val testRuns = 100
 
     private fun runTestGame(players: ArrayList<IPlayer>, handler: Handler) {
         val totalNumberOfTurns = mutableListOf<Int>()
@@ -49,7 +51,7 @@ class AIUnitTests {
         }
 
         val player1: IPlayer = NeuralNetworkAI(null, 1, 0)
-        val player2: IPlayer = EuclideanAI(2, 1)
+        val player2: IPlayer = MinimaxAI(2, 1)
         val players = arrayListOf(player1, player2)
 
         runTestGame(players, handler)

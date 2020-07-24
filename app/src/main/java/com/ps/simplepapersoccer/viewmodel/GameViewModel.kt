@@ -56,7 +56,7 @@ class GameViewModel(application: Application): AndroidViewModel(application), IG
     }
 
     fun getAllNodeNeighbors(node: Node): HashSet<Node> {
-        return node.connectedNodes.toHashSet()
+        return node.openConnectionNodes.toHashSet()
     }
 
     fun updatePlayerTurnText() {

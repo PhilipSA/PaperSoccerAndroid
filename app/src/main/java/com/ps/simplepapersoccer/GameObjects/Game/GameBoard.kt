@@ -20,7 +20,15 @@ data class GameBoard(val gridSizeX: Int, val gridSizeY: Int) {
     val allBaseNodes = mutableListOf<BaseNode>()
     val allNodes: HashSet<Node>
 
-    lateinit var ballNode: Node
+    private var currentBallNode: Node? = null
+        set(value) {
+            field = value
+            allLegalMovesFromBallNode = ballNode.connectedNodes.sortedBy { it.coords }.map { PossibleMove(ballNode, it) }
+        }
+
+    val ballNode: Node get() = currentBallNode!!
+
+    var allLegalMovesFromBallNode: List<PossibleMove> = emptyList(); private set
 
     var currentPlayersTurn: Int = 1
 
@@ -120,7 +128,7 @@ data class GameBoard(val gridSizeX: Int, val gridSizeY: Int) {
     private fun getWinner(node: Node): Boolean {
         return when {
             node.nodeType == NodeTypeEnum.Goal -> true
-            node.getNodeNeighbors(true).size == 0 -> {
+            node.connectedNodes.size == 0 -> {
                 true
             }
             else -> {
@@ -129,8 +137,8 @@ data class GameBoard(val gridSizeX: Int, val gridSizeY: Int) {
         }
     }
 
-    fun allPossibleMovesFromNode(node: Node): List<PossibleMove> {
-        return node.getNodeNeighbors().sortedBy { it.coords }.map { PossibleMove(node, it) }
+    private fun allPossibleMovesFromNode(node: Node): List<PossibleMove> {
+        return node.connectedNodes.sortedBy { it.coords }.map { PossibleMove(node, it) }
     }
 
     fun allPossibleMovesFromNodeCoords(node: Node): List<Pair<PossibleMove, Boolean>> {

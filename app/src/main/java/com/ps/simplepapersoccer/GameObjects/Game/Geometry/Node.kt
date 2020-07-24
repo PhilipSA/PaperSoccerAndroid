@@ -11,7 +11,8 @@ class Node(coords: TwoDimensionalPoint,
     var costSoFar: Double = 0.0
     var containsBall: Boolean = false
 
-    val coordNeighbors: HashSet<Node> get() = getNodeNeighbors(false)
+    val coordNeighbors: HashSet<Node> = hashSetOf()
+    val connectedNodes: HashSet<Node> = hashSetOf()
 
     override val getVisibleCoords: TwoDimensionalPoint
         get() = TwoDimensionalPoint(coords.x / 2, coords.y / 2)
@@ -32,14 +33,17 @@ class Node(coords: TwoDimensionalPoint,
         neighbors.add(other)
     }
 
-    override fun toString(): String {
-        return coords.toString() + nodeType.toString()
+    fun createConnectedNodePair(node: Node) {
+        this.connectedNodes.add(node)
+        node.connectedNodes.add(this)
     }
 
-    fun getNodeNeighbors(filterOpenConnection: Boolean = true): HashSet<Node> {
-        return neighbors.flatMap { connectionNode ->
-            connectionNode.connectedNodes.filter { (it.node1 == this || it.node2 == this) && if (filterOpenConnection) it.openConnection else true }
-                    .map { if (it.node1 == this) it.node2 else it.node1 }
-        }.toHashSet()
+    fun createCoordNeighborPair(node: Node) {
+        this.coordNeighbors.add(node)
+        node.coordNeighbors.add(this)
+    }
+
+    override fun toString(): String {
+        return coords.toString() + nodeType.toString()
     }
 }

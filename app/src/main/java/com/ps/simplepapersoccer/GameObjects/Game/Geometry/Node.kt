@@ -5,7 +5,6 @@ import com.ps.simplepapersoccer.gameObjects.game.geometry.abstraction.BaseNode
 
 class Node(coords: TwoDimensionalPoint,
            var nodeType: NodeTypeEnum) : BaseNode(coords) {
-    val neighbors: HashSet<ConnectionNode> = hashSetOf()
     var cameFrom: Node? = null
     var nodeValue: Double = 0.0
     var costSoFar: Double = 0.0
@@ -13,7 +12,7 @@ class Node(coords: TwoDimensionalPoint,
 
     val coordNeighbors: HashSet<Node> = hashSetOf()
     val connectedNodesMap: HashMap<Node, ConnectionNode> = hashMapOf()
-    val openConnectionNodes get() = connectedNodesMap.filter { it.value.connectedNodes[ConnectionNode.NodeConnection(this, it.key)] == true }.keys
+    val openConnectionNodes = hashSetOf<Node>()
 
     override val getVisibleCoords: TwoDimensionalPoint
         get() = TwoDimensionalPoint(coords.x / 2, coords.y / 2)
@@ -30,13 +29,12 @@ class Node(coords: TwoDimensionalPoint,
         return coords.y != other.coords.y && other.coords.x != this.coords.x
     }
 
-    fun addNeighbor(other: ConnectionNode) {
-        neighbors.add(other)
-    }
-
     fun createConnectedNodePair(node: Node, connectionNode: ConnectionNode) {
         this.connectedNodesMap[node] = connectionNode
         node.connectedNodesMap[this] = connectionNode
+
+        node.openConnectionNodes.add(this)
+        this.openConnectionNodes.add(node)
     }
 
     fun createCoordNeighborPair(node: Node) {

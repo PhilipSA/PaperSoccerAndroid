@@ -23,12 +23,12 @@ data class GameBoard(val gridSizeX: Int, val gridSizeY: Int) {
     private var currentBallNode: Node? = null
         set(value) {
             field = value
-            allLegalMovesFromBallNode = ballNode.openConnectionNodes.sortedBy { it.coords }.map { PossibleMove(ballNode, it) }
+            allLegalMovesFromBallNode = ballNode.openConnectionNodes.map { PossibleMove(ballNode, it) }.toHashSet()
         }
 
     val ballNode: Node get() = currentBallNode!!
 
-    var allLegalMovesFromBallNode: List<PossibleMove> = emptyList(); private set
+    var allLegalMovesFromBallNode: HashSet<PossibleMove> = hashSetOf(); private set
 
     var currentPlayersTurn: Int = 1
 
@@ -111,7 +111,6 @@ data class GameBoard(val gridSizeX: Int, val gridSizeY: Int) {
                 if (node is Node && otherNode is ConnectionNode) {
                     val euclideanDistance = MathHelper.euclideanDistance(node.coords, otherNode.coords)
                     if (euclideanDistance.toInt() < 2) {
-                        node.addNeighbor(otherNode)
                         otherNode.neighbors.add(node)
                     }
                 }
@@ -137,12 +136,8 @@ data class GameBoard(val gridSizeX: Int, val gridSizeY: Int) {
         }
     }
 
-    private fun allPossibleMovesFromNode(node: Node): List<PossibleMove> {
-        return node.openConnectionNodes.sortedBy { it.coords }.map { PossibleMove(node, it) }
-    }
-
     fun allPossibleMovesFromNodeCoords(node: Node): List<Pair<PossibleMove, Boolean>> {
-        val legalMoves = allPossibleMovesFromNode(node)
+        val legalMoves = allLegalMovesFromBallNode
 
         return node.coordNeighbors.sortedBy { it.coords }.map { neighborNode ->
             Pair(PossibleMove(node, neighborNode), legalMoves.any { it.newNode == neighborNode })

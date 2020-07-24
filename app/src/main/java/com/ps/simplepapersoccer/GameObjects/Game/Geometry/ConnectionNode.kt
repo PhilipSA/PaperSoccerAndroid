@@ -8,31 +8,21 @@ import kotlin.math.atan2
 //Keeps track of how other nodes are connected
 class ConnectionNode(coords: TwoDimensionalPoint) : BaseNode(coords) {
 
-    data class NodeConnection(val node1: Node, val node2: Node) {
-        override fun equals(other: Any?): Boolean {
-            val otherNodeConnection = other as NodeConnection
-            return (this.node1 == otherNodeConnection.node1 && otherNodeConnection.node2 == node2)
-                    || (otherNodeConnection.node1 == node2 && otherNodeConnection.node2 == node1)
-        }
-
-        override fun hashCode(): Int {
-            return node1.hashCode().and(node2.hashCode())
-        }
-    }
+    data class NodeConnection(val node1: Node, val node2: Node, var openConnection: Boolean)
 
     val neighbors: HashSet<Node> = hashSetOf()
-    val connectedNodes = HashMap<NodeConnection, Boolean>()
+    val connectedNodes = HashMap<Int, NodeConnection>()
 
-    override val getVisibleCoords: TwoDimensionalPoint
-        get() = coords
+    override val getVisibleCoords: TwoDimensionalPoint = coords
 
     val connectionTypeEnum: ConnectionTypeEnum
         get() {
-            return when (connectedNodes.filter { it.value }.size) {
+            val openConnections = connectedNodes.filter { it.value.openConnection }
+            return when (openConnections.size) {
                 2 -> ConnectionTypeEnum.Open
                 0 -> ConnectionTypeEnum.Blocked
                 1 -> {
-                    val openConnection = connectedNodes.filter { it.value }.keys
+                    val openConnection = openConnections.values
                     val node1 = openConnection.first().node1
                     val node2 = openConnection.first().node2
 
@@ -57,19 +47,25 @@ class ConnectionNode(coords: TwoDimensionalPoint) : BaseNode(coords) {
     }
 
     fun connectNodes(node: Node, node2: Node) {
-        connectedNodes[getNodeConnection(node, node2)] = true
+        connectedNodes[getNodeConnection(node, node2)]?.openConnection = true
+
+        node.openConnectionNodes.add(node2)
+        node2.openConnectionNodes.add(node)
     }
 
     fun disconnectNode(node: Node, node2: Node) {
-        connectedNodes[getNodeConnection(node, node2)] = false
+        connectedNodes[getNodeConnection(node, node2)]?.openConnection = false
+
+        node.openConnectionNodes.remove(node2)
+        node2.openConnectionNodes.remove(node)
     }
 
-    fun getNodeConnection(node1: Node, node2: Node): NodeConnection {
-        return NodeConnection(node1, node2)
+    fun getNodeConnection(node1: Node, node2: Node): Int {
+        return node1.hashCode().and(node2.hashCode())
     }
 
     private fun initNodeConnection(firstNode: Node, secondNode: Node, openConnection: Boolean) {
-        connectedNodes.put(NodeConnection(firstNode, secondNode), openConnection)
+        connectedNodes[getNodeConnection(firstNode, secondNode)] = NodeConnection(firstNode, secondNode, openConnection)
         firstNode.createCoordNeighborPair(secondNode)
 
         if (openConnection) {

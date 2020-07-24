@@ -27,14 +27,14 @@ class GameAIHandler(private val aiHandlerListener: IGameAiHandlerListener,
                 aiTimeOut = true
             }
 
-            makeAIMoveAsync(aiPlayer, gameHandler)
-            job.cancel()
+            makeAIMoveAsync(aiPlayer, gameHandler, job)
         }
     }
 
-    private suspend fun makeAIMoveAsync(aiPlayer: AIPlayer, gameHandler: GameHandler) {
+    private suspend fun makeAIMoveAsync(aiPlayer: AIPlayer, gameHandler: GameHandler, job: Job) {
         val gameHandlerHashCode = gameHandler.hashCode()
         val aiMove = aiPlayer.makeMove(gameHandler)
+        job.cancel()
 
         if (gameHandler.hashCode() != gameHandlerHashCode) {
             throw Exception("The AI modified the GameHandler without reverting all changes")
@@ -46,6 +46,6 @@ class GameAIHandler(private val aiHandlerListener: IGameAiHandlerListener,
     }
 
     companion object {
-        const val AI_TIMEOUT_MS = 600L
+        const val AI_TIMEOUT_MS = 500L
     }
 }

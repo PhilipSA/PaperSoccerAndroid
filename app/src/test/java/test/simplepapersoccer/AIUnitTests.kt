@@ -17,7 +17,7 @@ import org.junit.Test
 
 class AIUnitTests {
 
-    private val testRuns = 100
+    private val testRuns = 10
 
     private fun runTestGame(players: ArrayList<IPlayer>, handler: Handler) {
         val totalNumberOfTurns = mutableListOf<Int>()

@@ -1,10 +1,8 @@
 package com.ps.simplepapersoccer.ai.jonasAI
 
-import com.ps.simplepapersoccer.ai.jonasAI.MoveSequence
 import com.ps.simplepapersoccer.ai.abstraction.IGameAI
 import com.ps.simplepapersoccer.data.enums.NodeTypeEnum
 import com.ps.simplepapersoccer.gameObjects.game.GameHandler
-import com.ps.simplepapersoccer.gameObjects.game.geometry.Node
 import com.ps.simplepapersoccer.gameObjects.move.PartialMove
 import com.ps.simplepapersoccer.gameObjects.player.AIPlayer
 import com.ps.simplepapersoccer.helpers.PathFindingHelper
@@ -86,7 +84,7 @@ class JonasAI(playerName: String, playerNumber: Int, playerColor: Int): IGameAI,
         }
 
         for(sequence in sequences){
-            tempManhattan = PathFindingHelper.findPath(sequence.endNode, gameHandler.getOpponent(gameHandler.currentPlayersTurn).goal!!.goalNode()).size.toDouble()
+            tempManhattan = PathFindingHelper.findPathGreedyBestFirstSearchBiDirectional(sequence.endNode, gameHandler.getOpponent(gameHandler.currentPlayersTurn).goal!!.goalNode()).size.toDouble()
             if (tempManhattan < manhattanDistance) {
                 manhattanDistance = tempManhattan
                 manhattanSequence = sequence

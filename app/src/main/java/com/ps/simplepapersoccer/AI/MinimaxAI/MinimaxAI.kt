@@ -36,7 +36,7 @@ class MinimaxAI(playerNumber: Int,
         for (move in moves) {
 
             state.gameBoard.makePartialMove(move.returnMove as PartialMove)
-            val searchTimeLimit = ((timeLimitMilliSeconds - 1000) / moves.size)
+            val searchTimeLimit = timeLimitMilliSeconds / moves.size
             val score = iterativeDeepeningSearch(state, searchTimeLimit, maximPlayer)
             //val score = alphaBetaPruningNoTimeLimit(state, 0, maximPlayer, Integer.MIN_VALUE.toDouble(), Integer.MAX_VALUE.toDouble())
             state.gameBoard.undoLastMove()
@@ -161,7 +161,7 @@ class MinimaxAI(playerNumber: Int,
         score += (-state.numberOfTurns).toDouble()
 
         val opponentsGoal = state.getOpponent(maximizingPlayer).goal!!.goalNode()
-        score += -PathFindingHelper.findPath(state.ballNode, opponentsGoal).size * 2
+        score += -PathFindingHelper.findPathGreedyBestFirstSearchBiDirectional(state.ballNode, opponentsGoal).size * 2
 
         //Neighbors are bounceable
         state.gameBoard.allLegalMovesFromBallNode.forEach{

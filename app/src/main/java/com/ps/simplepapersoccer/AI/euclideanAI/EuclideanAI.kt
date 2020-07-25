@@ -17,7 +17,7 @@ class EuclideanAI(playerNumber: Int,
         var tempManhattan: Double
 
         for (possibleMove in gameHandler.gameBoard.allLegalMovesFromBallNode) {
-            tempManhattan = PathFindingHelper.findPathAstar(possibleMove.newNode, gameHandler.getOpponent(gameHandler.currentPlayersTurn).goal!!.goalNode()).size.toDouble()
+            tempManhattan = PathFindingHelper.findPathGreedyBestFirstSearchBiDirectional(possibleMove.newNode, gameHandler.getOpponent(gameHandler.currentPlayersTurn).goal!!.goalNode()).size.toDouble()
             if (tempManhattan < manhattanDistance) {
                 manhattanDistance = tempManhattan
                 manhattanMove = PartialMove(possibleMove.oldNode, possibleMove.newNode, gameHandler.gameBoard.currentPlayersTurn)

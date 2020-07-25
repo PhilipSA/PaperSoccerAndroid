@@ -2,6 +2,9 @@ package com.ps.simplepapersoccer.ai.neuralnetworkAI
 
 import android.content.Context
 import android.util.Log
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.io.*
 import java.util.zip.Deflater
 import java.util.zip.Inflater
@@ -9,9 +12,9 @@ import kotlin.math.*
 import kotlin.random.Random
 
 class NeuralNetwork<T>(context: Context?,
-                    private val neuralNetworkController: INeuralNetworkController<T>,
-                    private val networkBackupEnabled: Boolean,
-                    private val neuralNetworkParameters: NeuralNetworkParameters = NeuralNetworkParameters()) {
+                       private val neuralNetworkController: INeuralNetworkController<T>,
+                       private val networkBackupEnabled: Boolean,
+                       private val neuralNetworkParameters: NeuralNetworkParameters = NeuralNetworkParameters()) {
 
     data class Neuron(
             val incoming: HashSet<Gene>,
@@ -93,12 +96,12 @@ class NeuralNetwork<T>(context: Context?,
     private fun newGenome(): Genome {
         return Genome(mutableListOf(), 0.0, 0, Network(hashMapOf()), 0, 0,
                 hashMapOf("connections" to neuralNetworkParameters.MUTATE_CONNECTION_CHANCE,
-                    "link" to neuralNetworkParameters.LINK_MUTATION_CHANCE,
-                    "bias" to neuralNetworkParameters.BIAS_MUTATION_CHANCE,
-                    "node" to neuralNetworkParameters.NODE_MUTATION_CHANCE,
-                    "enable" to neuralNetworkParameters.ENABLE_MUTATION_CHANCE,
-                    "disable" to neuralNetworkParameters.DISABLE_MUTATION_CHANCE,
-                    "step" to neuralNetworkParameters.STEP_SIZE))
+                        "link" to neuralNetworkParameters.LINK_MUTATION_CHANCE,
+                        "bias" to neuralNetworkParameters.BIAS_MUTATION_CHANCE,
+                        "node" to neuralNetworkParameters.NODE_MUTATION_CHANCE,
+                        "enable" to neuralNetworkParameters.ENABLE_MUTATION_CHANCE,
+                        "disable" to neuralNetworkParameters.DISABLE_MUTATION_CHANCE,
+                        "step" to neuralNetworkParameters.STEP_SIZE))
     }
 
     private fun copyGenome(genome: Genome): Genome {
@@ -380,45 +383,28 @@ class NeuralNetwork<T>(context: Context?,
         }
 
         var p = genome.mutationRates.getValue("link")
-
-        while (p > 0) {
-            if (Random.nextDouble(0.0, 1.0) < p) {
-                linkMutate(genome, false)
-            }
-            --p
+        if (Random.nextDouble(0.0, 1.0) < p - floor(p)) {
+            linkMutate(genome, false)
         }
 
         p = genome.mutationRates.getValue("bias")
-        while (p > 0) {
-            if (Random.nextDouble(0.0, 1.0) < p) {
-                linkMutate(genome, true)
-            }
-            --p
+        if (Random.nextDouble(0.0, 1.0) < p - floor(p)) {
+            linkMutate(genome, false)
         }
 
         p = genome.mutationRates.getValue("node")
-        while (p > 0) {
-            if (Random.nextDouble(0.0, 1.0) < p) {
-                nodeMutate(genome)
-            }
-            --p
+        if (Random.nextDouble(0.0, 1.0) < p - floor(p)) {
+            nodeMutate(genome)
         }
 
-
         p = genome.mutationRates.getValue("enable")
-        while (p > 0) {
-            if (Random.nextDouble(0.0, 1.0) < p) {
-                enableDisableMutate(genome, true)
-            }
-            --p
+        if (Random.nextDouble(0.0, 1.0) < p - floor(p)) {
+            enableDisableMutate(genome, true)
         }
 
         p = genome.mutationRates.getValue("disable")
-        while (p > 0) {
-            if (Random.nextDouble(0.0, 1.0) < p) {
-                enableDisableMutate(genome, false)
-            }
-            --p
+        if (Random.nextDouble(0.0, 1.0) < p - floor(p)) {
+            enableDisableMutate(genome, false)
         }
     }
 
@@ -524,9 +510,7 @@ class NeuralNetwork<T>(context: Context?,
             var remaining = ceil((species.genomes.size / 2).toDouble())
             if (cutToOne) remaining = 1.0
 
-            while (species.genomes.size > remaining) {
-                species.genomes.removeAt(species.genomes.lastIndex)
-            }
+            species.genomes.subList(remaining.toInt(), species.genomes.size).clear()
         }
     }
 
@@ -594,7 +578,6 @@ class NeuralNetwork<T>(context: Context?,
         }
     }
 
-    //TODO: write to file
     private fun newGeneration() {
         cullSpecies(false)
         rankGlobally()
@@ -731,7 +714,6 @@ class NeuralNetwork<T>(context: Context?,
 
     private fun writeFile() {
         if (networkBackupEnabled.not()) return
-
         val file = File(poolCacheDirectory, neuralNetworkParameters.FILE_NAME)
         try {
             file.createNewFile()

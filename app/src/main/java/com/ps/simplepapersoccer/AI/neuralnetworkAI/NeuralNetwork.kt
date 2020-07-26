@@ -389,7 +389,7 @@ class NeuralNetwork<T>(context: Context?,
 
         p = genome.mutationRates.getValue("bias")
         if (Random.nextDouble(0.0, 1.0) < p - floor(p)) {
-            linkMutate(genome, false)
+            linkMutate(genome, true)
         }
 
         p = genome.mutationRates.getValue("node")

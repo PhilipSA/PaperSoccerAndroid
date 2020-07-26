@@ -79,13 +79,14 @@ object PathFindingHelper {
         }
         visitedCurrentSide.add(node)
         for (nextNode in node.openConnectionNodes) {
-            val costSoFar = MathHelper.euclideanDistance(node.coords, nextNode.coords)
+            val costSoFar = node.costSoFar + MathHelper.euclideanDistance(node.coords, nextNode.coords)
 
             if (visitedCurrentSide.contains(nextNode)) continue
             if (priorityQueue.add(nextNode).not() && costSoFar >= nextNode.costSoFar) continue
 
             nextNode.cameFrom = node
-            nextNode.nodeValue = MathHelper.euclideanDistance(nextNode.coords, endNode.coords)
+            nextNode.costSoFar = costSoFar
+            nextNode.nodeValue = nextNode.costSoFar + MathHelper.euclideanDistance(nextNode.coords, endNode.coords)
         }
 
         return null

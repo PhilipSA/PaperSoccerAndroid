@@ -10,12 +10,8 @@ import kotlin.random.Random
 
 class NeuralNetworkTests {
 
-    private val andOperationNeuralNetworkParameters = NeuralNetworkParameters(MAX_NODES = 2)
-
     @Test
     fun neuralNetworkLearnsAndOperation() {
-
-        val gameBoard = GameBoard(8 * 2, 11 * 2)
 
         var scoreCounter = 0
         var lastGuess = -1
@@ -44,7 +40,7 @@ class NeuralNetworkTests {
             override fun updateInputs() {
 
             }
-        }, false, andOperationNeuralNetworkParameters)
+        }, false)
 
         for (i in 0 until numberOfRuns) {
             val nextStep = neuralNetwork.nextStep()

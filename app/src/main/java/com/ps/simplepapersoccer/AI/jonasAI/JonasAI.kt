@@ -9,7 +9,7 @@ import com.ps.simplepapersoccer.helpers.PathFindingHelper
 import java.util.*
 import kotlin.collections.ArrayList
 
-class JonasAI(playerName: String, playerNumber: Int, playerColor: Int) : IGameAI, AIPlayer(playerName, playerNumber, playerColor) {
+class JonasAI(playerNumber: Int, playerColor: Int, playerName: String = JonasAI::class.java.simpleName) : IGameAI, AIPlayer(playerName, playerNumber, playerColor) {
     var goalFound: Boolean = false
 
     override suspend fun makeMove(gameHandler: GameHandler): PartialMove {

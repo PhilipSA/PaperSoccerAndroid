@@ -36,7 +36,6 @@ dependencies {
     implementation("androidx.preference:preference:1.1.1")
     implementation("androidx.constraintlayout:constraintlayout:1.1.3")
     implementation("com.google.android.material:material:1.1.0")
-    implementation("org.tensorflow:tensorflow-lite:2.2.0")
 
     testImplementation("androidx.test:core:1.2.0")
     testImplementation("junit:junit:4.13")

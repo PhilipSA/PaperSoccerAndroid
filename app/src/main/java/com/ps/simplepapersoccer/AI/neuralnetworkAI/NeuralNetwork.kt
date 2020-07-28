@@ -410,26 +410,21 @@ class NeuralNetwork<T>(context: Context?,
 
     private fun disjoint(genes1: List<Gene>, genes2: List<Gene>): Int {
         val i1 = HashMap<Int, Boolean>()
-
-        genes1.forEach {
-            i1[it.innovation] = true
-        }
-
         val i2 = HashMap<Int, Boolean>()
-
-        genes2.forEach {
-            i1[it.innovation] = true
-        }
 
         var disjointGenes = 0
 
         genes1.forEach {
+            i1[it.innovation] = true
+
             if (i2[it.innovation]?.not() == true) {
                 ++disjointGenes
             }
         }
 
         genes2.forEach {
+            i2[it.innovation] = true
+
             if (i1[it.innovation]?.not() == true) {
                 ++disjointGenes
             }
@@ -478,8 +473,8 @@ class NeuralNetwork<T>(context: Context?,
 
         global.sortBy { it.fitness }
 
-        for ((g, _) in global.withIndex()) {
-            global[g].globalRank = g
+        for ((g, genome) in global.withIndex()) {
+            genome.globalRank = g
         }
     }
 
@@ -494,13 +489,9 @@ class NeuralNetwork<T>(context: Context?,
     }
 
     private fun totalAverageFitness(): Double {
-        var total = 0.0
-
-        pool.species.forEach { species ->
-            total += species.averageFitness
+        return pool.species.sumByDouble { species ->
+            species.averageFitness
         }
-
-        return total
     }
 
     private fun cullSpecies(cutToOne: Boolean) {
@@ -675,8 +666,8 @@ class NeuralNetwork<T>(context: Context?,
 
     private fun playTop() {
         var maxfitness = 0.0
-        var maxs: Int = 0
-        var maxg: Int = 0
+        var maxs = 0
+        var maxg = 0
 
         pool.species.forEach { species ->
             species.genomes.forEach { genome ->

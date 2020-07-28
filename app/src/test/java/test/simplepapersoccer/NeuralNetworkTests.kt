@@ -18,9 +18,8 @@ class NeuralNetworkTests {
         val numberOfRuns = 5000
         var inputs = listOf(Random.nextInt(0, 2), Random.nextInt(0, 2))
 
-        val neuralNetwork = NeuralNetwork(null, object : INeuralNetworkController<Int> {
-            override val inputs: List<Double>
-                get() = inputs.map { it.toDouble() }
+        val controller = object : INeuralNetworkController<Int> {
+            override var inputs: List<Double> = inputs.map { it.toDouble() }
 
             override val outputs = 1
 
@@ -33,20 +32,22 @@ class NeuralNetworkTests {
 
             override fun networkGuessOutput(output: List<Double>): Int {
                 return output.map {
-                    if (it >= 0.5) 1 else 0
+                    if (it >= 0) 1 else 0
                 }.first()
             }
 
             override fun updateInputs() {
-
+                this.inputs = listOf(Random.nextInt(0, 2), Random.nextInt(0, 2)).map { it.toDouble() }
             }
-        }, false)
+        }
+
+        val neuralNetwork = NeuralNetwork(null, controller, false)
 
         for (i in 0 until numberOfRuns) {
             val nextStep = neuralNetwork.nextStep()
             lastGuess = nextStep ?: -1
             neuralNetwork.cutOff()
-            inputs = listOf(Random.nextInt(0, 2), Random.nextInt(0, 2))
+            controller.updateInputs()
         }
 
         TestCase.assertEquals(numberOfRuns * 0.9, scoreCounter)

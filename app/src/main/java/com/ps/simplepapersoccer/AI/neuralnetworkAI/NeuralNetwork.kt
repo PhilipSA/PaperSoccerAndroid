@@ -705,39 +705,42 @@ class NeuralNetwork<T>(context: Context?,
 
     private fun writeFile() {
         if (networkBackupEnabled.not()) return
-        val file = File(poolCacheDirectory, neuralNetworkParameters.FILE_NAME)
-        try {
-            file.createNewFile()
 
-            val poolByteArrayOutput = ByteArrayOutputStream().use { byteArray ->
-                ObjectOutputStream(byteArray).use {
-                    it.writeObject(pool)
+        CoroutineScope(Dispatchers.IO).launch {
+            val file = File(poolCacheDirectory, neuralNetworkParameters.FILE_NAME)
+            try {
+                file.createNewFile()
+
+                val poolByteArrayOutput = ByteArrayOutputStream().use { byteArray ->
+                    ObjectOutputStream(byteArray).use {
+                        it.writeObject(pool)
+                    }
+                    byteArray
                 }
-                byteArray
-            }
 
-            val poolByteArray = poolByteArrayOutput.toByteArray()
+                val poolByteArray = poolByteArrayOutput.toByteArray()
 
-            val input = ByteArray(poolByteArray.size)
-            val compresser = Deflater()
-            compresser.setInput(poolByteArray)
-            compresser.finish()
-            val resultLength = compresser.deflate(input)
-            compresser.end()
+                val input = ByteArray(poolByteArray.size)
+                val compresser = Deflater()
+                compresser.setInput(poolByteArray)
+                compresser.finish()
+                val resultLength = compresser.deflate(input)
+                compresser.end()
 
-            val compressedPool = input.copyOf(resultLength)
-            val poolDto = PoolDto(poolByteArray.size, compressedPool)
+                val compressedPool = input.copyOf(resultLength)
+                val poolDto = PoolDto(poolByteArray.size, compressedPool)
 
-            val poolDtoByteOutput = ByteArrayOutputStream().use { byteArray ->
-                ObjectOutputStream(byteArray).use {
-                    it.writeObject(poolDto)
+                val poolDtoByteOutput = ByteArrayOutputStream().use { byteArray ->
+                    ObjectOutputStream(byteArray).use {
+                        it.writeObject(poolDto)
+                    }
+                    byteArray
                 }
-                byteArray
-            }
 
-            file.writeBytes(poolDtoByteOutput.toByteArray())
-        } catch (e: IOException) {
-            Log.d(NeuralNetworkAI::class.java.canonicalName, e.message, e)
+                file.writeBytes(poolDtoByteOutput.toByteArray())
+            } catch (e: IOException) {
+                Log.d(NeuralNetworkAI::class.java.canonicalName, e.message, e)
+            }
         }
     }
 

@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import java.io.*
 import java.util.zip.Deflater
@@ -705,12 +706,12 @@ class NeuralNetwork<T>(context: Context?,
 
     private fun writeFile() {
         if (networkBackupEnabled.not()) return
+        val file = File(poolCacheDirectory, neuralNetworkParameters.FILE_NAME)
+        file.createNewFile()
+        val pool = pool
 
         CoroutineScope(Dispatchers.IO).launch {
-            val file = File(poolCacheDirectory, neuralNetworkParameters.FILE_NAME)
             try {
-                file.createNewFile()
-
                 val poolByteArrayOutput = ByteArrayOutputStream().use { byteArray ->
                     ObjectOutputStream(byteArray).use {
                         it.writeObject(pool)

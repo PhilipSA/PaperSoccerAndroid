@@ -49,8 +49,8 @@ class GameActivity : AppCompatActivity() {
 
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
 
-        gameViewModel.player1Arg = intent.getStringExtra(ARG_PLAYER1)
-        gameViewModel.player2Arg = intent.getStringExtra(ARG_PLAYER2)
+        gameViewModel.player1Arg = intent.getStringExtra(ARG_PLAYER1)!!
+        gameViewModel.player2Arg = intent.getStringExtra(ARG_PLAYER2)!!
 
         val playerName = sharedPreferences.getString(PREF_PLAYER_NAME, "Player")!!
 

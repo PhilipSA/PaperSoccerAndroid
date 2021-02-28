@@ -11,10 +11,12 @@ import com.ps.simplepapersoccer.gameObjects.player.AIPlayer
 import com.ps.simplepapersoccer.gameObjects.player.abstraction.IPlayer
 import kotlinx.coroutines.CoroutineDispatcher
 
-class GameHandler(private val listener: IGameHandlerListener?, gridX: Int, gridY: Int,
+class GameHandler(private val listener: IGameHandlerListener?,
+                  gridX: Int,
+                  gridY: Int,
                   private val players: ArrayList<IPlayer>,
                   private val dispatcher: CoroutineDispatcher,
-                  private val handler: Handler = Handler()): IGameAiHandlerListener {
+                  private val handler: Handler = Handler()) : IGameAiHandlerListener {
 
     private val player1: IPlayer = players[0]
     private val player2: IPlayer = players[1]

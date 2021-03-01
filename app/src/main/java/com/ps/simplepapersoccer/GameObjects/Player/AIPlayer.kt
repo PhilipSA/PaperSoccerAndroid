@@ -32,7 +32,7 @@ abstract class AIPlayer(playerName: String, playerNumber: Int, playerColor: Int)
             MinimaxAI::class.java.simpleName -> MinimaxAI(playerNumber, playerColor)
             JonasAI::class.java.simpleName -> JonasAI(playerNumber, playerColor)
             NeuralNetworkAI::class.java.simpleName -> NeuralNetworkAI(context, playerNumber, playerColor, backupFileName =  NEURAL_NETWORK_FILE_NAME)
-            AlphaZeroAI2::class.java.simpleName -> AlphaZeroAI2(playerName, playerNumber, playerColor)
+            AlphaZeroAI2::class.java.simpleName -> AlphaZeroAI2(playerNumber, playerColor)
             RandomAI::class.java.simpleName -> RandomAI(playerNumber, playerColor, playerName)
             else -> {
                 EuclideanAI(playerNumber, playerColor)

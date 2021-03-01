@@ -24,24 +24,24 @@ class NeuralNetworkAI(private val context: Context?,
         if (this.gameHandler == null) this.gameHandler = gameHandler
 
         val neuralNetworkController = object : INeuralNetworkController<PossibleMove> {
-            override lateinit var inputs: List<Double>
+            override lateinit var inputs: List<Int>
 
             override val outputs = 8
 
-            override fun fitnessEvaluation(): Double {
+            override fun fitnessEvaluation(): Float {
                 val winner = this@NeuralNetworkAI.gameHandler!!.winner
 
                 return if (winner?.winner == this@NeuralNetworkAI &&
-                        (winner.victoryConditionEnum == VictoryConditionEnum.Goal || winner.victoryConditionEnum == VictoryConditionEnum.OpponentOutOfMoves)) 1.0
-                else this@NeuralNetworkAI.gameHandler!!.numberOfTurns.toDouble() / 200
+                        (winner.victoryConditionEnum == VictoryConditionEnum.Goal || winner.victoryConditionEnum == VictoryConditionEnum.OpponentOutOfMoves)) 1f
+                else this@NeuralNetworkAI.gameHandler!!.numberOfTurns.toFloat() / 200
             }
 
-            override fun networkGuessOutput(output: List<Double>): PossibleMove? {
+            override fun networkGuessOutput(output: List<Float>): PossibleMove? {
                 val possibleOutputs = this@NeuralNetworkAI.gameHandler!!.gameBoard.allPossibleMovesFromNodeCoords(this@NeuralNetworkAI.gameHandler!!.ballNode)
                 val alignedOutputs = if (this@NeuralNetworkAI.gameHandler!!.getPlayerPosition(this@NeuralNetworkAI) != 0) possibleOutputs.reversed() else possibleOutputs
 
-                val outputs = mutableListOf<Pair<PossibleMove, Double>>()
-                var maxScore = Double.NEGATIVE_INFINITY
+                val outputs = mutableListOf<Pair<PossibleMove, Float>>()
+                var maxScore = Float.NEGATIVE_INFINITY
 
                 for (i in output.indices) {
                     val currentOutput = output[i]

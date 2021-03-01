@@ -1,27 +1,10 @@
 package com.ps.simplepapersoccer.gameObjects.game.geometry
 
-class TwoDimensionalPointF() {
-    var x: Float = 0f
-    var y: Float = 0f
-
-    constructor(x: Float, y: Float) : this() {
-        this.x = x
-        this.y = y
-    }
+data class TwoDimensionalPointF(var x: Float, var y: Float) {
 
     fun set(x: Float, y: Float) {
         this.x = x
         this.y = y
-    }
-
-    fun negate() {
-        x = -x
-        y = -y
-    }
-
-    fun offset(dx: Float, dy: Float) {
-        x += dx
-        y += dy
     }
 
     fun equals(x: Float, y: Float): Boolean {

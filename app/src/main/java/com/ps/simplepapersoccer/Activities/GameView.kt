@@ -144,8 +144,8 @@ class GameView : View {
                     .forEach { canvas.drawLine(nodeToCoords(node)[0], nodeToCoords(node)[1], nodeToCoords(it)[0], nodeToCoords(it)[1], paint) }
         }
 
-        drawGoalLine(topEdge, paint, Color.RED, gameBoard!!.topGoalLines.goalLine)
-        drawGoalLine(bottomEdge, paint, Color.BLUE, gameBoard!!.bottomGoalLines.goalLine)
+        drawGoalLine(paint, Color.RED, gameBoard!!.topGoalLines.goalLine)
+        drawGoalLine(paint, Color.BLUE, gameBoard!!.bottomGoalLines.goalLine)
 
         paint.color = Color.BLACK
         paint.strokeWidth = sideLineStrokeWidth.toFloat()
@@ -180,7 +180,7 @@ class GameView : View {
                 }
     }
 
-    private fun drawGoalLine(edge: Float, paint: Paint, color: Int, line: IntegerLine) {
+    private fun drawGoalLine(paint: Paint, color: Int, line: IntegerLine) {
         paint.color = color
         paint.strokeWidth = sideLineStrokeWidth.toFloat()
         val startPoint = pointsCoordsToCoords(line.fromPoint)

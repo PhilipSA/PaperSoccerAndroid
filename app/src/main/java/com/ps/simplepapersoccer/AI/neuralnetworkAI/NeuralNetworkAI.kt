@@ -52,7 +52,7 @@ class NeuralNetworkAI(private val context: Context?,
                     }
                 }
 
-                return outputs.maxBy { it.second }?.first
+                return outputs.maxByOrNull { it.second }?.first
             }
 
             override fun updateInputs() {

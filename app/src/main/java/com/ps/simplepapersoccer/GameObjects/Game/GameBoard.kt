@@ -16,7 +16,7 @@ import java.util.*
 import kotlin.collections.HashSet
 import kotlin.math.roundToInt
 
-class GameBoard(val gridSizeX: Int, val gridSizeY: Int) {
+data class GameBoard(val gridSizeX: Int, val gridSizeY: Int) {
     val allBaseNodes = mutableListOf<BaseNode>()
     val allNodes: HashSet<Node>
 

@@ -9,7 +9,7 @@ object PathFindingHelper {
         val frontier = hashSetOf(startNode)
         val explored = HashSet<Node>()
         while (frontier.isNotEmpty()) {
-            val node = frontier.minBy { x -> x.nodeValue }!!
+            val node = frontier.minByOrNull { x -> x.nodeValue }!!
             frontier.remove(node)
 
             if (node == goalNode) {
@@ -71,7 +71,7 @@ object PathFindingHelper {
     }
 
     private fun bestFirstSearchPathFinder(priorityQueue: HashSet<Node>, visitedCurrentSide: HashSet<Node>, visitedOtherSide: HashSet<Node>, endNode: Node): Node? {
-        val node = priorityQueue.minBy { x -> x.nodeValue }!!
+        val node = priorityQueue.minByOrNull { x -> x.nodeValue }!!
         priorityQueue.remove(node)
 
         if (node == endNode || visitedOtherSide.contains(node)) {

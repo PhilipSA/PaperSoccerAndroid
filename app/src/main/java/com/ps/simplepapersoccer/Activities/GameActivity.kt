@@ -93,6 +93,14 @@ class GameActivity : AppCompatActivity() {
         registerObservers()
 
         gameViewModel.gameHandler.updateGameState()
+
+        play_again_button.setOnClickListener {
+            resetGame()
+        }
+
+        quit_button.setOnClickListener {
+            quit()
+        }
     }
 
     private fun registerObservers() {

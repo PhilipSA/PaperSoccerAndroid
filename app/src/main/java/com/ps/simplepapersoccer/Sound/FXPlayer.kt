@@ -9,7 +9,7 @@ import android.util.SparseIntArray
 
 import com.ps.simplepapersoccer.R
 
-class FXPlayer(private val context: Context) {
+class FXPlayer(context: Context) {
     private var soundPool: SoundPool? = null
     private var soundMap: HashMap<Int, Int>
     private val audioManager: AudioManager

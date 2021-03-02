@@ -49,8 +49,8 @@ class GameActivity : AppCompatActivity() {
 
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
 
-        gameViewModel.player1Arg = intent.getStringExtra(ARG_PLAYER1)
-        gameViewModel.player2Arg = intent.getStringExtra(ARG_PLAYER2)
+        gameViewModel.player1Arg = intent.getStringExtra(ARG_PLAYER1)!!
+        gameViewModel.player2Arg = intent.getStringExtra(ARG_PLAYER2)!!
 
         val playerName = sharedPreferences.getString(PREF_PLAYER_NAME, "Player")!!
 
@@ -93,6 +93,14 @@ class GameActivity : AppCompatActivity() {
         registerObservers()
 
         gameViewModel.gameHandler.updateGameState()
+
+        play_again_button.setOnClickListener {
+            resetGame()
+        }
+
+        quit_button.setOnClickListener {
+            quit()
+        }
     }
 
     private fun registerObservers() {
@@ -206,12 +214,12 @@ class GameActivity : AppCompatActivity() {
         recreate()
     }
 
-    fun resetGame(view: View) {
+    fun resetGame() {
         play_again_button.visibility = View.INVISIBLE
         recreate()
     }
 
-    fun quit(view: View) {
+    fun quit() {
         fxPlayer.cleanUpIfEnd()
         finish()
     }
@@ -228,22 +236,20 @@ class GameActivity : AppCompatActivity() {
         const val ARG_GRID_SIZE_X = "grid_size_x"
         const val ARG_GRID_SIZE_Y = "grid_size_y"
 
-        fun getWidth(mContext: Context): Int {
+        fun getWidth(context: Context): Int {
             val width: Int
-            val wm = mContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager
-            val display = wm.defaultDisplay
+            val display = context.display
             val size = Point()
-            display.getSize(size)
+            display?.getSize(size)
             width = size.x
             return width
         }
 
-        fun getHeight(mContext: Context): Int {
+        fun getHeight(context: Context): Int {
             val height: Int
-            val wm = mContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager
-            val display = wm.defaultDisplay
+            val display = context.display
             val size = Point()
-            display.getSize(size)
+            display?.getSize(size)
             height = size.y
             return height
         }

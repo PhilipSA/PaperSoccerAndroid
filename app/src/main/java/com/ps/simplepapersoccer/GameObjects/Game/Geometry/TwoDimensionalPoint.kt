@@ -1,21 +1,10 @@
 package com.ps.simplepapersoccer.gameObjects.game.geometry
 
 data class TwoDimensionalPoint(var x: Int, var y: Int): Comparable<TwoDimensionalPoint> {
-    fun toAndroidPoint() = android.graphics.Point(x, y)
 
     fun set(x: Int, y: Int) {
         this.x = x
         this.y = y
-    }
-
-    fun negate() {
-        x = -x
-        y = -y
-    }
-
-    fun offset(dx: Int, dy: Int) {
-        x += dx
-        y += dy
     }
 
     fun equals(x: Int, y: Int): Boolean {

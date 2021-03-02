@@ -42,7 +42,7 @@ class ConnectionNode(coords: TwoDimensionalPoint) : BaseNode(coords) {
             }
         }
 
-    override fun normalizedIdentifierHashCode(): Double {
+    override fun normalizedIdentifierHashCode(): Int {
         return connectionTypeEnum.normalizedIdentiferValue
     }
 

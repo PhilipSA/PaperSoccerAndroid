@@ -9,9 +9,7 @@ class Goal(var goalLine: IntegerLine, var leftPost: IntegerLine, var rightPost: 
     {
         return goalLine.contains(point) || leftPost.contains(point) || rightPost.contains(point) || outerGoalLine.contains(point)
     }
-    val height : Int get() = leftPost.length
-    val width : Int get() = goalLine.length
-    val outerGoalLine: IntegerLine get() = IntegerLine(leftPost.toPoint, rightPost.toPoint)
+    private val outerGoalLine: IntegerLine get() = IntegerLine(leftPost.toPoint, rightPost.toPoint)
     val allNodes: HashSet<BaseNode> = hashSetOf()
 
     fun isGoalNode(node: Node): Boolean {

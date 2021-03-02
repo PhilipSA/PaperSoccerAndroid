@@ -18,7 +18,6 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentBottom="true"
-        android:onClick="quit"
         android:text="@string/quit_button_text"
         android:visibility="visible" />
 
@@ -29,7 +28,6 @@
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_alignParentBottom="true"
-        android:onClick="resetGame"
         android:text="@string/play_again_button_text"
         android:visibility="invisible" />
 

@@ -1,19 +1,11 @@
 package com.ps.simplepapersoccer.ai.neuralnetworkAI
 
-import android.content.Context
-import android.util.Log
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import java.io.*
-import java.util.zip.Deflater
-import java.util.zip.Inflater
 import kotlin.math.*
 import kotlin.random.Random
 
-class NeuralNetwork<T>(context: Context?,
-                       private val neuralNetworkController: INeuralNetworkController<T>,
-                       private val networkBackupEnabled: Boolean,
+class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkController<T>,
+                       private val neuralNetworkCache: NeuralNetworkCache,
                        private val neuralNetworkParameters: NeuralNetworkParameters = NeuralNetworkParameters()) {
 
     data class Neuron(
@@ -68,9 +60,6 @@ class NeuralNetwork<T>(context: Context?,
     ) : Serializable
 
     lateinit var pool: Pool
-
-    private val poolCacheDirectory = context?.filesDir?.toString()
-            ?: "C:\\Users\\Admin\\Documents\\AlphaZero"
 
     init {
         initPool()
@@ -604,11 +593,20 @@ class NeuralNetwork<T>(context: Context?,
 
         pool.generation = pool.generation + 1
 
-        writeFile()
+        neuralNetworkCache.savePool(pool)
     }
 
     private fun initPool() {
-        if (loadFile().not()) {
+        val loadedPool = neuralNetworkCache.loadPool()
+
+        if (loadedPool != null) {
+            pool = loadedPool
+
+            while (fitnessAlreadyMeasured()) {
+                nextGenome()
+            }
+            initRun()
+        } else {
             pool = newPool()
 
             for (x in 0 until neuralNetworkParameters.POPULATION) {
@@ -653,7 +651,7 @@ class NeuralNetwork<T>(context: Context?,
         if (fitness > pool.maxFitness) {
             println("Max fitness: ${pool.maxFitness} Gen ${pool.generation} species ${pool.species.sumBy { it.averageFitness.toInt() }} genome: ${pool.currentGenomeIndex}")
             pool.maxFitness = fitness
-            writeFile()
+            neuralNetworkCache.savePool(pool)
         }
 
         pool.currentSpeciesIndex = 0
@@ -703,74 +701,5 @@ class NeuralNetwork<T>(context: Context?,
         }
 
         return current
-    }
-
-    private fun writeFile() {
-        if (networkBackupEnabled.not()) return
-        val file = File(poolCacheDirectory, neuralNetworkParameters.FILE_NAME)
-        try {
-            file.createNewFile()
-
-            val poolByteArrayOutput = ByteArrayOutputStream().use { byteArray ->
-                ObjectOutputStream(byteArray).use {
-                    it.writeObject(pool)
-                }
-                byteArray
-            }
-
-            val poolByteArray = poolByteArrayOutput.toByteArray()
-
-            val input = ByteArray(poolByteArray.size)
-            val compresser = Deflater()
-            compresser.setInput(poolByteArray)
-            compresser.finish()
-            val resultLength = compresser.deflate(input)
-            compresser.end()
-
-            val compressedPool = input.copyOf(resultLength)
-            val poolDto = PoolDto(poolByteArray.size, compressedPool)
-
-            val poolDtoByteOutput = ByteArrayOutputStream().use { byteArray ->
-                ObjectOutputStream(byteArray).use {
-                    it.writeObject(poolDto)
-                }
-                byteArray
-            }
-
-            file.writeBytes(poolDtoByteOutput.toByteArray())
-        } catch (e: IOException) {
-            Log.d(NeuralNetworkAI::class.java.canonicalName, e.message, e)
-        }
-    }
-
-    private fun loadFile(): Boolean {
-        if (networkBackupEnabled.not()) return false
-
-        val file = File(poolCacheDirectory, neuralNetworkParameters.FILE_NAME)
-
-        return if (file.exists()) {
-
-            val poolDto = ObjectInputStream(ByteArrayInputStream(file.readBytes(), 0, file.length().toInt())).use {
-                it.readObject() as PoolDto
-            }
-
-            val decompresser = Inflater()
-            decompresser.setInput(poolDto.pool)
-            val result = ByteArray(poolDto.uncompressedSize)
-            val resultLength = decompresser.inflate(result)
-            decompresser.end()
-
-            ObjectInputStream(ByteArrayInputStream(result, 0, resultLength)).use {
-                pool = it.readObject() as Pool
-            }
-
-            while (fitnessAlreadyMeasured()) {
-                nextGenome()
-            }
-            initRun()
-            true
-        } else {
-            false
-        }
     }
 }

@@ -1,9 +1,8 @@
 package test.simplepapersoccer
 
+import com.ps.simplepapersoccer.ai.neuralnetworkAI.NeuralNetworkCache
 import com.ps.simplepapersoccer.ai.neuralnetworkAI.INeuralNetworkController
 import com.ps.simplepapersoccer.ai.neuralnetworkAI.NeuralNetwork
-import com.ps.simplepapersoccer.ai.neuralnetworkAI.NeuralNetworkParameters
-import com.ps.simplepapersoccer.gameObjects.game.GameBoard
 import junit.framework.TestCase
 import org.junit.Test
 import kotlin.random.Random
@@ -44,7 +43,7 @@ class NeuralNetworkTests {
             }
         }
 
-        val neuralNetwork = NeuralNetwork(null, controller, false)
+        val neuralNetwork = NeuralNetwork(controller, NeuralNetworkCache(null, false))
 
         for (i in 0 until numberOfRuns) {
             val nextStep = neuralNetwork.nextStep()

@@ -17,7 +17,7 @@ import org.junit.Test
 
 class AIUnitTests {
 
-    private val testRuns = 10
+    private val testRuns = 10000
 
     private fun runTestGame(players: ArrayList<IPlayer>, handler: Handler) {
         val totalNumberOfTurns = mutableListOf<Int>()
@@ -41,6 +41,27 @@ class AIUnitTests {
     }
 
     @Test
+    fun neuralNetworkAITraining() {
+        val handler = mock<Handler> {
+            on { post(any()) }.thenAnswer { invocation ->
+                val msg = invocation.getArgument<Runnable>(0)
+                msg.run()
+                null
+            }
+        }
+
+        val player1 = NeuralNetworkAI(null, 1, 0)
+        val player2: IPlayer = EuclideanAI(2, 1)
+        val players = arrayListOf(player1, player2)
+
+        runTestGame(players, handler)
+
+        player1.neuralNetworkCache.createBackupFile()
+
+        assertEquals(0.5, (player1.score.toDouble() / (player1.score + player2.score)))
+    }
+
+    @Test
     fun higherDifficultyWinVsLowerDifficulty() {
         val handler = mock<Handler> {
             on { post(any()) }.thenAnswer { invocation ->
@@ -51,7 +72,7 @@ class AIUnitTests {
         }
 
         val player1: IPlayer = NeuralNetworkAI(null, 1, 0)
-        val player2: IPlayer = MinimaxAI(2, 1)
+        val player2: IPlayer = EuclideanAI(2, 1)
         val players = arrayListOf(player1, player2)
 
         runTestGame(players, handler)

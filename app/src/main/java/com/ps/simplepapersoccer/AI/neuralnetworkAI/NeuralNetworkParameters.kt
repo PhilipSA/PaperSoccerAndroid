@@ -16,5 +16,4 @@ data class NeuralNetworkParameters(
         val DISABLE_MUTATION_CHANCE: Float = 0.4f,
         val ENABLE_MUTATION_CHANCE: Float = 0.2f,
         val MAX_NODES: Int = 100000,
-        val FILE_NAME: String = "temp.pool"
 )

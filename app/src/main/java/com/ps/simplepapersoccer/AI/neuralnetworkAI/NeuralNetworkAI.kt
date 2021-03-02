@@ -2,7 +2,6 @@ package com.ps.simplepapersoccer.ai.neuralnetworkAI
 
 import android.content.Context
 import com.ps.simplepapersoccer.ai.abstraction.IGameAI
-import com.ps.simplepapersoccer.data.constants.StringConstants.NEURAL_NETWORK_FILE_NAME
 import com.ps.simplepapersoccer.data.enums.VictoryConditionEnum
 import com.ps.simplepapersoccer.gameObjects.game.GameHandler
 import com.ps.simplepapersoccer.gameObjects.move.PartialMove
@@ -12,11 +11,12 @@ import com.ps.simplepapersoccer.gameObjects.player.AIPlayer
 class NeuralNetworkAI(private val context: Context?,
                       playerNumber: Int,
                       playerColor: Int,
-                      playerName: String = NeuralNetworkAI::class.java.simpleName,
-                      private val backupFileName: String = NEURAL_NETWORK_FILE_NAME) : IGameAI, AIPlayer(playerName, playerNumber, playerColor) {
+                      playerName: String = NeuralNetworkAI::class.java.simpleName) : IGameAI, AIPlayer(playerName, playerNumber, playerColor) {
 
     private var neuralNetwork: NeuralNetwork<PossibleMove>? = null
     private var gameHandler: GameHandler? = null
+
+    val neuralNetworkCache = NeuralNetworkCache(context, true)
 
     @ExperimentalStdlibApi
     override suspend fun makeMove(gameHandler: GameHandler): PartialMove? {
@@ -65,7 +65,7 @@ class NeuralNetworkAI(private val context: Context?,
         neuralNetworkController.updateInputs()
 
         if (neuralNetwork == null) {
-            neuralNetwork = NeuralNetwork(context, neuralNetworkController, true, NeuralNetworkParameters(FILE_NAME = backupFileName))
+            neuralNetwork = NeuralNetwork(neuralNetworkController, neuralNetworkCache, NeuralNetworkParameters())
         }
 
         //New game

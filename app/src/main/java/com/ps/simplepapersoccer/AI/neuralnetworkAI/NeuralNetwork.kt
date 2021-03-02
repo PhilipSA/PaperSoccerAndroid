@@ -643,7 +643,7 @@ class NeuralNetwork<T>(context: Context?,
     }
 
     private fun fitnessAlreadyMeasured(): Boolean {
-        return pool.currentGenome?.fitness ?: -1 != 0.0
+        return pool.currentGenome?.fitness != 0f
     }
 
     fun cutOff() {

@@ -13,7 +13,7 @@ class NeuralNetworkTests {
     fun neuralNetworkLearnsAndOperation() {
 
         var scoreCounter = 0
-        var lastGuess = -1
+        var lastGuess = 1
         val numberOfRuns = 5000
 
         val controller = object : INeuralNetworkController<Int> {
@@ -24,13 +24,13 @@ class NeuralNetworkTests {
             override fun fitnessEvaluation(): Float {
                 return if (lastGuess == inputs[0].and(inputs[1])) {
                     ++scoreCounter
-                    1f
-                } else -1f
+                    1000f
+                } else 1f
             }
 
             override fun networkGuessOutput(output: List<Float>): Int {
                 return output.map {
-                    if (it >= 0) 1 else 0
+                    if (it > 0) 1 else 0
                 }.first()
             }
 
@@ -47,7 +47,7 @@ class NeuralNetworkTests {
 
         for (i in 0 until numberOfRuns) {
             val nextStep = neuralNetwork.nextStep()
-            lastGuess = nextStep ?: -1
+            lastGuess = nextStep!!
             neuralNetwork.cutOff()
             controller.updateInputs()
         }

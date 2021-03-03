@@ -1,8 +1,8 @@
 package com.ps.simplepapersoccer.data.enums
 
-enum class ConnectionTypeEnum(val normalizedIdentiferValue: Int) {
-    Open(1),
-    Blocked(2),
-    LineTiltedLeft(3),
-    LineTiltedRight(4)
+enum class ConnectionTypeEnum(val normalizedIdentiferValue: Float) {
+    Open(0.1f),
+    Blocked(0.2f),
+    LineTiltedLeft(0.3f),
+    LineTiltedRight(0.4f)
 }

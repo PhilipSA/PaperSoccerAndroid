@@ -13,24 +13,24 @@ class NeuralNetworkTests {
     fun neuralNetworkLearnsAndOperation() {
 
         var scoreCounter = 0
-        var lastGuess = 1
+        var lastGuess = 1f
         val numberOfRuns = 5000
 
-        val controller = object : INeuralNetworkController<Int> {
+        val controller = object : INeuralNetworkController<Float> {
             override var inputs = getRandomInputs()
 
             override val outputs = 1
 
             override fun fitnessEvaluation(): Float {
-                return if (lastGuess == inputs[0].and(inputs[1])) {
+                return if (lastGuess == 1f) {
                     ++scoreCounter
                     1000f
                 } else 1f
             }
 
-            override fun networkGuessOutput(output: List<Float>): Int {
+            override fun networkGuessOutput(output: List<Float>): Float {
                 return output.map {
-                    if (it > 0) 1 else 0
+                    if (it > 0) 1f else 0f
                 }.first()
             }
 
@@ -38,8 +38,8 @@ class NeuralNetworkTests {
                 this.inputs = getRandomInputs()
             }
 
-            fun getRandomInputs(): List<Int> {
-                return listOf(Random.nextInt(0, 2), Random.nextInt(0, 2))
+            fun getRandomInputs(): List<Float> {
+                return listOf(0.5f)
             }
         }
 

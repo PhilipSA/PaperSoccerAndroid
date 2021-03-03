@@ -24,7 +24,7 @@ class NeuralNetworkAI(private val context: Context?,
         if (this.gameHandler == null) this.gameHandler = gameHandler
 
         val neuralNetworkController = object : INeuralNetworkController<PossibleMove> {
-            override lateinit var inputs: List<Int>
+            override lateinit var inputs: List<Float>
 
             override val outputs = 8
 

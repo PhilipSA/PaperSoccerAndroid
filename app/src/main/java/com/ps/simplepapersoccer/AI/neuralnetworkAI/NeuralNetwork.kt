@@ -159,7 +159,7 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
         genome.network = network
     }
 
-    private fun evaluateNetwork(network: Network, inputsArg: List<Int>): T? {
+    private fun evaluateNetwork(network: Network, inputsArg: List<Float>): T? {
         if (inputsArg.size != neuralNetworkController.inputs.size) {
             throw(Exception("No"))
         }

@@ -1,5 +1,5 @@
-package com.ps.simplepapersoccer.gameObjects.player
+package com.ps.simplepapersoccer.gameobjects.player
 
-import com.ps.simplepapersoccer.gameObjects.player.abstraction.IPlayer
+import com.ps.simplepapersoccer.gameobjects.player.abstraction.IPlayer
 
 class Player(playerName: String, playerNumber: Int, playerColor: Int, isAi: Boolean) : IPlayer(playerName, playerNumber, playerColor, isAi)

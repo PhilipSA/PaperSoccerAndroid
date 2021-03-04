@@ -1,7 +1,8 @@
-package com.ps.simplepapersoccer.gameObjects.game
+package com.ps.simplepapersoccer.gameobjects.game
 
 import androidx.lifecycle.MutableLiveData
-import com.ps.simplepapersoccer.gameObjects.move.PartialMove
+import com.ps.simplepapersoccer.gameobjects.game.Victory
+import com.ps.simplepapersoccer.gameobjects.move.PartialMove
 
 interface IGameHandlerListener {
     val winnerLiveData: MutableLiveData<Victory>

@@ -1,8 +1,8 @@
-package com.ps.simplepapersoccer.gameObjects.game.geometry
+package com.ps.simplepapersoccer.gameobjects.game.geometry
 
 import com.ps.simplepapersoccer.data.enums.NodeTypeEnum
-import com.ps.simplepapersoccer.gameObjects.game.geometry.abstraction.BaseNode
-import com.ps.simplepapersoccer.gameObjects.game.geometry.abstraction.IntegerLine
+import com.ps.simplepapersoccer.gameobjects.game.geometry.Abstraction.BaseNode
+import com.ps.simplepapersoccer.gameobjects.game.geometry.Abstraction.IntegerLine
 
 class Goal(var goalLine: IntegerLine, var leftPost: IntegerLine, var rightPost: IntegerLine, var connectionLine: IntegerLine) {
     fun contains(point: TwoDimensionalPoint) : Boolean

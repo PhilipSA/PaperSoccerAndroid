@@ -1,16 +1,16 @@
-package com.ps.simplepapersoccer.gameObjects.game
+package com.ps.simplepapersoccer.gameobjects.game
 
 import com.ps.simplepapersoccer.data.enums.ConnectionTypeEnum
 import com.ps.simplepapersoccer.data.enums.NodeTypeEnum
-import com.ps.simplepapersoccer.gameObjects.game.geometry.ConnectionNode
-import com.ps.simplepapersoccer.gameObjects.game.geometry.Goal
-import com.ps.simplepapersoccer.gameObjects.game.geometry.Node
-import com.ps.simplepapersoccer.gameObjects.game.geometry.TwoDimensionalPoint
-import com.ps.simplepapersoccer.gameObjects.game.geometry.abstraction.BaseNode
-import com.ps.simplepapersoccer.gameObjects.game.geometry.abstraction.IntegerLine
-import com.ps.simplepapersoccer.gameObjects.move.PartialMove
-import com.ps.simplepapersoccer.gameObjects.move.PossibleMove
-import com.ps.simplepapersoccer.gameObjects.move.StoredMove
+import com.ps.simplepapersoccer.gameobjects.game.geometry.ConnectionNode
+import com.ps.simplepapersoccer.gameobjects.game.geometry.Goal
+import com.ps.simplepapersoccer.gameobjects.game.geometry.Node
+import com.ps.simplepapersoccer.gameobjects.game.geometry.TwoDimensionalPoint
+import com.ps.simplepapersoccer.gameobjects.game.geometry.Abstraction.BaseNode
+import com.ps.simplepapersoccer.gameobjects.game.geometry.Abstraction.IntegerLine
+import com.ps.simplepapersoccer.gameobjects.move.PartialMove
+import com.ps.simplepapersoccer.gameobjects.move.PossibleMove
+import com.ps.simplepapersoccer.gameobjects.move.StoredMove
 import com.ps.simplepapersoccer.helpers.MathHelper
 import java.util.*
 import kotlin.collections.HashSet

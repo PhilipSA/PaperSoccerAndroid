@@ -2,14 +2,11 @@ package com.ps.simplepapersoccer.activities
 
 import android.content.Intent
 import android.os.Bundle
-import android.preference.PreferenceFragment
 import android.widget.ArrayAdapter
-import android.widget.SpinnerAdapter
 import androidx.appcompat.app.AppCompatActivity
-import androidx.preference.PreferenceFragmentCompat
 
 import com.ps.simplepapersoccer.R
-import com.ps.simplepapersoccer.gameObjects.player.AIPlayer
+import com.ps.simplepapersoccer.gameobjects.player.AIPlayer
 import kotlinx.android.synthetic.main.activity_settings.*
 
 class SettingsActivity : AppCompatActivity(R.layout.activity_settings) {

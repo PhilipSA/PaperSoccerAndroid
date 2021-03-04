@@ -1,6 +1,6 @@
-package com.ps.simplepapersoccer.gameObjects.game.geometry.abstraction
+package com.ps.simplepapersoccer.gameobjects.game.geometry.Abstraction
 
-import com.ps.simplepapersoccer.gameObjects.game.geometry.TwoDimensionalPoint
+import com.ps.simplepapersoccer.gameobjects.game.geometry.TwoDimensionalPoint
 
 abstract class BaseNode(val coords: TwoDimensionalPoint) {
     abstract fun normalizedIdentifierHashCode(): Float

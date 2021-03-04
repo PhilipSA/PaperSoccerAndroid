@@ -474,7 +474,7 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
             total += it.globalRank
         }
 
-        species.averageFitness = if (species.genomes.size == 0) 0f else total / species.genomes.size
+        species.averageFitness = total / species.genomes.size
     }
 
     private fun totalAverageFitness(): Float {
@@ -649,8 +649,8 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
         pool.currentGenome?.fitness = fitness
 
         if (fitness > pool.maxFitness) {
-            println("Max fitness: ${pool.maxFitness} Gen ${pool.generation} species ${pool.species.sumBy { it.averageFitness.toInt() }} genome: ${pool.currentGenomeIndex}")
             pool.maxFitness = fitness
+            println("Max fitness: ${pool.maxFitness} Gen ${pool.generation} species ${pool.species.sumBy { it.averageFitness.toInt() }} genome: ${pool.currentGenomeIndex}")
             neuralNetworkCache.savePool(pool)
         }
 

@@ -681,7 +681,10 @@ class NeuralNetworkAI2<T>(private val neuralNetworkController: INeuralNetworkCon
     }
 
     private fun evaluateCurrent(): T? {
-        return evaluateNetwork(pool.currentGenome.network, neuralNetworkController.inputs)
+        val species = pool.species[pool.currentSpecies]!!
+        val genome = species.genomes[pool.currentGenome]!!
+
+        return evaluateNetwork(genome.network, neuralNetworkController.inputs)
     }
 
     fun cutOff() {
@@ -705,7 +708,7 @@ class NeuralNetworkAI2<T>(private val neuralNetworkController: INeuralNetworkCon
             nextGenome()
         }
 
-        initRun()
+        initializeRun()
     }
 
     private fun playTop() {
@@ -713,12 +716,12 @@ class NeuralNetworkAI2<T>(private val neuralNetworkController: INeuralNetworkCon
         var maxs = 0
         var maxg = 0
 
-        pool.species.forEach { species ->
-            species.genomes.forEach { genome ->
+        for ((s,species) in pool.species) {
+            for ((g,genome) in species.genomes) {
                 if (genome.fitness > maxfitness) {
                     maxfitness = genome.fitness
-                    maxs = pool.species.indexOf(species)
-                    maxg = pool.currentSpecies.genomes.indexOf(genome)
+                    maxs = s
+                    maxg = g
                 }
             }
         }
@@ -735,8 +738,11 @@ class NeuralNetworkAI2<T>(private val neuralNetworkController: INeuralNetworkCon
         var measured = 0
         var total = 0
 
-        pool.species.forEach { species ->
-            species.genomes.forEach { genome ->
+        for (s in 1 until pool.species.size) {
+            val species = pool.species[s]!!
+            for (g in 1 until species.genomes.size) {
+                val genome = species.genomes[g]!!
+
                 ++total
                 if (genome.fitness != 0f) {
                     ++measured

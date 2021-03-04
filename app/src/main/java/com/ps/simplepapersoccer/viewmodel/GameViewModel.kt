@@ -2,6 +2,7 @@ package com.ps.simplepapersoccer.viewmodel
 
 import android.app.Application
 import android.graphics.Color
+import android.os.Handler
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import com.ps.simplepapersoccer.gameobjects.game.GameHandler
@@ -14,8 +15,12 @@ import com.ps.simplepapersoccer.gameobjects.move.PartialMove
 import com.ps.simplepapersoccer.gameobjects.player.AIPlayer
 import com.ps.simplepapersoccer.gameobjects.player.abstraction.IPlayer
 import com.ps.simplepapersoccer.gameobjects.player.Player
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.util.*
 import kotlin.collections.HashSet
+import kotlin.coroutines.CoroutineContext
 
 class GameViewModel(application: Application): AndroidViewModel(application), IGameHandlerListener {
     lateinit var gameHandler: GameHandler
@@ -32,9 +37,9 @@ class GameViewModel(application: Application): AndroidViewModel(application), IG
 
     val executeUpdateGameViewTaskLiveData = MutableLiveData<GameViewDrawData>()
     val playerTurnTextLiveData = MutableLiveData<Boolean>()
-    override val winnerLiveData = MutableLiveData<Victory>()
-    override val reDrawLiveData = MutableLiveData<Boolean>()
-    override val drawPartialMoveLiveData = MutableLiveData<PartialMove>()
+    val winnerLiveData = MutableLiveData<Victory>()
+    val reDrawLiveData = MutableLiveData<Boolean>()
+    val drawPartialMoveLiveData = MutableLiveData<PartialMove>()
 
     fun initPlayers(playerName: String) {
         if (players.isNotEmpty()) {
@@ -61,5 +66,20 @@ class GameViewModel(application: Application): AndroidViewModel(application), IG
 
     fun updatePlayerTurnText() {
         playerTurnTextLiveData.value = true
+    }
+
+    override fun reDraw() {
+        reDrawLiveData.value = true
+    }
+
+    override fun winner(victory: Victory) {
+        winnerLiveData.postValue(victory)
+    }
+
+    override suspend fun drawPartialMove(partialMove: PartialMove): Boolean {
+        return withContext(Dispatchers.Main) {
+            drawPartialMoveLiveData.value = partialMove
+            true
+        }
     }
 }

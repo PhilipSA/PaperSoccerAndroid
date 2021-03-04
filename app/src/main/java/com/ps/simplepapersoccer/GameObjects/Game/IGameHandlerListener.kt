@@ -5,7 +5,7 @@ import com.ps.simplepapersoccer.gameobjects.game.Victory
 import com.ps.simplepapersoccer.gameobjects.move.PartialMove
 
 interface IGameHandlerListener {
-    val winnerLiveData: MutableLiveData<Victory>
-    val reDrawLiveData: MutableLiveData<Boolean>
-    val drawPartialMoveLiveData: MutableLiveData<PartialMove>
+    fun winner(victory: Victory)
+    fun reDraw()
+    suspend fun drawPartialMove(partialMove: PartialMove): Boolean
 }

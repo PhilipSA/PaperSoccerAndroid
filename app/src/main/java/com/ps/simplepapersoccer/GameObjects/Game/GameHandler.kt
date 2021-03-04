@@ -9,6 +9,8 @@ import com.ps.simplepapersoccer.gameobjects.move.PartialMove
 import com.ps.simplepapersoccer.gameobjects.player.AIPlayer
 import com.ps.simplepapersoccer.gameobjects.player.abstraction.IPlayer
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 class GameHandler(private val listener: IGameHandlerListener?,
                   gridX: Int,
@@ -37,7 +39,7 @@ class GameHandler(private val listener: IGameHandlerListener?,
         gameBoard.currentPlayersTurn = players[0].playerNumber
         player1.goal = gameBoard.goal1
         player2.goal = gameBoard.goal2
-        listener?.reDrawLiveData?.value = true
+        listener?.reDraw()
     }
 
     fun updateGameState() {
@@ -73,10 +75,14 @@ class GameHandler(private val listener: IGameHandlerListener?,
     }
 
     private fun makeMove(partialMove: PartialMove) {
-        gameBoard.makePartialMove(partialMove)
-        listener?.drawPartialMoveLiveData?.postValue(partialMove)
-        ++numberOfTurns
-        updateGameState()
+        CoroutineScope(dispatcher).launch {
+            gameBoard.makePartialMove(partialMove)
+            val postedMoveToMainThread = listener?.drawPartialMove(partialMove) ?: true
+            if (postedMoveToMainThread) {
+                ++numberOfTurns
+                updateGameState()
+            }
+        }
     }
 
     val isGameOver: Boolean
@@ -100,7 +106,7 @@ class GameHandler(private val listener: IGameHandlerListener?,
     private fun winner(victory: Victory) {
         this.winner = victory
         victory.winner.score += 1
-        listener?.winnerLiveData?.value = victory
+        listener?.winner(victory)
     }
 
     fun getOpponent(myPlayer: IPlayer): IPlayer {

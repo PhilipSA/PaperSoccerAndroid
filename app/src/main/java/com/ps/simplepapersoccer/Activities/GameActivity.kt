@@ -103,32 +103,32 @@ class GameActivity : AppCompatActivity() {
     }
 
     private fun registerObservers() {
-        gameViewModel.executeUpdateGameViewTaskLiveData.observe(this, Observer {
+        gameViewModel.executeUpdateGameViewTaskLiveData.observe(this, {
             if (it != null) {
                 executeUpdateGameViewTask(it)
                 gameViewModel.executeUpdateGameViewTaskLiveData.value = null
             }
         })
 
-        gameViewModel.playerTurnTextLiveData.observe(this, Observer {
+        gameViewModel.playerTurnTextLiveData.observe(this, {
             setPlayerTurnTextViewText()
         })
 
-        gameViewModel.winnerLiveData.observe(this, Observer {
+        gameViewModel.winnerLiveData.observe(this, {
             if (it != null) {
                 winner(it)
                 gameViewModel.winnerLiveData.value = null
             }
         })
 
-        gameViewModel.reDrawLiveData.observe(this, Observer {
+        gameViewModel.reDrawLiveData.observe(this, {
             if (it == true) {
                 reDraw()
                 gameViewModel.reDrawLiveData.value = false
             }
         })
 
-        gameViewModel.drawPartialMoveLiveData.observe(this, Observer { partialMove ->
+        gameViewModel.drawPartialMoveLiveData.observe(this, { partialMove ->
             if (partialMove != null) {
                 drawPartialMove(partialMove, gameViewModel.players.first { it.playerNumber == partialMove.madeTheMove})
                 gameViewModel.drawPartialMoveLiveData.value = null

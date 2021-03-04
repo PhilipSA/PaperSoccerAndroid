@@ -378,28 +378,43 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
         }
 
         var p = genome.mutationRates.getValue("link")
-        if (Random.nextFloat() < p - floor(p)) {
-            linkMutate(genome, false)
+        while (p > 0) {
+            if (Random.nextFloat() < p) {
+                linkMutate(genome, false)
+            }
+            --p
         }
 
         p = genome.mutationRates.getValue("bias")
-        if (Random.nextFloat() < p - floor(p)) {
-            linkMutate(genome, true)
+        while (p > 0) {
+            if (Random.nextFloat() < p) {
+                linkMutate(genome, true)
+            }
+            --p
         }
 
         p = genome.mutationRates.getValue("node")
-        if (Random.nextFloat() < p - floor(p)) {
-            nodeMutate(genome)
+        while (p > 0) {
+            if (Random.nextFloat() < p) {
+                nodeMutate(genome)
+            }
+            --p
         }
 
         p = genome.mutationRates.getValue("enable")
-        if (Random.nextFloat() < p - floor(p)) {
-            enableDisableMutate(genome, true)
+        while (p > 0) {
+            if (Random.nextFloat() < p) {
+                enableDisableMutate(genome, true)
+            }
+            --p
         }
 
         p = genome.mutationRates.getValue("disable")
-        if (Random.nextFloat() < p - floor(p)) {
-            enableDisableMutate(genome, false)
+        while (p > 0) {
+            if (Random.nextFloat() < p) {
+                enableDisableMutate(genome, false)
+            }
+            --p
         }
     }
 

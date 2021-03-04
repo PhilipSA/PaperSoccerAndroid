@@ -61,6 +61,8 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
 
     private lateinit var pool: Pool
 
+    val inputSize get() = neuralNetworkController.inputs.size + 1
+
     init {
         initPool()
     }
@@ -109,7 +111,7 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
 
     private fun basicGenome(): Genome {
         val genome = newGenome()
-        genome.maxNeuron = neuralNetworkController.inputs.size - 1
+        genome.maxNeuron = inputSize - 1
         mutate(genome)
         return genome
     }
@@ -243,11 +245,11 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
         }
 
         genes.forEach {
-            if (nonInput.not() || it.into > neuralNetworkController.inputs.size) {
+            if (nonInput.not() || it.into > inputSize) {
                 neurons[it.into] = true
             }
 
-            if (nonInput.not() || it.out > neuralNetworkController.inputs.size) {
+            if (nonInput.not() || it.out > inputSize) {
                 neurons[it.out] = true
             }
         }
@@ -290,12 +292,12 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
 
         val newLink = newGene()
 
-        if (neuron1 < neuralNetworkController.inputs.size && neuron2 < neuralNetworkController.inputs.size) {
+        if (neuron1 < inputSize && neuron2 < inputSize) {
             //Both input nodes
             return
         }
 
-        if (neuron2 < neuralNetworkController.inputs.size) {
+        if (neuron2 < inputSize) {
             val temp = neuron1
             neuron1 = neuron2
             neuron2 = temp
@@ -304,7 +306,7 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
         newLink.into = neuron1
         newLink.out = neuron2
 
-        if (forceBias) newLink.into = neuralNetworkController.inputs.size - 1
+        if (forceBias) newLink.into = inputSize - 1
 
         if (containsLink(genome.genes, newLink)) return
 

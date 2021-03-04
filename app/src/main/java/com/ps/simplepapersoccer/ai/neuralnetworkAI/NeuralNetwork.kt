@@ -38,8 +38,8 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
             var maxFitness: Float,
             var innovation: Int
     ) : Serializable {
-        val currentSpecies get() = species.getOrNull(currentSpeciesIndex)
-        val currentGenome get() = currentSpecies?.genomes?.getOrNull(currentGenomeIndex)
+        val currentSpecies get() = species[currentSpeciesIndex]
+        val currentGenome get() = currentSpecies.genomes[currentGenomeIndex]
     }
 
     data class Gene(
@@ -59,7 +59,7 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
             val pool: ByteArray
     ) : Serializable
 
-    lateinit var pool: Pool
+    private lateinit var pool: Pool
 
     init {
         initPool()
@@ -165,7 +165,7 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
         }
 
         for (index in neuralNetworkController.inputs.indices) {
-            network.neurons[index]?.value = inputsArg[index].toFloat()
+            network.neurons[index]?.value = inputsArg[index]
         }
 
         network.neurons.values.forEach { neuron ->
@@ -616,21 +616,21 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
     }
 
     private fun initRun() {
-        generateNetwork(pool.currentGenome!!)
+        generateNetwork(pool.currentGenome)
     }
 
     private fun evaluateCurrent(): T? {
-        return evaluateNetwork(pool.currentGenome!!.network, neuralNetworkController.inputs)
+        return evaluateNetwork(pool.currentGenome.network, neuralNetworkController.inputs)
     }
 
     private fun nextGenome() {
         ++pool.currentGenomeIndex
 
-        if (pool.currentGenomeIndex + 1 > pool.currentSpecies?.genomes?.size ?: 0) {
+        if (pool.currentGenomeIndex >= pool.currentSpecies.genomes.size) {
             pool.currentGenomeIndex = 0
             ++pool.currentSpeciesIndex
 
-            if (pool.currentSpeciesIndex + 1 > pool.species.size) {
+            if (pool.currentSpeciesIndex >= pool.species.size) {
                 newGeneration()
                 pool.currentSpeciesIndex = 0
             }
@@ -638,13 +638,13 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
     }
 
     private fun fitnessAlreadyMeasured(): Boolean {
-        return pool.currentGenome?.fitness != 0f
+        return pool.currentGenome.fitness != 0f
     }
 
     fun cutOff() {
         val fitness = neuralNetworkController.fitnessEvaluation()
 
-        pool.currentGenome?.fitness = fitness
+        pool.currentGenome.fitness = fitness
 
         if (fitness > pool.maxFitness) {
             pool.maxFitness = fitness
@@ -672,7 +672,7 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
                 if (genome.fitness > maxfitness) {
                     maxfitness = genome.fitness
                     maxs = pool.species.indexOf(species)
-                    maxg = pool.currentSpecies!!.genomes.indexOf(genome)
+                    maxg = pool.currentSpecies.genomes.indexOf(genome)
                 }
             }
         }

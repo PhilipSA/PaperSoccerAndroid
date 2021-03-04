@@ -61,7 +61,7 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
 
     private lateinit var pool: Pool
 
-    val inputSize get() = neuralNetworkController.inputs.size + 1
+    private val inputSize get() = neuralNetworkController.inputs.size + 1
 
     init {
         initPool()
@@ -162,12 +162,16 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
     }
 
     private fun evaluateNetwork(network: Network, inputsArg: List<Float>): T? {
-        if (inputsArg.size != neuralNetworkController.inputs.size) {
+        val inputs = inputsArg.toMutableList().apply {
+            add(1f)
+        }
+
+        if (inputs.size != inputSize) {
             throw(Exception("No"))
         }
 
         for (index in neuralNetworkController.inputs.indices) {
-            network.neurons[index]?.value = inputsArg[index]
+            network.neurons[index]?.value = inputs[index]
         }
 
         network.neurons.values.forEach { neuron ->

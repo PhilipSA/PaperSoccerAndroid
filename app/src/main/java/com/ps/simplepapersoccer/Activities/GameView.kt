@@ -11,7 +11,7 @@ import android.view.View
 import com.ps.simplepapersoccer.data.enums.NodeTypeEnum
 import com.ps.simplepapersoccer.gameobjects.game.GameBoard
 import com.ps.simplepapersoccer.gameobjects.game.GameViewDrawData
-import com.ps.simplepapersoccer.gameobjects.game.geometry.Abstraction.IntegerLine
+import com.ps.simplepapersoccer.gameobjects.game.geometry.abstraction.IntegerLine
 import com.ps.simplepapersoccer.gameobjects.game.geometry.LinesToDraw
 import com.ps.simplepapersoccer.gameobjects.game.geometry.Node
 import com.ps.simplepapersoccer.R

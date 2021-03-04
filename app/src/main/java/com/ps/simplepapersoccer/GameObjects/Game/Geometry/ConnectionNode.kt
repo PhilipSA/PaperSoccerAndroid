@@ -2,7 +2,7 @@ package com.ps.simplepapersoccer.gameobjects.game.geometry
 
 import com.ps.simplepapersoccer.data.enums.ConnectionTypeEnum
 import com.ps.simplepapersoccer.data.enums.NodeTypeEnum
-import com.ps.simplepapersoccer.gameobjects.game.geometry.Abstraction.BaseNode
+import com.ps.simplepapersoccer.gameobjects.game.geometry.abstraction.BaseNode
 import kotlin.math.atan2
 
 //Keeps track of how other nodes are connected

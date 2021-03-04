@@ -1,4 +1,4 @@
-package com.ps.simplepapersoccer.gameobjects.game.geometry.Abstraction
+package com.ps.simplepapersoccer.gameobjects.game.geometry.abstraction
 
 import com.ps.simplepapersoccer.gameobjects.game.geometry.TwoDimensionalPoint
 

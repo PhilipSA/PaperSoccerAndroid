@@ -6,8 +6,8 @@ import com.ps.simplepapersoccer.gameobjects.game.geometry.ConnectionNode
 import com.ps.simplepapersoccer.gameobjects.game.geometry.Goal
 import com.ps.simplepapersoccer.gameobjects.game.geometry.Node
 import com.ps.simplepapersoccer.gameobjects.game.geometry.TwoDimensionalPoint
-import com.ps.simplepapersoccer.gameobjects.game.geometry.Abstraction.BaseNode
-import com.ps.simplepapersoccer.gameobjects.game.geometry.Abstraction.IntegerLine
+import com.ps.simplepapersoccer.gameobjects.game.geometry.abstraction.BaseNode
+import com.ps.simplepapersoccer.gameobjects.game.geometry.abstraction.IntegerLine
 import com.ps.simplepapersoccer.gameobjects.move.PartialMove
 import com.ps.simplepapersoccer.gameobjects.move.PossibleMove
 import com.ps.simplepapersoccer.gameobjects.move.StoredMove

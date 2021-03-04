@@ -19,9 +19,9 @@ import com.ps.simplepapersoccer.data.enums.NodeTypeEnum
 import com.ps.simplepapersoccer.data.enums.VictoryConditionEnum
 import com.ps.simplepapersoccer.gameobjects.game.GameHandler
 import com.ps.simplepapersoccer.gameobjects.game.GameViewDrawData
+import com.ps.simplepapersoccer.gameobjects.game.Victory
 import com.ps.simplepapersoccer.gameobjects.game.geometry.LinesToDraw
 import com.ps.simplepapersoccer.gameobjects.game.geometry.Node
-import com.ps.simplepapersoccer.gameobjects.game.Victory
 import com.ps.simplepapersoccer.gameobjects.game.geometry.TwoDimensionalPoint
 import com.ps.simplepapersoccer.gameobjects.game.geometry.TwoDimensionalPointF
 import com.ps.simplepapersoccer.gameobjects.move.PartialMove

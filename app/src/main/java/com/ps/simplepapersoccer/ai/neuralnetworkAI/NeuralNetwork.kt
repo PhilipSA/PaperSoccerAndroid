@@ -111,7 +111,7 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
 
     private fun basicGenome(): Genome {
         val genome = newGenome()
-        genome.maxNeuron = inputSize - 1
+        genome.maxNeuron = inputSize
         mutate(genome)
         return genome
     }
@@ -135,7 +135,7 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
     private fun generateNetwork(genome: Genome) {
         val network = Network(hashMapOf())
 
-        for (i in neuralNetworkController.inputs.indices) {
+        for (i in 0 until inputSize) {
             network.neurons[i] = newNeuron()
         }
 

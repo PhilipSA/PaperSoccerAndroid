@@ -421,7 +421,7 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
 
         val n = max(genes1.size, genes2.size)
 
-        return if (n == 0) 0 else disjointGenes / n
+        return if (n == 0) Int.MAX_VALUE else disjointGenes / n
     }
 
     private fun weights(genes1: List<Gene>, genes2: List<Gene>): Float {
@@ -442,7 +442,7 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
             }
         }
 
-        return if (coincident == 0f) 0f else sum / coincident
+        return sum / coincident
     }
 
     private fun sameSpecies(genome1: Genome, genome2: Genome): Boolean {
@@ -626,11 +626,11 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
     private fun nextGenome() {
         ++pool.currentGenomeIndex
 
-        if (pool.currentGenomeIndex >= pool.currentSpecies.genomes.size) {
+        if (pool.currentGenomeIndex >= pool.currentSpecies.genomes.size - 1) {
             pool.currentGenomeIndex = 0
             ++pool.currentSpeciesIndex
 
-            if (pool.currentSpeciesIndex >= pool.species.size) {
+            if (pool.currentSpeciesIndex >= pool.species.size - 1) {
                 newGeneration()
                 pool.currentSpeciesIndex = 0
             }

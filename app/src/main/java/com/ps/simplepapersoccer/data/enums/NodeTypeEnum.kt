@@ -1,10 +1,11 @@
 package com.ps.simplepapersoccer.data.enums
 
-enum class NodeTypeEnum(val normalizedIdentiferValue: Int) {
-    Empty(-1),
-    Wall(-2),
-    ContainsBall(-3),
-    BounceAble(-4),
-    Goal(-5),
-    Post(-6)
+//Don't steal from ConnectionTypeEnum values
+enum class NodeTypeEnum(val normalizedIdentiferValue: Float) {
+    Empty(0.11f),
+    Wall(0.21f),
+    ContainsBall(0.31f),
+    BounceAble(0.41f),
+    Goal(0.51f),
+    Post(0.61f)
 }

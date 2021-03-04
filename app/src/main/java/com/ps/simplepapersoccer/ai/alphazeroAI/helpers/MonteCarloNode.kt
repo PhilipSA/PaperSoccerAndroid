@@ -1,5 +1,5 @@
 import com.ps.simplepapersoccer.ai.alphazeroAI.helpers.State
-import com.ps.simplepapersoccer.gameObjects.game.GameBoard
+import com.ps.simplepapersoccer.gameobjects.game.GameBoard
 import kotlin.collections.ArrayList
 
 class MonteCarloNode {

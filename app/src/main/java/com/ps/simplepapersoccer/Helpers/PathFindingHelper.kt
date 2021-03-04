@@ -1,6 +1,6 @@
 package com.ps.simplepapersoccer.helpers
 
-import com.ps.simplepapersoccer.gameObjects.game.geometry.Node
+import com.ps.simplepapersoccer.gameobjects.game.geometry.Node
 import kotlin.collections.HashSet
 
 object PathFindingHelper {

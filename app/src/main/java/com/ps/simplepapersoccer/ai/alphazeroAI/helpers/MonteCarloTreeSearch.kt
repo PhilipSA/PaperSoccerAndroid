@@ -1,7 +1,7 @@
 import com.ps.simplepapersoccer.ai.alphazeroAI.helpers.Tree
 import com.ps.simplepapersoccer.ai.alphazeroAI.helpers.UCT
-import com.ps.simplepapersoccer.gameObjects.game.GameBoard
-import com.ps.simplepapersoccer.gameObjects.move.PartialMove
+import com.ps.simplepapersoccer.gameobjects.game.GameBoard
+import com.ps.simplepapersoccer.gameobjects.move.PartialMove
 
 class MonteCarloTreeSearch {
     var level = 3

@@ -4,16 +4,16 @@ import android.app.Application
 import android.graphics.Color
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
-import com.ps.simplepapersoccer.gameObjects.game.GameHandler
-import com.ps.simplepapersoccer.gameObjects.game.GameViewDrawData
-import com.ps.simplepapersoccer.gameObjects.game.IGameHandlerListener
-import com.ps.simplepapersoccer.gameObjects.game.Victory
-import com.ps.simplepapersoccer.gameObjects.game.geometry.LinesToDraw
-import com.ps.simplepapersoccer.gameObjects.game.geometry.Node
-import com.ps.simplepapersoccer.gameObjects.move.PartialMove
-import com.ps.simplepapersoccer.gameObjects.player.AIPlayer
-import com.ps.simplepapersoccer.gameObjects.player.abstraction.IPlayer
-import com.ps.simplepapersoccer.gameObjects.player.Player
+import com.ps.simplepapersoccer.gameobjects.game.GameHandler
+import com.ps.simplepapersoccer.gameobjects.game.GameViewDrawData
+import com.ps.simplepapersoccer.gameobjects.game.IGameHandlerListener
+import com.ps.simplepapersoccer.gameobjects.game.Victory
+import com.ps.simplepapersoccer.gameobjects.game.geometry.LinesToDraw
+import com.ps.simplepapersoccer.gameobjects.game.geometry.Node
+import com.ps.simplepapersoccer.gameobjects.move.PartialMove
+import com.ps.simplepapersoccer.gameobjects.player.AIPlayer
+import com.ps.simplepapersoccer.gameobjects.player.abstraction.IPlayer
+import com.ps.simplepapersoccer.gameobjects.player.Player
 import java.util.*
 import kotlin.collections.HashSet
 

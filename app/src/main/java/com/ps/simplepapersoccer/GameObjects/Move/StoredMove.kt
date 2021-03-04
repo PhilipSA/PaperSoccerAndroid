@@ -1,4 +1,4 @@
-package com.ps.simplepapersoccer.gameObjects.move
+package com.ps.simplepapersoccer.gameobjects.move
 
 import com.ps.simplepapersoccer.data.enums.NodeTypeEnum
 

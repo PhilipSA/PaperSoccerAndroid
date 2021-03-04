@@ -2,9 +2,9 @@ package com.ps.simplepapersoccer.ai.jonasAI
 
 import com.ps.simplepapersoccer.ai.abstraction.IGameAI
 import com.ps.simplepapersoccer.data.enums.NodeTypeEnum
-import com.ps.simplepapersoccer.gameObjects.game.GameHandler
-import com.ps.simplepapersoccer.gameObjects.move.PartialMove
-import com.ps.simplepapersoccer.gameObjects.player.AIPlayer
+import com.ps.simplepapersoccer.gameobjects.game.GameHandler
+import com.ps.simplepapersoccer.gameobjects.move.PartialMove
+import com.ps.simplepapersoccer.gameobjects.player.AIPlayer
 import com.ps.simplepapersoccer.helpers.PathFindingHelper
 import java.util.*
 import kotlin.collections.ArrayList

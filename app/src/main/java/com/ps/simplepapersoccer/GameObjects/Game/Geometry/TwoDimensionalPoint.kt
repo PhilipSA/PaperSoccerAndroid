@@ -1,4 +1,4 @@
-package com.ps.simplepapersoccer.gameObjects.game.geometry
+package com.ps.simplepapersoccer.gameobjects.game.geometry
 
 data class TwoDimensionalPoint(var x: Int, var y: Int): Comparable<TwoDimensionalPoint> {
 

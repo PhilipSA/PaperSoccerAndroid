@@ -1,6 +1,6 @@
 package com.ps.simplepapersoccer.helpers
 
-import com.ps.simplepapersoccer.gameObjects.game.geometry.TwoDimensionalPoint
+import com.ps.simplepapersoccer.gameobjects.game.geometry.TwoDimensionalPoint
 import kotlin.math.abs
 import kotlin.math.sqrt
 

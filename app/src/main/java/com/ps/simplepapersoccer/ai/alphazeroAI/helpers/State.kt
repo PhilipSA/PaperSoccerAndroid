@@ -1,13 +1,8 @@
 package com.ps.simplepapersoccer.ai.alphazeroAI.helpers
 
-import com.ps.simplepapersoccer.gameObjects.game.GameBoard
-import com.ps.simplepapersoccer.gameObjects.game.GameHandler
-import com.ps.simplepapersoccer.gameObjects.move.PartialMove
-import com.ps.simplepapersoccer.gameObjects.move.PossibleMove
-import java.util.*
-import kotlin.collections.ArrayDeque
+import com.ps.simplepapersoccer.gameobjects.game.GameBoard
+import com.ps.simplepapersoccer.gameobjects.move.PartialMove
 import kotlin.collections.ArrayList
-import kotlin.collections.HashSet
 
 class State {
     var board: GameBoard

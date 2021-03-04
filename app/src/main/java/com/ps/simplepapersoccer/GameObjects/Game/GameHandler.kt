@@ -1,22 +1,20 @@
-package com.ps.simplepapersoccer.gameObjects.game
+package com.ps.simplepapersoccer.gameobjects.game
 
-import android.os.Handler
 import com.ps.simplepapersoccer.ai.GameAIHandler
 import com.ps.simplepapersoccer.ai.abstraction.IGameAiHandlerListener
 import com.ps.simplepapersoccer.data.enums.NodeTypeEnum
 import com.ps.simplepapersoccer.data.enums.VictoryConditionEnum
-import com.ps.simplepapersoccer.gameObjects.game.geometry.Node
-import com.ps.simplepapersoccer.gameObjects.move.PartialMove
-import com.ps.simplepapersoccer.gameObjects.player.AIPlayer
-import com.ps.simplepapersoccer.gameObjects.player.abstraction.IPlayer
+import com.ps.simplepapersoccer.gameobjects.game.geometry.Node
+import com.ps.simplepapersoccer.gameobjects.move.PartialMove
+import com.ps.simplepapersoccer.gameobjects.player.AIPlayer
+import com.ps.simplepapersoccer.gameobjects.player.abstraction.IPlayer
 import kotlinx.coroutines.CoroutineDispatcher
 
 class GameHandler(private val listener: IGameHandlerListener?,
                   gridX: Int,
                   gridY: Int,
                   private val players: ArrayList<IPlayer>,
-                  private val dispatcher: CoroutineDispatcher,
-                  private val handler: Handler = Handler()) : IGameAiHandlerListener {
+                  private val dispatcher: CoroutineDispatcher) : IGameAiHandlerListener {
 
     private val player1: IPlayer = players[0]
     private val player2: IPlayer = players[1]
@@ -49,7 +47,7 @@ class GameHandler(private val listener: IGameHandlerListener?,
             return
         }
         if (currentPlayersTurn.isAi) {
-            GameAIHandler(this, dispatcher, handler).makeAIMove(currentPlayersTurn as AIPlayer, this)
+            GameAIHandler(this, dispatcher).makeAIMove(currentPlayersTurn as AIPlayer, this)
         }
     }
 
@@ -76,7 +74,7 @@ class GameHandler(private val listener: IGameHandlerListener?,
 
     private fun makeMove(partialMove: PartialMove) {
         gameBoard.makePartialMove(partialMove)
-        listener?.drawPartialMoveLiveData?.value = partialMove
+        listener?.drawPartialMoveLiveData?.postValue(partialMove)
         ++numberOfTurns
         updateGameState()
     }

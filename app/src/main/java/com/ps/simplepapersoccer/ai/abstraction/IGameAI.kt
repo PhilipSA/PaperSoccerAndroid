@@ -1,7 +1,7 @@
 package com.ps.simplepapersoccer.ai.abstraction
 
-import com.ps.simplepapersoccer.gameObjects.game.GameHandler
-import com.ps.simplepapersoccer.gameObjects.move.PartialMove
+import com.ps.simplepapersoccer.gameobjects.game.GameHandler
+import com.ps.simplepapersoccer.gameobjects.move.PartialMove
 import java.io.Serializable
 
 interface IGameAI: Serializable {

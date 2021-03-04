@@ -1,5 +1,5 @@
 package com.ps.simplepapersoccer.ai.minimaxAI
-import com.ps.simplepapersoccer.gameObjects.move.PartialMove
+import com.ps.simplepapersoccer.gameobjects.move.PartialMove
 
 class MoveData(var returnValue: Double) : Comparable<MoveData> {
     var returnMove: PartialMove? = null

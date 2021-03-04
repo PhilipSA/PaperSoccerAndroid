@@ -13,11 +13,11 @@ class EuclideanAI(playerNumber: Int,
 
     override suspend fun makeMove(gameHandler: GameHandler): PartialMove {
         var manhattanMove: PartialMove? = null
-        var manhattanDistance = Integer.MAX_VALUE.toDouble()
-        var tempManhattan: Double
+        var manhattanDistance = Int.MAX_VALUE
+        var tempManhattan: Int
 
         for (possibleMove in gameHandler.gameBoard.allLegalMovesFromBallNode) {
-            tempManhattan = PathFindingHelper.findPathGreedyBestFirstSearchBiDirectional(possibleMove.newNode, gameHandler.getOpponent(gameHandler.currentPlayersTurn).goal!!.goalNode()).size.toDouble()
+            tempManhattan = PathFindingHelper.findPathGreedyBestFirstSearchBiDirectional(possibleMove.newNode, gameHandler.getOpponent(gameHandler.currentPlayersTurn).goal!!.goalNode()).size
             if (tempManhattan < manhattanDistance) {
                 manhattanDistance = tempManhattan
                 manhattanMove = PartialMove(possibleMove.oldNode, possibleMove.newNode, gameHandler.gameBoard.currentPlayersTurn)

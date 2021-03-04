@@ -463,7 +463,7 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
         global.sortBy { it.fitness }
 
         for ((g, genome) in global.withIndex()) {
-            genome.globalRank = g
+            genome.globalRank = g + 1
         }
     }
 
@@ -516,7 +516,7 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
         pool.species.forEach { species ->
             species.genomes.sortByDescending { it.fitness }
 
-            if (species.genomes.getOrNull(0)?.fitness ?: 0f > species.topFitness) {
+            if (species.genomes[0].fitness > species.topFitness) {
                 species.topFitness = species.genomes[0].fitness
                 species.staleness = 0
             } else {
@@ -581,10 +581,8 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
         cullSpecies(true)
 
         while (children.size + pool.species.size < neuralNetworkParameters.POPULATION) {
-            if (pool.species.isNotEmpty()) {
-                val species = pool.species.random()
-                children.add(breedChild(species))
-            }
+            val species = pool.species.random()
+            children.add(breedChild(species))
         }
 
         children.forEach {

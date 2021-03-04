@@ -3,7 +3,9 @@ package test.simplepapersoccer
 import com.ps.simplepapersoccer.ai.neuralnetworkAI.NeuralNetworkAI
 import com.ps.simplepapersoccer.ai.euclideanAI.EuclideanAI
 import com.ps.simplepapersoccer.ai.jonasAI.JonasAI
+import com.ps.simplepapersoccer.ai.minimaxAI.MinimaxAI
 import com.ps.simplepapersoccer.gameobjects.game.GameHandler
+import com.ps.simplepapersoccer.gameobjects.game.Victory
 import com.ps.simplepapersoccer.gameobjects.player.abstraction.IPlayer
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.Dispatchers
@@ -15,6 +17,11 @@ class AIUnitTests {
 
     private fun runTestGame(players: ArrayList<IPlayer>) {
         val totalNumberOfTurns = mutableListOf<Int>()
+        var neuralNetworkAIVictoryBoard: String? = null
+        var neuralNetworkAIVictoryType: Victory? = null
+
+        val player1 = players.first()
+        val player2 = players[1]
 
         for (i in 0 until testRuns) {
             players.shuffle()
@@ -23,12 +30,20 @@ class AIUnitTests {
             if (i == testRuns / 2) {
                 System.gc()
                 System.runFinalization()
+            }
 
-                println(gameHandler.gameBoard)
+            if (gameHandler.winner?.winner is NeuralNetworkAI) {
+                neuralNetworkAIVictoryBoard = gameHandler.gameBoard.toString()
+                neuralNetworkAIVictoryType = gameHandler.winner
             }
 
             totalNumberOfTurns.add(gameHandler.numberOfTurns)
         }
+
+        println((player1.score.toDouble() / (player1.score + player2.score)) * 100)
+
+        println(neuralNetworkAIVictoryBoard)
+        println(neuralNetworkAIVictoryType)
 
         println("Average number of turns = ${totalNumberOfTurns.sum() / testRuns}")
         println("Max number of turns = ${totalNumberOfTurns.max()}")
@@ -44,8 +59,6 @@ class AIUnitTests {
 
         player1.neuralNetworkCache.createBackupFile()
         player2.neuralNetworkCache.createBackupFile()
-
-        assertEquals(0.5, (player1.score.toDouble() / (player1.score + player2.score)))
     }
 
     @Test
@@ -57,8 +70,6 @@ class AIUnitTests {
         runTestGame(players)
 
         player1.neuralNetworkCache.createBackupFile()
-
-        assertEquals(0.5, (player1.score.toDouble() / (player1.score + player2.score)))
     }
 
     @Test
@@ -72,6 +83,17 @@ class AIUnitTests {
         player1.neuralNetworkCache.createBackupFile()
 
         assertEquals(0.5, (player1.score.toDouble() / (player1.score + player2.score)))
+    }
+
+    @Test
+    fun neuralNetworkAIVsMinimaxAITraining() {
+        val player1 = NeuralNetworkAI(null, 1, 0)
+        val player2 = MinimaxAI(2, 1)
+        val players = arrayListOf(player1 as IPlayer, player2)
+
+        runTestGame(players)
+
+        player1.neuralNetworkCache.createBackupFile()
     }
 
     @Test

@@ -1,15 +1,13 @@
 package com.ps.simplepapersoccer.ai.neuralnetworkAI
 
 import java.io.Serializable
-import kotlin.math.abs
-import kotlin.math.exp
-import kotlin.math.floor
-import kotlin.math.roundToInt
+import kotlin.math.*
 import kotlin.random.Random
 
-class NeuralNetworkAI2<T>(private val neuralNetworkController: INeuralNetworkController<T>,
-                          private val neuralNetworkCache: NeuralNetworkCache,
-                          private val neuralNetworkParameters: NeuralNetworkParameters = NeuralNetworkParameters()) {
+//https://gist.github.com/d12frosted/7471e2123f10485d96bb
+class NeuralNetworkAILuaConverted<T>(private val neuralNetworkController: INeuralNetworkController<T>,
+                                     private val neuralNetworkCache: NeuralNetworkCache,
+                                     private val neuralNetworkParameters: NeuralNetworkParameters = NeuralNetworkParameters()) {
     data class Neuron(
             val incoming: HashMap<Int, Gene>,
             var value: Float
@@ -90,11 +88,11 @@ class NeuralNetworkAI2<T>(private val neuralNetworkController: INeuralNetworkCon
     }
 
     private fun copyGenome(genome: Genome): Genome {
-        val newGenes = genome.genes.flatMap {
-            mapOf(it.key to copyGene(it.value))
+        val newGenes = genome.genes.mapValues {
+            copyGene(it.value)
         }
 
-        return genome.copy(genes = newGenes,
+        return genome.copy(genes = HashMap(newGenes),
                 fitness = genome.fitness,
                 adjustedFitness = genome.adjustedFitness,
                 network = genome.network,
@@ -492,9 +490,9 @@ class NeuralNetworkAI2<T>(private val neuralNetworkController: INeuralNetworkCon
             }
         }
 
-        table.sort(global, function(a, b)
+/*        table.sort(global, function(a, b)
                 return (a.fitness < b.fitness)
-                        end)
+                        end)*/
 
         for (g in 1 until global.size) {
             global[g]!!.globalRank = g
@@ -527,17 +525,17 @@ class NeuralNetworkAI2<T>(private val neuralNetworkController: INeuralNetworkCon
         for (s in 1 until pool.species.size) {
             val species = pool.species[s]!!
 
-            table.sort(species.genomes, function(a, b)
+/*            table.sort(species.genomes, function(a, b)
                     return (a.fitness > b.fitness)
-                            end)
+                            end)*/
 
-            val remaining = Math.ceil(species.genomes.size / 2)
+            val remaining = ceil(species.genomes.size / 2f)
 
-            if (cutToOne) remaining = 1
+            //if (cutToOne) remaining = 1f
 
             while (species.genomes.size > remaining) {
                 species.genomes.toMutableMap().remove(species.genomes)
-                table.remove(species.genomes)
+                //table.remove(species.genomes)
             }
         }
     }
@@ -563,12 +561,12 @@ class NeuralNetworkAI2<T>(private val neuralNetworkController: INeuralNetworkCon
         for (s in 1 until pool.species.size) {
             val species = pool.species[s]!!
 
-            table.sort(species.genomes, function(a, b)
+/*            table.sort(species.genomes, function(a, b)
                     return (a.fitness > b.fitness)
-                            end)
+                            end)*/
 
             if (species.genomes[1]!!.fitness > species.topFitness) {
-                species.topFitness = species.genomes[1].fitness
+                species.topFitness = species.genomes[1]!!.fitness
                 species.staleness = 0
             } else {
                 species.staleness = species.staleness + 1
@@ -702,8 +700,8 @@ class NeuralNetworkAI2<T>(private val neuralNetworkController: INeuralNetworkCon
 
         if (fitness > pool.maxFitness) {
             pool.maxFitness = fitness
-            println("Max fitness: ${pool.maxFitness} Gen ${pool.generation} species ${pool.species.sumBy { it.averageFitness.toInt() }} genome: ${pool.currentGenomeIndex}")
-            neuralNetworkCache.savePool(pool)
+/*            println("Max fitness: ${pool.maxFitness} Gen ${pool.generation} species ${pool.species.sumBy { it.averageFitness.toInt() }} genome: ${pool.currentGenomeIndex}")
+            neuralNetworkCache.savePool(pool)*/
         }
 
         pool.currentSpecies = 1

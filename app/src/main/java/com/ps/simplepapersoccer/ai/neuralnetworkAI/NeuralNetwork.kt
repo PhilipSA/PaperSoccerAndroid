@@ -33,15 +33,15 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
             val mutationRates: HashMap<String, Float>
     ) : Serializable {
         fun nextMaxNeuron() {
-            maxNeuron = network.hiddenLayerNeurons[network.hiddenLayerNeurons.indexOf(maxNeuron) + 1]
+            maxNeuron = network.inputNeurons[network.inputNeurons.indexOf(maxNeuron) + 1]
         }
 
         fun getMaxNeuronIndex(): Int {
-            return network.hiddenLayerNeurons.indexOf(maxNeuron)
+            return network.inputNeurons.indexOf(maxNeuron)
         }
 
         fun getNeuronIndex(neuron: Neuron): Int {
-            return network.hiddenLayerNeurons.indexOf(neuron)
+            return network.inputNeurons.indexOf(neuron)
         }
     }
 
@@ -71,10 +71,9 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
 
     data class Network(
             val inputNeurons: MutableList<Neuron>,
-            val hiddenLayerNeurons: MutableList<Neuron>,
             val outputNeurons: MutableList<Neuron>
     ) : Serializable {
-        val allNeurons get() = inputNeurons.plus(hiddenLayerNeurons).plus(outputNeurons)
+        val allNeurons get() = inputNeurons.plus(outputNeurons)
     }
 
     data class PoolDto(
@@ -108,7 +107,7 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
     }
 
     private fun newGenome(): Genome {
-        return Genome(mutableListOf(), 0f, 0, Network(mutableListOf(), mutableListOf(), mutableListOf()), null, 0,
+        return Genome(mutableListOf(), 0f, 0, Network(mutableListOf(), mutableListOf()), null, 0,
                 hashMapOf("connections" to neuralNetworkParameters.MUTATE_CONNECTION_CHANCE,
                         "link" to neuralNetworkParameters.LINK_MUTATION_CHANCE,
                         "bias" to neuralNetworkParameters.BIAS_MUTATION_CHANCE,
@@ -156,7 +155,7 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
     }
 
     private fun generateNetwork(genome: Genome) {
-        val network = Network(mutableListOf(), mutableListOf(), mutableListOf())
+        val network = Network(mutableListOf(), mutableListOf())
 
         for (i in 0 until inputSize) {
             network.inputNeurons.add(newNeuron().copy(neuronType = NeuronType.Input))
@@ -262,12 +261,10 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
         val neurons = mutableListOf<Neuron>()
 
         if (nonInput.not()) {
-            for (i in neuralNetworkController.inputs.indices) {
-                genome.network.hiddenLayerNeurons.getOrNull(i)?.let { neurons.add(it) }
-            }
+            neurons.addAll(genome.network.inputNeurons)
         }
 
-        neurons.addAll(genome.network.hiddenLayerNeurons.filter { it.isInputNeuron.not() })
+        neurons.addAll(genome.network.outputNeurons)
 
         genes.forEach {
             if (nonInput.not() || it.into!!.isInputNeuron.not()) {
@@ -315,7 +312,7 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
             return
         }
 
-        if (neuron2.isInputNeuron.not()) {
+        if (neuron2.isInputNeuron) {
             val temp = neuron1
             neuron1 = neuron2
             neuron2 = temp
@@ -324,7 +321,7 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
         newLink.into = neuron1
         newLink.out = neuron2
 
-        if (forceBias) newLink.into = genome.network.hiddenLayerNeurons[inputSize - 1]
+        if (forceBias) newLink.into = genome.network.inputNeurons.last()
 
         if (containsLink(genome.genes, newLink)) return
 
@@ -687,7 +684,7 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
 
         if (fitness > pool.maxFitness) {
             pool.maxFitness = fitness
-            println("Max fitness: ${pool.maxFitness} Gen ${pool.generation} species ${pool.species.sumBy { it.averageFitness.toInt() }} genome: ${pool.currentGenome}")
+            println("Max fitness: ${pool.maxFitness} Gen ${pool.generation} species ${pool.species.sumBy { it.averageFitness.toInt() }}")
             neuralNetworkCache.savePool(pool)
         }
 

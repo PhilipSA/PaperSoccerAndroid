@@ -4,6 +4,7 @@ import java.io.Serializable
 import kotlin.math.abs
 import kotlin.math.exp
 import kotlin.math.floor
+import kotlin.math.roundToInt
 import kotlin.random.Random
 
 class NeuralNetworkAI2<T>(private val neuralNetworkController: INeuralNetworkController<T>,
@@ -57,7 +58,7 @@ class NeuralNetworkAI2<T>(private val neuralNetworkController: INeuralNetworkCon
     private val inputSize get() = neuralNetworkController.inputs.size + 1
 
     init {
-        initPool()
+        initializePool()
     }
 
     private fun sigmoid(x: Float): Float {
@@ -89,8 +90,8 @@ class NeuralNetworkAI2<T>(private val neuralNetworkController: INeuralNetworkCon
     }
 
     private fun copyGenome(genome: Genome): Genome {
-        val newGenes = genome.genes.map {
-            copyGene(it)
+        val newGenes = genome.genes.flatMap {
+            mapOf(it.key to copyGene(it.value))
         }
 
         return genome.copy(genes = newGenes,
@@ -172,9 +173,9 @@ class NeuralNetworkAI2<T>(private val neuralNetworkController: INeuralNetworkCon
             var sum = 0f
 
             neuron.incoming.forEach { incoming ->
-                val other = network.neurons[incoming]
+                val other = network.neurons[incoming]!!
 
-                sum += incoming.weight * other!!.value
+                sum += incoming.value.weight * other.value
             }
 
             if (neuron.incoming.size > 0) {
@@ -258,7 +259,7 @@ class NeuralNetworkAI2<T>(private val neuralNetworkController: INeuralNetworkCon
             ++count
         }
 
-        var n = Random.nextInt(1, count)
+        var n = Random.nextInt(0, count)
 
         for ((k, v) in neurons) {
             n -= 1
@@ -330,7 +331,7 @@ class NeuralNetworkAI2<T>(private val neuralNetworkController: INeuralNetworkCon
 
         genome.maxNeuron = genome.maxNeuron - 1
 
-        val gene = genome.genes[Random.nextInt(1, genome.genes.size)]!!
+        val gene = genome.genes[Random.nextInt(0, genome.genes.size)]!!
         if (gene.enabled.not()) return
 
         gene.enabled = false
@@ -360,7 +361,7 @@ class NeuralNetworkAI2<T>(private val neuralNetworkController: INeuralNetworkCon
 
         if (candidates.size == 0) return
 
-        val gene = candidates[Random.nextInt(1, candidates.size)]!!
+        val gene = candidates[Random.nextInt(0, candidates.size)]!!
         gene.enabled = gene.enabled.not()
     }
 
@@ -543,11 +544,11 @@ class NeuralNetworkAI2<T>(private val neuralNetworkController: INeuralNetworkCon
 
     fun breedChild(species: Species): Genome {
         val child: Genome = if (Random.nextFloat() < neuralNetworkParameters.CROSSOVER_CHANCE) {
-            val g1 = species.genomes[Random.nextInt(1, species.genomes.size)]!!
-            val g2 = species.genomes[Random.nextInt(1, species.genomes.size)]!!
+            val g1 = species.genomes[Random.nextInt(0, species.genomes.size)]!!
+            val g2 = species.genomes[Random.nextInt(0, species.genomes.size)]!!
             crossOver(g1, g2)
         } else {
-            val g = species.genomes[Random.nextInt(1, species.genomes.size)]!!
+            val g = species.genomes[Random.nextInt(0, species.genomes.size)]!!
             copyGenome(g)
         }
 
@@ -626,13 +627,13 @@ class NeuralNetworkAI2<T>(private val neuralNetworkController: INeuralNetworkCon
         for (s in 1 until pool.species.size) {
             val species = pool.species[s]!!
             val breed = floor(species.averageFitness / sum * neuralNetworkParameters.POPULATION) - 1
-            for (i in 1 until breed) {
+            for (i in 1 until breed.roundToInt()) {
                 children[children.size + 1] = breedChild(species)
             }
         }
         cullSpecies(true)
         while (children.size + pool.species.size < neuralNetworkParameters.POPULATION) {
-            val species = pool.species[Random.nextInt(1, pool.species.size)]!!
+            val species = pool.species[Random.nextInt(0, pool.species.size)]!!
             children[children.size + 1] = breedChild(species)
         }
         for (c in 1 until children.size) {
@@ -688,10 +689,14 @@ class NeuralNetworkAI2<T>(private val neuralNetworkController: INeuralNetworkCon
     }
 
     fun cutOff() {
-        val fitness = neuralNetworkController.fitnessEvaluation()
+        var fitness = neuralNetworkController.fitnessEvaluation()
 
         val species = pool.species[pool.currentSpecies]!!
         val genome = species.genomes[pool.currentGenome]!!
+
+        if (fitness == 0f) {
+            fitness = -1f
+        }
 
         genome.fitness = fitness
 
@@ -738,11 +743,8 @@ class NeuralNetworkAI2<T>(private val neuralNetworkController: INeuralNetworkCon
         var measured = 0
         var total = 0
 
-        for (s in 1 until pool.species.size) {
-            val species = pool.species[s]!!
-            for (g in 1 until species.genomes.size) {
-                val genome = species.genomes[g]!!
-
+        for ((_, species) in pool.species) {
+            for ((_, genome) in species.genomes) {
                 ++total
                 if (genome.fitness != 0f) {
                     ++measured

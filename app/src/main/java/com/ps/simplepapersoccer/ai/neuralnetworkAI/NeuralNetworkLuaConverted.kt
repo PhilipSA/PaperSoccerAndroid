@@ -5,16 +5,16 @@ import kotlin.math.*
 import kotlin.random.Random
 
 //https://gist.github.com/d12frosted/7471e2123f10485d96bb
-class NeuralNetworkAILuaConverted<T>(private val neuralNetworkController: INeuralNetworkController<T>,
-                                     private val neuralNetworkCache: NeuralNetworkCache,
-                                     private val neuralNetworkParameters: NeuralNetworkParameters = NeuralNetworkParameters()) {
+class NeuralNetworkLuaConverted<T>(private val neuralNetworkController: INeuralNetworkController<T>,
+                                   private val neuralNetworkCache: NeuralNetworkCache,
+                                   private val neuralNetworkParameters: NeuralNetworkParameters = NeuralNetworkParameters()) {
     data class Neuron(
-            val incoming: HashMap<Int, Gene>,
+            val incoming: ArrayList<Gene>,
             var value: Float
     ) : Serializable
 
     data class Genome(
-            val genes: HashMap<Int, Gene>,
+            val genes: ArrayList<Gene>,
             var fitness: Float,
             val adjustedFitness: Int,
             var network: Network,
@@ -26,12 +26,12 @@ class NeuralNetworkAILuaConverted<T>(private val neuralNetworkController: INeura
     data class Species(
             var topFitness: Float,
             var staleness: Int,
-            val genomes: HashMap<Int, Genome>,
+            val genomes: ArrayList<Genome>,
             var averageFitness: Float
     ) : Serializable
 
     data class Pool(
-            var species: HashMap<Int, Species>,
+            var species: ArrayList<Species>,
             var generation: Int,
             var currentSpecies: Int,
             var currentGenome: Int,
@@ -48,7 +48,7 @@ class NeuralNetworkAILuaConverted<T>(private val neuralNetworkController: INeura
     ) : Serializable
 
     data class Network(
-            val neurons: HashMap<Int, Neuron>
+            val neurons: ArrayList<Neuron>
     ) : Serializable
 
     private lateinit var pool: Pool
@@ -69,15 +69,15 @@ class NeuralNetworkAILuaConverted<T>(private val neuralNetworkController: INeura
     }
 
     private fun newPool(): Pool {
-        return Pool(hashMapOf(), 0, 1, 1, 0f, neuralNetworkController.outputs)
+        return Pool(arrayListOf(), 0, 1, 1, 0f, neuralNetworkController.outputs)
     }
 
     private fun newSpecies(): Species {
-        return Species(0f, 0, hashMapOf(), 0f)
+        return Species(0f, 0, arrayListOf(), 0f)
     }
 
     private fun newGenome(): Genome {
-        return Genome(hashMapOf(), 0f, 0, Network(hashMapOf()), 0, 0,
+        return Genome(arrayListOf(), 0f, 0, Network(arrayListOf()), 0, 0,
                 hashMapOf("connections" to neuralNetworkParameters.MUTATE_CONNECTION_CHANCE,
                         "link" to neuralNetworkParameters.LINK_MUTATION_CHANCE,
                         "bias" to neuralNetworkParameters.BIAS_MUTATION_CHANCE,
@@ -88,11 +88,11 @@ class NeuralNetworkAILuaConverted<T>(private val neuralNetworkController: INeura
     }
 
     private fun copyGenome(genome: Genome): Genome {
-        val newGenes = genome.genes.mapValues {
-            copyGene(it.value)
+        val newGenes = genome.genes.map {
+            copyGene(it)
         }
 
-        return genome.copy(genes = HashMap(newGenes),
+        return genome.copy(genes = ArrayList(newGenes),
                 fitness = genome.fitness,
                 adjustedFitness = genome.adjustedFitness,
                 network = genome.network,
@@ -117,11 +117,11 @@ class NeuralNetworkAILuaConverted<T>(private val neuralNetworkController: INeura
     }
 
     private fun newNeuron(): Neuron {
-        return Neuron(hashMapOf(), 0f)
+        return Neuron(arrayListOf(), 0f)
     }
 
     private fun generateNetwork(genome: Genome) {
-        val network = Network(hashMapOf())
+        val network = Network(arrayListOf())
 
         for (i in 1 until inputSize) {
             network.neurons[i + 1] = newNeuron()
@@ -131,20 +131,19 @@ class NeuralNetworkAILuaConverted<T>(private val neuralNetworkController: INeura
             network.neurons[neuralNetworkParameters.MAX_NODES + index] = newNeuron()
         }
 
-        //TODO FIX THIS SHIT
-        //genome.genes.toSortedMap(compareByDescending { it. } )
+        genome.genes.sortBy { it.out }
 
         for (i in 1 until genome.genes.size) {
-            val gene = genome.genes[i]!!
+            val gene = genome.genes[i]
             if (gene.enabled) {
-                if (network.neurons[gene.out] == null) {
+                if (network.neurons.getOrNull(gene.out) == null) {
                     network.neurons[gene.out] = newNeuron()
                 }
 
-                val neuron = network.neurons[gene.out]!!
+                val neuron = network.neurons[gene.out]
                 neuron.incoming[neuron.incoming.size + 1] = gene
 
-                if (network.neurons[gene.into] == null) {
+                if (network.neurons.getOrNull(gene.into) == null) {
                     network.neurons[gene.into] = newNeuron()
                 }
             }
@@ -163,17 +162,17 @@ class NeuralNetworkAILuaConverted<T>(private val neuralNetworkController: INeura
             throw(Exception("No"))
         }
 
-        for (index in neuralNetworkController.inputs.indices) {
-            network.neurons[index]?.value = inputs[index]
+        for (index in 1 until neuralNetworkController.inputs.size) {
+            network.neurons[index].value = inputs[index]
         }
 
-        network.neurons.values.forEach { neuron ->
+        network.neurons.forEach { neuron ->
             var sum = 0f
 
-            neuron.incoming.forEach { incoming ->
-                val other = network.neurons[incoming]!!
-
-                sum += incoming.value.weight * other.value
+            for (j in 1 until neuron.incoming.size) {
+                val incoming = neuron.incoming[j]
+                val other = network.neurons[incoming.into]
+                sum += incoming.weight * other.value
             }
 
             if (neuron.incoming.size > 0) {
@@ -184,7 +183,7 @@ class NeuralNetworkAILuaConverted<T>(private val neuralNetworkController: INeura
         val allOutputNeurons = mutableListOf<Float>()
 
         for (index in 0 until neuralNetworkController.outputs) {
-            val neuronValue = network.neurons[neuralNetworkParameters.MAX_NODES + index]!!.value
+            val neuronValue = network.neurons[neuralNetworkParameters.MAX_NODES + index].value
             allOutputNeurons.add(neuronValue)
         }
 
@@ -205,12 +204,12 @@ class NeuralNetworkAILuaConverted<T>(private val neuralNetworkController: INeura
 
         val innovations2 = HashMap<Int, Gene>()
         for (i in 1 until g2.genes.size) {
-            val gene = g2.genes[i]!!
+            val gene = g2.genes[i]
             innovations2[gene.innovation] = gene
         }
 
         for (i in 1 until g1.genes.size) {
-            val gene1 = g1.genes[i]!!
+            val gene1 = g1.genes[i]
             val gene2 = innovations2[gene1.innovation]
 
             if (gene2 != null && Random.nextBoolean() && gene2.enabled) {
@@ -220,7 +219,7 @@ class NeuralNetworkAILuaConverted<T>(private val neuralNetworkController: INeura
             }
         }
 
-        child.maxNeuron = kotlin.math.max(g1.maxNeuron, g2.maxNeuron)
+        child.maxNeuron = max(g1.maxNeuron, g2.maxNeuron)
 
         for ((mutation, rate) in g1.mutationRates) {
             child.mutationRates[mutation] = rate
@@ -229,8 +228,8 @@ class NeuralNetworkAILuaConverted<T>(private val neuralNetworkController: INeura
         return child
     }
 
-    fun randomNeuron(genes: HashMap<Int, Gene>, nonInput: Boolean): Int {
-        val neurons = HashMap<Int, Boolean>()
+    fun randomNeuron(genes: ArrayList<Gene>, nonInput: Boolean): Int {
+        val neurons = ArrayList<Boolean>(neuralNetworkParameters.MAX_NODES + neuralNetworkController.outputs)
 
         if (nonInput.not()) {
             for (i in 1 until inputSize) {
@@ -242,24 +241,24 @@ class NeuralNetworkAILuaConverted<T>(private val neuralNetworkController: INeura
             neurons[neuralNetworkParameters.MAX_NODES + i] = true
         }
 
-        for (i in 1 until genes.values.size) {
-            if (nonInput.not() || genes[i]!!.into > inputSize) {
-                neurons[genes[i]!!.into] = true
+        for (i in 1 until genes.size) {
+            if (nonInput.not() || genes[i].into > inputSize) {
+                neurons[genes[i].into] = true
             }
-            if (nonInput.not() || genes[i]!!.out > inputSize) {
-                neurons[genes[i]!!.out] = true
+            if (nonInput.not() || genes[i].out > inputSize) {
+                neurons[genes[i].out] = true
             }
         }
 
         var count = 0
 
-        for ((_, _) in neurons) {
+        for (i in neurons.iterator()) {
             ++count
         }
 
         var n = Random.nextInt(0, count)
 
-        for ((k, v) in neurons) {
+        for (k in neurons.indices) {
             n -= 1
             if (n == 0) {
                 return k
@@ -269,9 +268,9 @@ class NeuralNetworkAILuaConverted<T>(private val neuralNetworkController: INeura
         return 0
     }
 
-    fun containsLink(genes: HashMap<Int, Gene>, link: Gene): Boolean {
+    fun containsLink(genes: ArrayList<Gene>, link: Gene): Boolean {
         for (i in 1 until genes.size) {
-            val gene = genes[i]!!
+            val gene = genes[i]
             if (gene.into == link.into && gene.out == link.out) {
                 return true
             }
@@ -284,7 +283,7 @@ class NeuralNetworkAILuaConverted<T>(private val neuralNetworkController: INeura
         val step = genome.mutationRates["step"]!!
 
         for (i in 1 until genome.genes.size) {
-            val gene = genome.genes[i]!!
+            val gene = genome.genes[i]
             if (Random.nextFloat() < neuralNetworkParameters.PERTURB_CHANCE) {
                 gene.weight = gene.weight + Random.nextFloat() * step * 2 - step
             } else {
@@ -349,9 +348,9 @@ class NeuralNetworkAILuaConverted<T>(private val neuralNetworkController: INeura
     }
 
     fun enableDisableMutate(genome: Genome, enabled: Boolean) {
-        val candidates = hashMapOf<Int, Gene>()
+        val candidates = ArrayList<Gene>()
 
-        for ((_, gene) in genome.genes) {
+        for (gene in genome.genes) {
             if (gene.enabled == enabled.not()) {
                 candidates[candidates.size + 1] = gene
             }
@@ -359,7 +358,7 @@ class NeuralNetworkAILuaConverted<T>(private val neuralNetworkController: INeura
 
         if (candidates.size == 0) return
 
-        val gene = candidates[Random.nextInt(0, candidates.size)]!!
+        val gene = candidates[Random.nextInt(0, candidates.size)]
         gene.enabled = gene.enabled.not()
     }
 
@@ -417,30 +416,30 @@ class NeuralNetworkAILuaConverted<T>(private val neuralNetworkController: INeura
         }
     }
 
-    fun disjoint(genes1: HashMap<Int, Gene>, genes2: HashMap<Int, Gene>): Int {
+    fun disjoint(genes1: ArrayList<Gene>, genes2: ArrayList<Gene>): Int {
         val i1 = hashMapOf<Int, Boolean>()
         for (i in 1 until genes1.size) {
-            val gene = genes1[i]!!
+            val gene = genes1[i]
             i1[gene.innovation] = true
         }
 
         val i2 = hashMapOf<Int, Boolean>()
         for (i in 1 until genes2.size) {
-            val gene = genes2[i]!!
+            val gene = genes2[i]
             i2[gene.innovation] = true
         }
 
         var disjointGenes = 0
 
         for (i in 1 until genes1.size) {
-            val gene = genes1[i]!!
+            val gene = genes1[i]
             if (i2[gene.innovation]!!.not()) {
                 disjointGenes += 1
             }
         }
 
         for (i in 1 until genes2.size) {
-            val gene = genes2[i]!!
+            val gene = genes2[i]
             if (i1[gene.innovation]!!.not()) {
                 disjointGenes += 1
             }
@@ -451,7 +450,7 @@ class NeuralNetworkAILuaConverted<T>(private val neuralNetworkController: INeura
         return disjointGenes / n
     }
 
-    fun weights(genes1: HashMap<Int, Gene>, genes2: HashMap<Int, Gene>): Float {
+    fun weights(genes1: ArrayList<Gene>, genes2: ArrayList<Gene>): Float {
         val i2 = hashMapOf<Int, Gene>()
 
         for (i in 1 until genes2.size) {
@@ -463,7 +462,7 @@ class NeuralNetworkAILuaConverted<T>(private val neuralNetworkController: INeura
         var coincident = 0
 
         for (i in 1 until genes1.size) {
-            val gene = genes1[i]!!
+            val gene = genes1[i]
             if (i2[gene.innovation] != null) {
                 val gene2 = i2[gene.innovation]!!
                 sum += abs(gene.weight - gene2.weight)
@@ -484,9 +483,9 @@ class NeuralNetworkAILuaConverted<T>(private val neuralNetworkController: INeura
         val global = hashMapOf<Int, Genome>()
 
         for (s in 1 until pool.species.size) {
-            val species = pool.species[s]!!
+            val species = pool.species[s]
             for (g in 1 until species.genomes.size) {
-                global[global.size + 1] = species.genomes[g]!!
+                global[global.size + 1] = species.genomes[g]
             }
         }
 
@@ -523,30 +522,31 @@ class NeuralNetworkAILuaConverted<T>(private val neuralNetworkController: INeura
 
     fun cullSpecies(cutToOne: Boolean) {
         for (s in 1 until pool.species.size) {
-            val species = pool.species[s]!!
+            val species = pool.species[s]
 
 /*            table.sort(species.genomes, function(a, b)
                     return (a.fitness > b.fitness)
                             end)*/
 
-            val remaining = ceil(species.genomes.size / 2f)
+            species.genomes.sortBy { it.fitness }
 
-            //if (cutToOne) remaining = 1f
+            var remaining = ceil(species.genomes.size / 2f)
+
+            if (cutToOne) remaining = 1f
 
             while (species.genomes.size > remaining) {
-                species.genomes.toMutableMap().remove(species.genomes)
-                //table.remove(species.genomes)
+                species.genomes.removeLast()
             }
         }
     }
 
     fun breedChild(species: Species): Genome {
         val child: Genome = if (Random.nextFloat() < neuralNetworkParameters.CROSSOVER_CHANCE) {
-            val g1 = species.genomes[Random.nextInt(0, species.genomes.size)]!!
-            val g2 = species.genomes[Random.nextInt(0, species.genomes.size)]!!
+            val g1 = species.genomes[Random.nextInt(0, species.genomes.size)]
+            val g2 = species.genomes[Random.nextInt(0, species.genomes.size)]
             crossOver(g1, g2)
         } else {
-            val g = species.genomes[Random.nextInt(0, species.genomes.size)]!!
+            val g = species.genomes[Random.nextInt(0, species.genomes.size)]
             copyGenome(g)
         }
 
@@ -556,17 +556,19 @@ class NeuralNetworkAILuaConverted<T>(private val neuralNetworkController: INeura
     }
 
     fun removeStaleSpecies() {
-        val survived = hashMapOf<Int, Species>()
+        val survived = ArrayList<Species>()
 
         for (s in 1 until pool.species.size) {
-            val species = pool.species[s]!!
+            val species = pool.species[s]
 
 /*            table.sort(species.genomes, function(a, b)
                     return (a.fitness > b.fitness)
                             end)*/
 
-            if (species.genomes[1]!!.fitness > species.topFitness) {
-                species.topFitness = species.genomes[1]!!.fitness
+            species.genomes.sortByDescending { it.fitness }
+
+            if (species.genomes[1].fitness > species.topFitness) {
+                species.topFitness = species.genomes[1].fitness
                 species.staleness = 0
             } else {
                 species.staleness = species.staleness + 1
@@ -580,11 +582,11 @@ class NeuralNetworkAILuaConverted<T>(private val neuralNetworkController: INeura
     }
 
     fun removeWeakSpecies() {
-        val survived = hashMapOf<Int, Species>()
+        val survived = ArrayList<Species>()
 
         val sum = totalAverageFitness()
         for (s in 1 until pool.species.size) {
-            val species = pool.species[s]!!
+            val species = pool.species[s]
             val breed = floor(species.averageFitness / sum * neuralNetworkParameters.POPULATION)
             if (breed >= 1) survived[survived.size + 1] = species
         }
@@ -596,8 +598,8 @@ class NeuralNetworkAILuaConverted<T>(private val neuralNetworkController: INeura
         var foundSpecies = false
 
         for (s in 1 until pool.species.size) {
-            val species = pool.species[s]!!
-            if (foundSpecies.not() && sameSpecies(child, species.genomes[1]!!)) {
+            val species = pool.species[s]
+            if (foundSpecies.not() && sameSpecies(child, species.genomes[1])) {
                 species.genomes[species.genomes.size + 1] = child
                 foundSpecies = true
             }
@@ -616,14 +618,14 @@ class NeuralNetworkAILuaConverted<T>(private val neuralNetworkController: INeura
         removeStaleSpecies()
         rankGlobally()
         for (s in 1 until pool.species.size) {
-            val species = pool.species[s]!!
+            val species = pool.species[s]
             calculateAverageFitness(species)
         }
         removeWeakSpecies()
         val sum = totalAverageFitness()
         val children = hashMapOf<Int, Genome>()
         for (s in 1 until pool.species.size) {
-            val species = pool.species[s]!!
+            val species = pool.species[s]
             val breed = floor(species.averageFitness / sum * neuralNetworkParameters.POPULATION) - 1
             for (i in 1 until breed.roundToInt()) {
                 children[children.size + 1] = breedChild(species)
@@ -631,7 +633,7 @@ class NeuralNetworkAILuaConverted<T>(private val neuralNetworkController: INeura
         }
         cullSpecies(true)
         while (children.size + pool.species.size < neuralNetworkParameters.POPULATION) {
-            val species = pool.species[Random.nextInt(0, pool.species.size)]!!
+            val species = pool.species[Random.nextInt(0, pool.species.size)]
             children[children.size + 1] = breedChild(species)
         }
         for (c in 1 until children.size) {
@@ -654,15 +656,15 @@ class NeuralNetworkAILuaConverted<T>(private val neuralNetworkController: INeura
     }
 
     fun initializeRun() {
-        val species = pool.species[pool.currentSpecies]!!
-        val genome = species.genomes[pool.currentGenome]!!
+        val species = pool.species[pool.currentSpecies]
+        val genome = species.genomes[pool.currentGenome]
         generateNetwork(genome)
         evaluateCurrent()
     }
 
     fun nextGenome() {
         pool.currentGenome = pool.currentGenome + 1
-        if (pool.currentGenome > pool.species[pool.currentSpecies]!!.genomes.size) {
+        if (pool.currentGenome > pool.species[pool.currentSpecies].genomes.size) {
             pool.currentGenome = 1
             pool.currentSpecies = pool.currentSpecies + 1
             if (pool.currentSpecies > pool.species.size) {
@@ -673,15 +675,15 @@ class NeuralNetworkAILuaConverted<T>(private val neuralNetworkController: INeura
     }
 
     fun fitnessAlreadyMeasured(): Boolean {
-        val species = pool.species[pool.currentSpecies]!!
-        val genome = species.genomes[pool.currentGenome]!!
+        val species = pool.species[pool.currentSpecies]
+        val genome = species.genomes[pool.currentGenome]
 
         return genome.fitness != 0f
     }
 
     private fun evaluateCurrent(): T? {
-        val species = pool.species[pool.currentSpecies]!!
-        val genome = species.genomes[pool.currentGenome]!!
+        val species = pool.species[pool.currentSpecies]
+        val genome = species.genomes[pool.currentGenome]
 
         return evaluateNetwork(genome.network, neuralNetworkController.inputs)
     }
@@ -689,8 +691,8 @@ class NeuralNetworkAILuaConverted<T>(private val neuralNetworkController: INeura
     fun cutOff() {
         var fitness = neuralNetworkController.fitnessEvaluation()
 
-        val species = pool.species[pool.currentSpecies]!!
-        val genome = species.genomes[pool.currentGenome]!!
+        val species = pool.species[pool.currentSpecies]
+        val genome = species.genomes[pool.currentGenome]
 
         if (fitness == 0f) {
             fitness = -1f
@@ -700,8 +702,8 @@ class NeuralNetworkAILuaConverted<T>(private val neuralNetworkController: INeura
 
         if (fitness > pool.maxFitness) {
             pool.maxFitness = fitness
-/*            println("Max fitness: ${pool.maxFitness} Gen ${pool.generation} species ${pool.species.sumBy { it.averageFitness.toInt() }} genome: ${pool.currentGenomeIndex}")
-            neuralNetworkCache.savePool(pool)*/
+            println("Max fitness: ${pool.maxFitness} Gen ${pool.generation} species ${pool.species.sumBy { it.averageFitness.toInt() }} genome: ${pool.currentGenome}")
+            //neuralNetworkCache.savePool()
         }
 
         pool.currentSpecies = 1
@@ -715,14 +717,14 @@ class NeuralNetworkAILuaConverted<T>(private val neuralNetworkController: INeura
     }
 
     private fun playTop() {
-        var maxfitness = 0f
+/*        var maxfitness = 0f
         var maxs = 0
         var maxg = 0
 
-        for ((s,species) in pool.species) {
-            for ((g,genome) in species.genomes) {
-                if (genome.fitness > maxfitness) {
-                    maxfitness = genome.fitness
+        for (s in pool.species) {
+            for (g in s.genomes) {
+                if (g.fitness > maxfitness) {
+                    maxfitness = g.fitness
                     maxs = s
                     maxg = g
                 }
@@ -732,7 +734,7 @@ class NeuralNetworkAILuaConverted<T>(private val neuralNetworkController: INeura
         pool.currentSpecies = maxs
         pool.currentGenome = maxg
         pool.maxFitness = maxfitness
-        initializeRun()
+        initializeRun()*/
     }
 
     fun nextStep(): T? {
@@ -741,8 +743,8 @@ class NeuralNetworkAILuaConverted<T>(private val neuralNetworkController: INeura
         var measured = 0
         var total = 0
 
-        for ((_, species) in pool.species) {
-            for ((_, genome) in species.genomes) {
+        for (species in pool.species) {
+            for (genome in species.genomes) {
                 ++total
                 if (genome.fitness != 0f) {
                     ++measured

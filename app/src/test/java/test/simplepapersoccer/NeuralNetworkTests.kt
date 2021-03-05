@@ -4,17 +4,46 @@ import com.ps.simplepapersoccer.ai.neuralnetworkAI.NeuralNetworkCache
 import com.ps.simplepapersoccer.ai.neuralnetworkAI.INeuralNetworkController
 import com.ps.simplepapersoccer.ai.neuralnetworkAI.NeuralNetwork
 import junit.framework.TestCase
+import org.junit.Assert
 import org.junit.Test
 import kotlin.random.Random
 
 class NeuralNetworkTests {
 
+    var scoreCounter = 0
+    var lastGuess = 1f
+
+    val controller = object : INeuralNetworkController<Float> {
+        override var inputs = getRandomInputs()
+
+        override val outputs = 1
+
+        override fun fitnessEvaluation(): Float {
+            return if (lastGuess == 1f) {
+                ++scoreCounter
+                1f
+            } else -1f
+        }
+
+        override fun networkGuessOutput(output: List<Float>): Float {
+            return output.map {
+                if (it > 0) 1f else 0f
+            }.first()
+        }
+
+        override fun updateInputs() {
+            this.inputs = getRandomInputs()
+        }
+
+        fun getRandomInputs(): List<Float> {
+            return listOf(0.5f)
+        }
+    }
+
     @Test
     fun neuralNetworkLearnsAndOperation() {
 
-        var scoreCounter = 0
-        var lastGuess = 1f
-        val numberOfRuns = 5000
+        val numberOfRuns = 500
 
         val controller = object : INeuralNetworkController<Float> {
             override var inputs = getRandomInputs()
@@ -24,8 +53,8 @@ class NeuralNetworkTests {
             override fun fitnessEvaluation(): Float {
                 return if (lastGuess == 1f) {
                     ++scoreCounter
-                    1000f
-                } else 1f
+                    1f
+                } else -1f
             }
 
             override fun networkGuessOutput(output: List<Float>): Float {
@@ -53,5 +82,12 @@ class NeuralNetworkTests {
         }
 
         TestCase.assertEquals(numberOfRuns * 0.9, scoreCounter)
+    }
+
+    @Test
+    fun canGenerateANetwork() {
+        val network = NeuralNetwork(controller, NeuralNetworkCache(null, false))
+
+        Assert.assertEquals(1f, network.nextStep())
     }
 }

@@ -32,24 +32,16 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
             var fitness: Float,
             val adjustedFitness: Int,
             var network: Network,
-            var maxNeuron: Neuron?,
+            var maxNeuron: NeuronIndex?,
             var globalRank: Int,
             val mutationRates: HashMap<String, Float>
     ) : Serializable {
         fun nextMaxNeuron() {
-            maxNeuron = network.inputNeurons.getOrNull(network.inputNeurons.indexOf(maxNeuron) + 1)
+            maxNeuron = maxNeuron?.let { NeuronIndex(it.index + 1, it.neuronType) }
         }
 
-        fun getMaxNeuronIndex(): Int {
-            return network.inputNeurons.indexOf(maxNeuron)
-        }
-
-        fun getNeuronIndex(neuron: Neuron): Int {
-            return network.inputNeurons.indexOf(neuron)
-        }
-
-        fun getNeuronById(id: String?): Neuron? {
-            return network.getNeuronById(id)
+        fun getNeuronByIndex(neuronIndex: NeuronIndex?): Neuron? {
+            return network.getNeuronByIndex(neuronIndex)
         }
     }
 
@@ -74,9 +66,11 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
         }
     }
 
+    data class NeuronIndex(val index: Int, val neuronType: NeuronType)
+
     data class Gene(
-            var intoNeuronId: String?,
-            var outNeuronId: String?,
+            var intoNeuronIndex: NeuronIndex?,
+            var outNeuronIndex: NeuronIndex?,
             var weight: Float,
             var enabled: Boolean,
             var innovation: Int
@@ -89,8 +83,13 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
     ) : Serializable {
         val allNeurons get() = inputNeurons.plus(outputNeurons).plus(hiddenLayerNeurons)
 
-        fun getNeuronById(id: String?): Neuron? {
-            return allNeurons.firstOrNull { it.id == id }
+        fun getNeuronByIndex(neuronIndex: NeuronIndex?): Neuron? {
+            return when (neuronIndex?.neuronType) {
+                NeuronType.Input -> inputNeurons.getOrNull(neuronIndex.index)
+                NeuronType.HiddenLayer -> hiddenLayerNeurons.getOrNull(neuronIndex.index)
+                NeuronType.Output -> outputNeurons.getOrNull(neuronIndex.index)
+                else -> null
+            }
         }
     }
 
@@ -151,7 +150,7 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
 
     private fun basicGenome(network: Network): Genome {
         val genome = newGenome(network)
-        genome.maxNeuron = network.inputNeurons.last()
+        genome.maxNeuron = NeuronIndex(network.inputNeurons.size - 1, NeuronType.Input)
         mutate(genome)
         return genome
     }
@@ -161,8 +160,8 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
     }
 
     private fun copyGene(gene: Gene): Gene {
-        return gene.copy(intoNeuronId = gene.intoNeuronId,
-                outNeuronId = gene.outNeuronId,
+        return gene.copy(intoNeuronIndex = gene.intoNeuronIndex,
+                outNeuronIndex = gene.outNeuronIndex,
                 weight = gene.weight,
                 enabled = gene.enabled,
                 innovation = gene.innovation)
@@ -187,21 +186,21 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
     }
 
     private fun generateNetwork(genome: Genome) {
-        genome.genes.sortBy { genome.getNeuronById(it.outNeuronId)?.let { it1 -> genome.getNeuronIndex(it1) } }
+        genome.genes.sortBy { it.outNeuronIndex?.index }
 
         genome.genes.forEach { gene ->
             if (gene.enabled) {
-                if (genome.getNeuronById(gene.outNeuronId) == null) {
+                if (genome.getNeuronByIndex(gene.outNeuronIndex) == null) {
                     val newNeuron = newNeuron(NeuronType.HiddenLayer)
                     genome.network.hiddenLayerNeurons.add(newNeuron)
-                    gene.outNeuronId = newNeuron.id
+                    gene.outNeuronIndex = NeuronIndex(genome.network.hiddenLayerNeurons.size - 1, newNeuron.neuronType)
                 }
-                val neuron = gene.outNeuronId
-                genome.getNeuronById(neuron)!!.incoming.add(gene)
-                if (genome.getNeuronById(gene.intoNeuronId) == null) {
+                val neuron = gene.outNeuronIndex
+                genome.getNeuronByIndex(neuron)!!.incoming.add(gene)
+                if (genome.getNeuronByIndex(gene.intoNeuronIndex) == null) {
                     val newNeuron = newNeuron(NeuronType.HiddenLayer)
                     genome.network.hiddenLayerNeurons.add(newNeuron)
-                    gene.intoNeuronId = newNeuron.id
+                    gene.intoNeuronIndex = NeuronIndex(genome.network.hiddenLayerNeurons.size - 1, newNeuron.neuronType)
                 }
             }
         }
@@ -224,7 +223,7 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
             var sum = 0f
 
             neuron.incoming.forEach { incoming ->
-                val other = network.getNeuronById(incoming.intoNeuronId)
+                val other = network.getNeuronByIndex(incoming.intoNeuronIndex)
 
                 sum += incoming.weight * other!!.value
             }
@@ -272,7 +271,7 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
             }
         }
 
-        child.maxNeuron = if (genome1.getMaxNeuronIndex() > genome2.getMaxNeuronIndex()) genome1.maxNeuron else genome2.maxNeuron
+        child.maxNeuron = if (genome1.maxNeuron?.index ?: 0 > genome2.maxNeuron?.index ?: 0) genome1.maxNeuron else genome2.maxNeuron
 
         for ((mutation, rate) in genome1.mutationRates) {
             child.mutationRates[mutation] = rate
@@ -281,25 +280,25 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
         return child
     }
 
-    private fun randomNeuron(genome: Genome, genes: MutableList<Gene>, nonInput: Boolean): Neuron? {
-        val neurons = mutableListOf<Neuron>()
+    private fun randomNeuron(genome: Genome, genes: MutableList<Gene>, nonInput: Boolean): NeuronIndex? {
+        val neurons = mutableListOf<NeuronIndex>()
 
         if (nonInput.not()) {
-            neurons.addAll(genome.network.inputNeurons)
+            neurons.addAll(genome.network.inputNeurons.mapIndexed { index, neuron -> NeuronIndex(index, neuron.neuronType) })
         }
 
-        neurons.addAll(genome.network.outputNeurons)
+        neurons.addAll(genome.network.outputNeurons.mapIndexed { index, neuron -> NeuronIndex(index, neuron.neuronType) })
 
-        genes.forEach {
-            val intoNeuron = genome.getNeuronById(it.intoNeuronId)
-            val outNeuron = genome.getNeuronById(it.intoNeuronId)
+        genes.forEach { gene ->
+            val intoNeuron = genome.getNeuronByIndex(gene.intoNeuronIndex)
+            val outNeuron = genome.getNeuronByIndex(gene.outNeuronIndex)
 
             if (nonInput.not() || intoNeuron?.isInputNeuron?.not() == true) {
-                intoNeuron?.let { neurons.add(it) }
+                gene.intoNeuronIndex?.let { neurons.add(it) }
             }
 
             if (nonInput.not() || outNeuron?.isInputNeuron?.not() == true) {
-                outNeuron?.let { neurons.add(it) }
+                gene.outNeuronIndex?.let { neurons.add(it) }
             }
         }
 
@@ -308,7 +307,7 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
 
     private fun containsLink(genes: MutableList<Gene>, link: Gene): Boolean {
         genes.forEach { gene ->
-            if (gene.intoNeuronId == link.intoNeuronId && gene.outNeuronId == link.outNeuronId) {
+            if (gene.intoNeuronIndex == link.intoNeuronIndex && gene.outNeuronIndex == link.outNeuronIndex) {
                 return true
             }
         }
@@ -328,8 +327,11 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
     }
 
     private fun linkMutate(genome: Genome, forceBias: Boolean) {
-        var neuron1 = randomNeuron(genome, genome.genes, false)
-        var neuron2 = randomNeuron(genome, genome.genes, true)
+        val neuronIndex1 = randomNeuron(genome, genome.genes, false)
+        val neuronIndex2 = randomNeuron(genome, genome.genes, true)
+
+        var neuron1 = genome.getNeuronByIndex(neuronIndex1)
+        var neuron2 = genome.getNeuronByIndex(neuronIndex2)
 
         if (neuron1 == null || neuron2 == null) return
 
@@ -345,10 +347,10 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
             neuron2 = temp
         }
 
-        newLink.intoNeuronId = neuron1.id
-        newLink.outNeuronId = neuron2.id
+        newLink.intoNeuronIndex = neuronIndex1
+        newLink.outNeuronIndex = neuronIndex2
 
-        if (forceBias) newLink.intoNeuronId = genome.network.inputNeurons.last().id
+        if (forceBias) newLink.intoNeuronIndex = NeuronIndex(genome.network.inputNeurons.size - 1, NeuronType.Input)
 
         if (containsLink(genome.genes, newLink)) return
 
@@ -369,20 +371,20 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
         gene.enabled = false
 
         val gene1 = copyGene(gene)
-        gene1.outNeuronId = genome.maxNeuron?.id
+        gene1.outNeuronIndex = genome.maxNeuron
         gene1.weight = 1f
         gene1.innovation = newInnovation()
         gene1.enabled = true
         genome.genes.add(gene1)
 
         val gene2 = copyGene(gene)
-        gene2.intoNeuronId = genome.maxNeuron?.id
+        gene2.intoNeuronIndex = genome.maxNeuron
         gene2.innovation = newInnovation()
         gene2.enabled = true
         genome.genes.add(gene2)
     }
 
-    private fun enableDisableMutate(genome: Genome, enable: Boolean) {
+    fun enableDisableMutate(genome: Genome, enable: Boolean) {
         val candidates = genome.genes.filter { it.enabled == enable.not() }
 
         if (candidates.isEmpty()) return
@@ -520,7 +522,7 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
         }
     }
 
-    private fun calculateAverageFitness(species: Species) {
+    fun calculateAverageFitness(species: Species) {
         var total = 0f
 
         species.genomes.forEach {
@@ -530,7 +532,7 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
         species.averageFitness = total / species.genomes.size
     }
 
-    private fun totalAverageFitness(): Float {
+    fun totalAverageFitness(): Float {
         var sum = 0f
         for (element in pool.species) {
             sum += element.averageFitness

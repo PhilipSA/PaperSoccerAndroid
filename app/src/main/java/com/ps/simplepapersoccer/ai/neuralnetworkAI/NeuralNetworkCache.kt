@@ -12,7 +12,7 @@ class NeuralNetworkCache(context: Context?,
                          private val fileName: String = StringConstants.NEURAL_NETWORK_FILE_NAME) {
 
     private val poolCacheDirectory = context?.filesDir?.toString()
-            ?: "C:\\Users\\PhilipSandegren\\Documents\\AlphaZero"
+            ?: "C:\\Users\\Admin\\Documents\\AlphaZero"
 
     private var cachedPool: NeuralNetwork.Pool? = null
 

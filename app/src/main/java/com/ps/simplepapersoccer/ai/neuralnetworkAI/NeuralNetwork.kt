@@ -55,18 +55,16 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
     data class Pool(
             var species: MutableList<Species>,
             var generation: Int,
-            var currentSpecies: Species?,
-            var currentGenome: Genome?,
+            var currentSpeciesIndex: Int,
+            var currentGenomeIndex: Int,
             var maxFitness: Float,
             var innovation: Int
     ) : Serializable {
-        fun setNewCurrentSpecies(species: Species) {
-            this.currentSpecies = species
-            this.currentGenome = species.genomes.first()
-        }
+        val currentSpecies get() = species.getOrNull(currentSpeciesIndex)
+        val currentGenome get() = currentSpecies?.genomes?.getOrNull(currentGenomeIndex)
     }
 
-    data class NeuronIndex(val index: Int, val neuronType: NeuronType)
+    data class NeuronIndex(val index: Int, val neuronType: NeuronType) : Serializable
 
     data class Gene(
             var intoNeuronIndex: NeuronIndex?,
@@ -116,7 +114,7 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
     }
 
     private fun newPool(): Pool {
-        return Pool(mutableListOf(), 0, null, null, 0f, neuralNetworkController.outputs)
+        return Pool(mutableListOf(), 0, 0, 0, 0f, neuralNetworkController.outputs)
     }
 
     private fun newSpecies(): Species {
@@ -666,8 +664,6 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
                 addToSpecies(basicGenome(newNetwork()))
             }
 
-            pool.setNewCurrentSpecies(pool.species.first())
-
             initRun()
         }
     }
@@ -681,24 +677,14 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
     }
 
     private fun nextGenome() {
-        val genomeIterator = pool.currentSpecies!!.genomes.listIterator(pool.currentSpecies!!.genomes.indexOf(pool.currentGenome) + 1)
+        pool.currentGenomeIndex +=  1
+        if (pool.currentGenomeIndex >= pool.currentSpecies!!.genomes.size) {
+            pool.currentGenomeIndex = 0
+            pool.currentSpeciesIndex += 1
 
-        if (genomeIterator.hasNext()) {
-            pool.currentGenome = genomeIterator.next()
-        }
-
-        if (genomeIterator.hasNext().not()) {
-            val speciesIterator = pool.species.listIterator(pool.species.indexOf(pool.currentSpecies) + 1)
-
-            pool.currentGenome = pool.currentSpecies!!.genomes.first()
-
-            if (speciesIterator.hasNext()) {
-                pool.setNewCurrentSpecies(speciesIterator.next())
-            }
-
-            if (speciesIterator.hasNext().not()) {
+            if (pool.currentSpeciesIndex >= pool.species.size) {
                 newGeneration()
-                pool.setNewCurrentSpecies(pool.species.first())
+                pool.currentSpeciesIndex = 0
             }
         }
     }
@@ -722,7 +708,8 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
             neuralNetworkCache.savePool(pool)
         }
 
-        pool.setNewCurrentSpecies(pool.species.first())
+        pool.currentSpeciesIndex = 0
+        pool.currentGenomeIndex = 0
 
         while (fitnessAlreadyMeasured()) {
             nextGenome()
@@ -733,21 +720,21 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
 
     private fun playTop() {
         var maxfitness = 0f
-        lateinit var maxs: Species
-        lateinit var maxg: Genome
+        var maxs = 0
+        var maxg = 0
 
-        pool.species.forEach { species ->
-            species.genomes.forEach { genome ->
+        pool.species.forEachIndexed { i, species ->
+            species.genomes.forEachIndexed { j, genome ->
                 if (genome.fitness > maxfitness) {
                     maxfitness = genome.fitness
-                    maxs = species
-                    maxg = genome
+                    maxs = i
+                    maxg = j
                 }
             }
         }
 
-        pool.currentSpecies = maxs
-        pool.currentGenome = maxg
+        pool.currentSpeciesIndex = maxs
+        pool.currentGenomeIndex = maxg
         pool.maxFitness = maxfitness
         initRun()
     }

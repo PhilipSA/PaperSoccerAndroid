@@ -14,13 +14,13 @@ class NeuralNetworkCache(context: Context?,
     private val poolCacheDirectory = context?.filesDir?.toString()
             ?: "C:\\Users\\Admin\\Documents\\AlphaZero"
 
-    private var cachedPool: NeuralNetwork.Pool? = null
+    private var cachedPool: Pool? = null
 
-    fun savePool(pool: NeuralNetwork.Pool) {
+    fun savePool(pool: Pool) {
         cachedPool = pool
     }
 
-    fun loadPool(): NeuralNetwork.Pool? {
+    fun loadPool(): Pool? {
         return if (cachedPool != null) cachedPool else loadFile()
     }
 
@@ -29,7 +29,7 @@ class NeuralNetworkCache(context: Context?,
         cachedPool = null
     }
 
-    private fun writeFile(pool: NeuralNetwork.Pool) {
+    private fun writeFile(pool: Pool) {
         if (networkFileBackupEnabled.not()) return
         val file = File(poolCacheDirectory, fileName)
         try {
@@ -52,7 +52,7 @@ class NeuralNetworkCache(context: Context?,
             compresser.end()
 
             val compressedPool = input.copyOf(resultLength)
-            val poolDto = NeuralNetwork.PoolDto(poolByteArray.size, compressedPool)
+            val poolDto = PoolDto(poolByteArray.size, compressedPool)
 
             val poolDtoByteOutput = ByteArrayOutputStream().use { byteArray ->
                 ObjectOutputStream(byteArray).use {
@@ -67,17 +67,17 @@ class NeuralNetworkCache(context: Context?,
         }
     }
 
-    private fun loadFile(): NeuralNetwork.Pool? {
+    private fun loadFile(): Pool? {
         if (networkFileBackupEnabled.not()) return null
 
         val file = File(poolCacheDirectory, fileName)
 
         return if (file.exists()) {
 
-            var pool: NeuralNetwork.Pool? = null
+            var pool: Pool? = null
 
             val poolDto = ObjectInputStream(ByteArrayInputStream(file.readBytes(), 0, file.length().toInt())).use {
-                it.readObject() as NeuralNetwork.PoolDto
+                it.readObject() as PoolDto
             }
 
             val decompresser = Inflater()
@@ -87,7 +87,7 @@ class NeuralNetworkCache(context: Context?,
             decompresser.end()
 
             ObjectInputStream(ByteArrayInputStream(result, 0, resultLength)).use {
-                pool = it.readObject() as NeuralNetwork.Pool
+                pool = it.readObject() as Pool
             }
 
             pool

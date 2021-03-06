@@ -11,91 +11,6 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
                        private val neuralNetworkCache: NeuralNetworkCache,
                        private val neuralNetworkParameters: NeuralNetworkParameters = NeuralNetworkParameters()) {
 
-    enum class NeuronType {
-        Input,
-        Output,
-        HiddenLayer
-    }
-
-    data class Neuron(
-            val id: String,
-            val incoming: HashSet<Gene>,
-            var value: Float,
-            var neuronType: NeuronType
-    ) : Serializable {
-        val isInputNeuron get() = neuronType == NeuronType.Input
-        val isOutputNeuron get() = neuronType == NeuronType.Output
-    }
-
-    class Genome(
-            val genes: MutableList<Gene>,
-            var fitness: Float,
-            val adjustedFitness: Int,
-            var network: Network,
-            var maxNeuron: NeuronIndex?,
-            var globalRank: Int,
-            val mutationRates: HashMap<String, Float>
-    ) : Serializable {
-        fun nextMaxNeuron() {
-            maxNeuron = maxNeuron?.let { NeuronIndex(it.index + 1, it.neuronType) }
-        }
-
-        fun getNeuronByIndex(neuronIndex: NeuronIndex?): Neuron? {
-            return network.getNeuronByIndex(neuronIndex)
-        }
-    }
-
-    data class Species(
-            var topFitness: Float,
-            var staleness: Int,
-            val genomes: MutableList<Genome>,
-            var averageFitness: Float
-    ) : Serializable
-
-    data class Pool(
-            var species: MutableList<Species>,
-            var generation: Int,
-            var currentSpeciesIndex: Int,
-            var currentGenomeIndex: Int,
-            var maxFitness: Float,
-            var innovation: Int
-    ) : Serializable {
-        val currentSpecies get() = species.getOrNull(currentSpeciesIndex)
-        val currentGenome get() = currentSpecies?.genomes?.getOrNull(currentGenomeIndex)
-    }
-
-    data class NeuronIndex(val index: Int, val neuronType: NeuronType) : Serializable
-
-    data class Gene(
-            var intoNeuronIndex: NeuronIndex?,
-            var outNeuronIndex: NeuronIndex?,
-            var weight: Float,
-            var enabled: Boolean,
-            var innovation: Int
-    ) : Serializable
-
-    data class Network(
-            val inputNeurons: MutableList<Neuron>,
-            val hiddenLayerNeurons: MutableList<Neuron>,
-            val outputNeurons: MutableList<Neuron>
-    ) : Serializable {
-        val allNeurons get() = inputNeurons.plus(outputNeurons).plus(hiddenLayerNeurons)
-
-        fun getNeuronByIndex(neuronIndex: NeuronIndex?): Neuron? {
-            return when (neuronIndex?.neuronType) {
-                NeuronType.Input -> inputNeurons.getOrNull(neuronIndex.index)
-                NeuronType.HiddenLayer -> hiddenLayerNeurons.getOrNull(neuronIndex.index)
-                NeuronType.Output -> outputNeurons.getOrNull(neuronIndex.index)
-                else -> null
-            }
-        }
-    }
-
-    data class PoolDto(
-            val uncompressedSize: Int,
-            val pool: ByteArray
-    ) : Serializable
-
     private lateinit var pool: Pool
 
     private val inputSize get() = neuralNetworkController.inputs.size + 1
@@ -113,28 +28,9 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
         return pool.innovation
     }
 
-    private fun newPool(): Pool {
-        return Pool(mutableListOf(), 0, 0, 0, 0f, neuralNetworkController.outputs)
-    }
-
-    private fun newSpecies(): Species {
-        return Species(0f, 0, mutableListOf(), 0f)
-    }
-
-    private fun newGenome(network: Network): Genome {
-        return Genome(mutableListOf(), 0f, 0, network, null, 0,
-                hashMapOf("connections" to neuralNetworkParameters.MUTATE_CONNECTION_CHANCE,
-                        "link" to neuralNetworkParameters.LINK_MUTATION_CHANCE,
-                        "bias" to neuralNetworkParameters.BIAS_MUTATION_CHANCE,
-                        "node" to neuralNetworkParameters.NODE_MUTATION_CHANCE,
-                        "enable" to neuralNetworkParameters.ENABLE_MUTATION_CHANCE,
-                        "disable" to neuralNetworkParameters.DISABLE_MUTATION_CHANCE,
-                        "step" to neuralNetworkParameters.STEP_SIZE))
-    }
-
     private fun copyGenome(genome: Genome): Genome {
         val newGenes = genome.genes.map {
-            copyGene(it)
+            it.copy()
         }.toMutableList()
 
         return Genome(genes = newGenes,
@@ -147,37 +43,21 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
     }
 
     private fun basicGenome(network: Network): Genome {
-        val genome = newGenome(network)
+        val genome = Genome(network, neuralNetworkParameters)
         genome.maxNeuron = NeuronIndex(network.inputNeurons.size - 1, NeuronType.Input)
         mutate(genome)
         return genome
-    }
-
-    private fun newGene(): Gene {
-        return Gene(null, null, 0f, true, 0)
-    }
-
-    private fun copyGene(gene: Gene): Gene {
-        return gene.copy(intoNeuronIndex = gene.intoNeuronIndex,
-                outNeuronIndex = gene.outNeuronIndex,
-                weight = gene.weight,
-                enabled = gene.enabled,
-                innovation = gene.innovation)
-    }
-
-    private fun newNeuron(neuronType: NeuronType): Neuron {
-        return Neuron(UUID.randomUUID().toString(), hashSetOf(), 0f, neuronType)
     }
 
     private fun newNetwork(): Network {
         val network = Network(mutableListOf(), mutableListOf(), mutableListOf())
 
         for (i in 0 until inputSize) {
-            network.inputNeurons.add(newNeuron(NeuronType.Input))
+            network.inputNeurons.add(Neuron.getDefault(NeuronType.Input))
         }
 
         for (index in 0 until neuralNetworkController.outputs) {
-            network.outputNeurons.add(newNeuron(NeuronType.Output))
+            network.outputNeurons.add(Neuron.getDefault(NeuronType.Output))
         }
 
         return network
@@ -189,14 +69,14 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
         genome.genes.forEach { gene ->
             if (gene.enabled) {
                 if (genome.getNeuronByIndex(gene.outNeuronIndex) == null) {
-                    val newNeuron = newNeuron(NeuronType.HiddenLayer)
+                    val newNeuron = Neuron.getDefault(NeuronType.HiddenLayer)
                     genome.network.hiddenLayerNeurons.add(newNeuron)
                     gene.outNeuronIndex = NeuronIndex(genome.network.hiddenLayerNeurons.size - 1, newNeuron.neuronType)
                 }
                 val neuron = gene.outNeuronIndex
                 genome.getNeuronByIndex(neuron)!!.incoming.add(gene)
                 if (genome.getNeuronByIndex(gene.intoNeuronIndex) == null) {
-                    val newNeuron = newNeuron(NeuronType.HiddenLayer)
+                    val newNeuron = Neuron.getDefault(NeuronType.HiddenLayer)
                     genome.network.hiddenLayerNeurons.add(newNeuron)
                     gene.intoNeuronIndex = NeuronIndex(genome.network.hiddenLayerNeurons.size - 1, newNeuron.neuronType)
                 }
@@ -251,7 +131,7 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
             genome2 = tempg
         }
 
-        val child = newGenome(newNetwork())
+        val child = Genome(newNetwork(), neuralNetworkParameters)
 
         val innovations2 = HashMap<Int, Gene>()
 
@@ -263,9 +143,9 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
             val gene2 = innovations2[gene1.innovation]
 
             if (gene2 != null && Random.nextBoolean() && gene2.enabled) {
-                child.genes.add(copyGene(gene2))
+                child.genes.add(gene2.copy())
             } else {
-                child.genes.add(copyGene(gene1))
+                child.genes.add(gene1.copy())
             }
         }
 
@@ -325,24 +205,24 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
     }
 
     private fun linkMutate(genome: Genome, forceBias: Boolean) {
-        val neuronIndex1 = randomNeuron(genome, genome.genes, false)
-        val neuronIndex2 = randomNeuron(genome, genome.genes, true)
+        var neuronIndex1 = randomNeuron(genome, genome.genes, false)
+        var neuronIndex2 = randomNeuron(genome, genome.genes, true)
 
-        var neuron1 = genome.getNeuronByIndex(neuronIndex1)
-        var neuron2 = genome.getNeuronByIndex(neuronIndex2)
+        val neuron1 = genome.getNeuronByIndex(neuronIndex1)
+        val neuron2 = genome.getNeuronByIndex(neuronIndex2)
 
         if (neuron1 == null || neuron2 == null) return
 
-        val newLink = newGene()
+        val newLink = Gene.getDefault()
 
         if (neuron1.isInputNeuron && neuron2.isInputNeuron) {
             return
         }
 
         if (neuron2.isInputNeuron) {
-            val temp = neuron1
-            neuron1 = neuron2
-            neuron2 = temp
+            val temp = neuronIndex1
+            neuronIndex1 = neuronIndex2
+            neuronIndex2 = temp
         }
 
         newLink.intoNeuronIndex = neuronIndex1
@@ -368,14 +248,14 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
         if (gene.enabled.not()) return
         gene.enabled = false
 
-        val gene1 = copyGene(gene)
+        val gene1 = gene.copy()
         gene1.outNeuronIndex = genome.maxNeuron
         gene1.weight = 1f
         gene1.innovation = newInnovation()
         gene1.enabled = true
         genome.genes.add(gene1)
 
-        val gene2 = copyGene(gene)
+        val gene2 = gene.copy()
         gene2.intoNeuronIndex = genome.maxNeuron
         gene2.innovation = newInnovation()
         gene2.enabled = true
@@ -607,7 +487,7 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
         }
 
         if (foundSpecies.not()) {
-            val childSpecies = newSpecies()
+            val childSpecies = Species.getDefault()
             childSpecies.genomes.add(child)
             pool.species.add(childSpecies)
         }
@@ -654,11 +534,11 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
             pool = loadedPool
 
             while (fitnessAlreadyMeasured()) {
-                nextGenome()
+                nextGenome(pool)
             }
             initRun()
         } else {
-            pool = newPool()
+            pool = Pool.getDefault(innovation = neuralNetworkController.outputs)
 
             for (x in 0 until neuralNetworkParameters.POPULATION) {
                 addToSpecies(basicGenome(newNetwork()))
@@ -676,7 +556,7 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
         return evaluateNetwork(pool.currentGenome!!.network, neuralNetworkController.inputs)
     }
 
-    private fun nextGenome() {
+    fun nextGenome(pool: Pool) {
         pool.currentGenomeIndex +=  1
         if (pool.currentGenomeIndex >= pool.currentSpecies!!.genomes.size) {
             pool.currentGenomeIndex = 0
@@ -712,7 +592,7 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
         pool.currentGenomeIndex = 0
 
         while (fitnessAlreadyMeasured()) {
-            nextGenome()
+            nextGenome(pool)
         }
 
         initRun()

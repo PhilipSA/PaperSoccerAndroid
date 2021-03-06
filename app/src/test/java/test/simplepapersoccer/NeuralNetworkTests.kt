@@ -3,6 +3,7 @@ package test.simplepapersoccer
 import com.ps.simplepapersoccer.ai.neuralnetworkAI.NeuralNetworkCache
 import com.ps.simplepapersoccer.ai.neuralnetworkAI.INeuralNetworkController
 import com.ps.simplepapersoccer.ai.neuralnetworkAI.NeuralNetwork
+import com.ps.simplepapersoccer.ai.neuralnetworkAI.Pool
 import junit.framework.TestCase
 import org.junit.Assert
 import org.junit.Test
@@ -89,5 +90,20 @@ class NeuralNetworkTests {
         val network = NeuralNetwork(controller, NeuralNetworkCache(null, false))
 
         Assert.assertEquals(1f, network.nextStep())
+    }
+
+    @Test
+    fun canCalculateTotalAverageFitness() {
+
+    }
+
+    @Test
+    fun canGoToNextGenome() {
+        val pool = Pool.getDefault(innovation = 0)
+        val network = NeuralNetwork(controller, NeuralNetworkCache(null, false))
+
+        network.nextGenome(pool)
+
+        assert(pool.currentGenomeIndex == 1)
     }
 }

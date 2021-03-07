@@ -52,7 +52,9 @@ class NeuralNetworkTests {
             override val outputs = 1
 
             override fun fitnessEvaluation(): Float {
-                return if (lastGuess == 1f) {
+                val andResult = inputs[0].toInt().and(inputs[1].toInt())
+
+                return if (lastGuess == andResult.toFloat()) {
                     ++scoreCounter
                     1f
                 } else -1f
@@ -69,7 +71,7 @@ class NeuralNetworkTests {
             }
 
             fun getRandomInputs(): List<Float> {
-                return listOf(0.5f)
+                return listOf(Random.nextInt(0, 2), Random.nextInt(0, 2)).map { it.toFloat() }
             }
         }
 

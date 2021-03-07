@@ -358,7 +358,7 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
 
         val n = max(genes1.size, genes2.size)
 
-        return if (n == 0) Int.MAX_VALUE else disjointGenes / n
+        return disjointGenes / n
     }
 
     private fun weights(genes1: List<Gene>, genes2: List<Gene>): Float {

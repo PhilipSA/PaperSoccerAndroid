@@ -1,5 +1,8 @@
 package com.ps.simplepapersoccer.ai.neuralnetworkAI
 
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
 import java.io.*
 import java.util.*
 import kotlin.collections.HashMap
@@ -11,9 +14,10 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
                        private val neuralNetworkCache: NeuralNetworkCache,
                        private val neuralNetworkParameters: NeuralNetworkParameters = NeuralNetworkParameters()) {
 
-    private lateinit var pool: Pool
+    lateinit var pool: Pool; private set
 
     private val inputSize get() = neuralNetworkController.inputs.size + 1
+    private val biasNodeIndex get() = inputSize - 1
 
     init {
         initPool()
@@ -44,7 +48,7 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
 
     private fun basicGenome(network: Network): Genome {
         val genome = Genome(network, neuralNetworkParameters)
-        genome.maxNeuron = NeuronIndex(network.inputNeurons.size - 1, NeuronType.Input)
+        genome.maxNeuron = NeuronIndex(biasNodeIndex, NeuronType.Bias)
         mutate(genome)
         return genome
     }
@@ -52,8 +56,8 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
     private fun newNetwork(): Network {
         val network = Network(mutableListOf(), mutableListOf(), mutableListOf())
 
-        for (i in 0 until inputSize) {
-            network.inputNeurons.add(Neuron.getDefault(NeuronType.Input))
+        for (i in 1..inputSize) {
+            network.inputNeurons.add(Neuron.getDefault(if (i == inputSize) NeuronType.Bias else NeuronType.Input))
         }
 
         for (index in 0 until neuralNetworkController.outputs) {
@@ -228,7 +232,7 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
         newLink.intoNeuronIndex = neuronIndex1
         newLink.outNeuronIndex = neuronIndex2
 
-        if (forceBias) newLink.intoNeuronIndex = NeuronIndex(genome.network.inputNeurons.size - 1, NeuronType.Input)
+        if (forceBias) newLink.intoNeuronIndex = NeuronIndex(biasNodeIndex, NeuronType.Bias)
 
         if (containsLink(genome.genes, newLink)) return
 
@@ -557,7 +561,7 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
     }
 
     fun nextGenome(pool: Pool) {
-        pool.currentGenomeIndex +=  1
+        pool.currentGenomeIndex += 1
         if (pool.currentGenomeIndex >= pool.currentSpecies!!.genomes.size) {
             pool.currentGenomeIndex = 0
             pool.currentSpeciesIndex += 1
@@ -635,5 +639,132 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
         }
 
         return current
+    }
+
+    data class Cell(var x: Float, var y: Float, val value: Float)
+
+    fun displayGenome(genome: Genome, canvas: Canvas?) {
+        val network = genome.network
+        val cells = mutableListOf<Cell>()
+        val boxRadius = 500
+        var i = 0
+
+        for (dy in -boxRadius until boxRadius) {
+            for (dx in -boxRadius until boxRadius) {
+                val cell = network.getNeuronByIndex(NeuronIndex(i, NeuronType.Input))?.value?.let { Cell(x = 50f + 5 * dx, y = 70f + 5 * dy, it) }
+                if (cell != null) {
+                    cells.add(cell)
+                }
+                ++i
+            }
+        }
+
+        val biasCell = Cell(x = 80f, y = 110f, network.getNeuronByIndex(NeuronIndex(biasNodeIndex, NeuronType.Bias))!!.value)
+        cells.add(biasCell)
+
+        for (o in 0 until neuralNetworkController.outputs) {
+            val outputCell = Cell(220f, 30f + 8 * o, network.outputNeurons[o].value)
+            cells.add(outputCell)
+            val color = if (outputCell.value > 1) {
+                Color.BLUE
+            } else Color.BLACK
+            canvas?.drawText("Input", 223f, 24f + 8 * o, Paint().apply {
+                textSize = 20f
+                this.color = color
+            })
+        }
+
+        network.allNeurons.forEachIndexed { index, neuron ->
+            if (index > inputSize && index <= neuralNetworkParameters.MAX_NODES) {
+                val cell = Cell(140f, 40f, neuron.value)
+                cells.add(cell)
+            }
+        }
+
+        for (unused in 0 until 3) {
+            genome.genes.forEach { gene ->
+                if (gene.enabled) {
+                    val c1 = cells.get(gene.intoNeuronIndex!!.index)
+                    val c2 = cells.get(gene.outNeuronIndex!!.index)
+
+                    if (gene.intoNeuronIndex!!.index > inputSize && gene.intoNeuronIndex!!.index <= neuralNetworkParameters.MAX_NODES) {
+                        c1.x = 0.75f * c1.x + 0.25f * c2.x
+                        if (c1.x >= c2.x) {
+                            c1.x = c1.x - 40
+                        }
+                        if (c1.x < 90) {
+                            c1.x = 90f
+                        }
+
+                        if (c1.x > 220) {
+                            c1.x = 220f
+                        }
+                        c1.y = 0.75f * c1.y + 0.25f * c2.y
+                    }
+
+                    if (gene.outNeuronIndex!!.index > inputSize && gene.outNeuronIndex!!.index <= neuralNetworkParameters.MAX_NODES) {
+                        c1.x = 0.25f * c1.x + 0.75f * c2.x
+                        if (c1.x >= c2.x) {
+                            c1.x = c1.x + 40
+                        }
+                        if (c2.x < 90) {
+                            c2.x = 90f
+                        }
+
+                        if (c2.x > 220) {
+                            c2.x = 220f
+                        }
+                        c2.y = 0.25f * c1.y + 0.75f * c2.y
+                    }
+                }
+            }
+        }
+
+        cells.forEachIndexed { index, cell ->
+            if (index > inputSize || cell.value != 0f) {
+                var color = floor((cell.value + 1) / 2 * 256)
+                if (color > 255) color = 255f
+                if (color < 0) color = 0f
+                var opacity = 0xFF000000
+                if (cell.value == 0f) opacity = 0x50000000
+                color += opacity + color * 0x10000 + color * 0x100
+                //forms.drawBox(netPicture,cell.x-2,cell.y-2,cell.x+2,cell.y+2,opacity,color)
+                //gui.drawBox(cell.x-2,cell.y-2,cell.x+2,cell.y+2,opacity,color)
+                canvas?.drawRect(cell.x - 2, cell.y - 2, cell.x + 2, cell.y + 2, Paint().apply {
+                    this.color = color.toInt()
+                })
+            }
+        }
+
+        genome.genes.forEach { gene ->
+            if (gene.enabled) {
+                val c1 = cells[gene.intoNeuronIndex!!.index]
+                val c2 = cells[gene.outNeuronIndex!!.index]
+                var opacity = 0xA0000000
+                if (c1.value == 0f) opacity = 0x20000000
+
+                var color = 0x80 - floor(abs(sigmoid(gene.weight)) * 0x80)
+                color = if (gene.weight > 0) {
+                    opacity + 0x8000 + 0x10000 * color
+                } else opacity + 0x800000 + 0x100 * color
+
+                //gui.drawLine(c1.x+1, c1.y, c2.x-3, c2.y, color)
+                //forms.drawLine(netPicture,c1.x+1, c1.y, c2.x-3, c2.y, color)
+                canvas?.drawLine(c1.x+1, c1.y, c2.x-3, c2.y, Paint().apply {
+                    this.color = color.toInt()
+                })
+            }
+        }
+
+        var pos = 100f
+        for ((mutation, rate) in genome.mutationRates) {
+            //gui.drawText(100, pos, mutation .. ": " .. rate, 0xFF000000, 10)
+            //forms.drawText(netPicture,100, pos, mutation .. ": " .. rate, 0xFF000000, 10)
+                canvas?.drawText("$mutation : $rate", 100f, pos, Paint().apply {
+                    this.color = Color.parseColor("#FF000000")
+                    this.textSize = 20f
+                })
+            pos += 8
+        }
     }
 }

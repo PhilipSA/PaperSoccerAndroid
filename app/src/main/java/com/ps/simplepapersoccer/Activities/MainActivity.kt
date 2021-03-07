@@ -23,7 +23,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun howToPlayClick(view: View) {
-        val intent = Intent(this, HowToPlayActivity::class.java)
+        //val intent = Intent(this, HowToPlayActivity::class.java)
+        val intent = Intent(this, NeuralNetworkVisualsActivity::class.java)
         startActivity(intent)
     }
 

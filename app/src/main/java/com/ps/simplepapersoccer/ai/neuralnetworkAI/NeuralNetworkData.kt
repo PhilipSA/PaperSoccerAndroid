@@ -7,6 +7,7 @@ import kotlin.collections.HashSet
 
 enum class NeuronType {
     Input,
+    Bias,
     Output,
     HiddenLayer
 }
@@ -119,6 +120,7 @@ data class Network(
     fun getNeuronByIndex(neuronIndex: NeuronIndex?): Neuron? {
         return when (neuronIndex?.neuronType) {
             NeuronType.Input -> inputNeurons.getOrNull(neuronIndex.index)
+            NeuronType.Bias -> inputNeurons.getOrNull(neuronIndex.index)
             NeuronType.HiddenLayer -> hiddenLayerNeurons.getOrNull(neuronIndex.index)
             NeuronType.Output -> outputNeurons.getOrNull(neuronIndex.index)
             else -> null

@@ -14,7 +14,7 @@ class NeuralNetworkTests {
     var scoreCounter = 0
     var lastGuess = 1f
 
-    val controller = object : INeuralNetworkController<Float> {
+    private val controller = object : INeuralNetworkController<Float> {
         override var inputs = getRandomInputs()
 
         override val outputs = 1

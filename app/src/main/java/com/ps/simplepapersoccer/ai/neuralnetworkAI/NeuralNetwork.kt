@@ -17,7 +17,7 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
     lateinit var pool: Pool; private set
 
     private val inputSize get() = neuralNetworkController.inputs.size + 1
-    private val biasNodeIndex get() = inputSize - 1
+    private val biasNodeIndex get() = inputSize - 2
 
     init {
         initPool()

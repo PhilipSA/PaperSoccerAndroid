@@ -13,7 +13,6 @@ enum class NeuronType {
 }
 
 data class Neuron(
-        val id: String,
         val incoming: HashSet<Gene>,
         var value: Float,
         var neuronType: NeuronType
@@ -23,7 +22,7 @@ data class Neuron(
 
     companion object {
         fun getDefault(neuronType: NeuronType): Neuron {
-            return Neuron(UUID.randomUUID().toString(), hashSetOf(), 0f, neuronType)
+            return Neuron(hashSetOf(), 0f, neuronType)
         }
     }
 }

@@ -83,7 +83,7 @@ class JonasAI(playerNumber: Int, playerColor: Int, playerName: String = JonasAI:
         }
 
         for (sequence in sequences) {
-            tempManhattan = PathFindingHelper.findPathGreedyBestFirstSearchBiDirectional(sequence.endNode, gameHandler.getOpponent(gameHandler.currentPlayersTurn).goal!!.goalNode()).size.toDouble()
+            tempManhattan = PathFindingHelper.findPathGreedyBestFirstSearchBiDirectional(sequence.endNode, gameHandler.getOpponent(gameHandler.currentPlayersTurn).goal!!.middleGoalNode).size.toDouble()
             if (tempManhattan < manhattanDistance) {
                 manhattanDistance = tempManhattan
                 manhattanSequence = sequence

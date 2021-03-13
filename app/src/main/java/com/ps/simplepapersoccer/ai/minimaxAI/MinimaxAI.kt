@@ -160,7 +160,7 @@ class MinimaxAI(playerNumber: Int,
 
         score += (-state.numberOfTurns).toDouble()
 
-        val opponentsGoal = state.getOpponent(maximizingPlayer).goal!!.goalNode()
+        val opponentsGoal = state.getOpponent(maximizingPlayer).goal!!.middleGoalNode
         score += -PathFindingHelper.findPathGreedyBestFirstSearchBiDirectional(state.ballNode, opponentsGoal).size * 2
 
         //Neighbors are bounceable

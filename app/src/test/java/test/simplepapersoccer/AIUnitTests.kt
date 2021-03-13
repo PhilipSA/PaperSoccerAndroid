@@ -13,9 +13,7 @@ import org.junit.Test
 
 class AIUnitTests {
 
-    private val testRuns = 10000
-
-    private fun runTestGame(players: ArrayList<IPlayer>) {
+    private fun runTestGame(players: ArrayList<IPlayer>, testRuns: Int = 10000) {
         val totalNumberOfTurns = mutableListOf<Int>()
         var neuralNetworkAIVictoryBoard: String? = null
         var neuralNetworkAIVictoryType: Victory? = null
@@ -94,6 +92,15 @@ class AIUnitTests {
         runTestGame(players)
 
         player1.neuralNetworkCache.createBackupFile()
+    }
+
+    @Test
+    fun minimaxVsEuclideanAI() {
+        val player1 = EuclideanAI(1, 0)
+        val player2 = MinimaxAI(2, 1)
+        val players = arrayListOf(player1 as IPlayer, player2)
+
+        runTestGame(players, 100)
     }
 
     @Test

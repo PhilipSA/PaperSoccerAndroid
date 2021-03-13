@@ -11,14 +11,11 @@ class Goal(var goalLine: IntegerLine, var leftPost: IntegerLine, var rightPost: 
     }
     private val outerGoalLine: IntegerLine get() = IntegerLine(leftPost.toPoint, rightPost.toPoint)
     val allNodes: HashSet<BaseNode> = hashSetOf()
+    val middleGoalNode: Node
 
     fun isGoalNode(node: Node): Boolean {
         if (node.nodeType == NodeTypeEnum.Goal) return allNodes.contains(node)
         return false
-    }
-
-    fun goalNode(): Node {
-        return allNodes.filter { x -> x is Node && x.nodeType == NodeTypeEnum.Goal }[1] as Node
     }
 
     init {
@@ -41,5 +38,6 @@ class Goal(var goalLine: IntegerLine, var leftPost: IntegerLine, var rightPost: 
                 else allNodes.add(Node(it, NodeTypeEnum.Empty))
             }
         }
+        middleGoalNode = allNodes.filter { x -> x is Node && x.nodeType == NodeTypeEnum.Goal }[1] as Node
     }
 }

@@ -1,8 +1,8 @@
 package com.ps.simplepapersoccer.ai.neuralnetworkAI
 
+import com.ps.simplepapersoccer.helpers.RandomHelper
 import java.io.Serializable
 import kotlin.math.*
-import kotlin.random.Random
 
 //https://gist.github.com/d12frosted/7471e2123f10485d96bb
 class NeuralNetworkLuaConverted<T>(private val neuralNetworkController: INeuralNetworkController<T>,
@@ -212,7 +212,7 @@ class NeuralNetworkLuaConverted<T>(private val neuralNetworkController: INeuralN
             val gene1 = g1.genes[i]
             val gene2 = innovations2[gene1.innovation]
 
-            if (gene2 != null && Random.nextBoolean() && gene2.enabled) {
+            if (gene2 != null && RandomHelper.nextBoolean() && gene2.enabled) {
                 child.genes[child.genes.size + 1] = copyGene(gene2)
             } else {
                 child.genes[child.genes.size + 1] = copyGene(gene1)
@@ -256,7 +256,7 @@ class NeuralNetworkLuaConverted<T>(private val neuralNetworkController: INeuralN
             ++count
         }
 
-        var n = Random.nextInt(0, count)
+        var n = RandomHelper.nextInt(0, count)
 
         for (k in neurons.indices) {
             n -= 1
@@ -284,10 +284,10 @@ class NeuralNetworkLuaConverted<T>(private val neuralNetworkController: INeuralN
 
         for (i in 1 until genome.genes.size) {
             val gene = genome.genes[i]
-            if (Random.nextFloat() < neuralNetworkParameters.PERTURB_CHANCE) {
-                gene.weight = gene.weight + Random.nextFloat() * step * 2 - step
+            if (RandomHelper.nextFloat() < neuralNetworkParameters.PERTURB_CHANCE) {
+                gene.weight = gene.weight + RandomHelper.nextFloat() * step * 2 - step
             } else {
-                gene.weight = Random.nextFloat() * 4 - 2
+                gene.weight = RandomHelper.nextFloat() * 4 - 2
             }
         }
     }
@@ -316,7 +316,7 @@ class NeuralNetworkLuaConverted<T>(private val neuralNetworkController: INeuralN
         if (containsLink(genome.genes, newLink)) return
 
         newLink.innovation = newInnovation()
-        newLink.weight = Random.nextFloat() * 4 - 2
+        newLink.weight = RandomHelper.nextFloat() * 4 - 2
 
         genome.genes[genome.genes.size + 1] = newLink
     }
@@ -328,7 +328,7 @@ class NeuralNetworkLuaConverted<T>(private val neuralNetworkController: INeuralN
 
         genome.maxNeuron = genome.maxNeuron - 1
 
-        val gene = genome.genes[Random.nextInt(0, genome.genes.size)]!!
+        val gene = genome.genes[RandomHelper.nextInt(0, genome.genes.size)]
         if (gene.enabled.not()) return
 
         gene.enabled = false
@@ -358,26 +358,26 @@ class NeuralNetworkLuaConverted<T>(private val neuralNetworkController: INeuralN
 
         if (candidates.size == 0) return
 
-        val gene = candidates[Random.nextInt(0, candidates.size)]
+        val gene = candidates[RandomHelper.nextInt(0, candidates.size)]
         gene.enabled = gene.enabled.not()
     }
 
     private fun mutate(genome: Genome) {
         for ((mutation, rate) in genome.mutationRates) {
-            if (Random.nextBoolean()) {
+            if (RandomHelper.nextBoolean()) {
                 genome.mutationRates[mutation] = 0.95f * rate
             } else {
                 genome.mutationRates[mutation] = 1.05263f * rate
             }
         }
 
-        if (Random.nextFloat() < genome.mutationRates["connections"]!!) {
+        if (RandomHelper.nextFloat() < genome.mutationRates["connections"]!!) {
             pointMutate(genome)
         }
 
         var p = genome.mutationRates.getValue("link")
         while (p > 0) {
-            if (Random.nextFloat() < p) {
+            if (RandomHelper.nextFloat() < p) {
                 linkMutate(genome, false)
             }
             --p
@@ -385,7 +385,7 @@ class NeuralNetworkLuaConverted<T>(private val neuralNetworkController: INeuralN
 
         p = genome.mutationRates.getValue("bias")
         while (p > 0) {
-            if (Random.nextFloat() < p) {
+            if (RandomHelper.nextFloat() < p) {
                 linkMutate(genome, true)
             }
             --p
@@ -393,7 +393,7 @@ class NeuralNetworkLuaConverted<T>(private val neuralNetworkController: INeuralN
 
         p = genome.mutationRates.getValue("node")
         while (p > 0) {
-            if (Random.nextFloat() < p) {
+            if (RandomHelper.nextFloat() < p) {
                 nodeMutate(genome)
             }
             --p
@@ -401,7 +401,7 @@ class NeuralNetworkLuaConverted<T>(private val neuralNetworkController: INeuralN
 
         p = genome.mutationRates.getValue("enable")
         while (p > 0) {
-            if (Random.nextFloat() < p) {
+            if (RandomHelper.nextFloat() < p) {
                 enableDisableMutate(genome, true)
             }
             --p
@@ -409,7 +409,7 @@ class NeuralNetworkLuaConverted<T>(private val neuralNetworkController: INeuralN
 
         p = genome.mutationRates.getValue("disable")
         while (p > 0) {
-            if (Random.nextFloat() < p) {
+            if (RandomHelper.nextFloat() < p) {
                 enableDisableMutate(genome, false)
             }
             --p
@@ -502,7 +502,7 @@ class NeuralNetworkLuaConverted<T>(private val neuralNetworkController: INeuralN
         var total = 0f
 
         for (g in 1 until species.genomes.size) {
-            val genome = species.genomes[g]!!
+            val genome = species.genomes[g]
             total += genome.globalRank
         }
 
@@ -513,7 +513,7 @@ class NeuralNetworkLuaConverted<T>(private val neuralNetworkController: INeuralN
         var total = 0f
 
         for (s in 1 until pool.species.size) {
-            val species = pool.species[s]!!
+            val species = pool.species[s]
             total += species.averageFitness
         }
 
@@ -541,12 +541,12 @@ class NeuralNetworkLuaConverted<T>(private val neuralNetworkController: INeuralN
     }
 
     fun breedChild(species: Species): Genome {
-        val child: Genome = if (Random.nextFloat() < neuralNetworkParameters.CROSSOVER_CHANCE) {
-            val g1 = species.genomes[Random.nextInt(0, species.genomes.size)]
-            val g2 = species.genomes[Random.nextInt(0, species.genomes.size)]
+        val child: Genome = if (RandomHelper.nextFloat() < neuralNetworkParameters.CROSSOVER_CHANCE) {
+            val g1 = species.genomes[RandomHelper.nextInt(0, species.genomes.size)]
+            val g2 = species.genomes[RandomHelper.nextInt(0, species.genomes.size)]
             crossOver(g1, g2)
         } else {
-            val g = species.genomes[Random.nextInt(0, species.genomes.size)]
+            val g = species.genomes[RandomHelper.nextInt(0, species.genomes.size)]
             copyGenome(g)
         }
 
@@ -633,7 +633,7 @@ class NeuralNetworkLuaConverted<T>(private val neuralNetworkController: INeuralN
         }
         cullSpecies(true)
         while (children.size + pool.species.size < neuralNetworkParameters.POPULATION) {
-            val species = pool.species[Random.nextInt(0, pool.species.size)]
+            val species = pool.species[RandomHelper.nextInt(0, pool.species.size)]
             children[children.size + 1] = breedChild(species)
         }
         for (c in 1 until children.size) {

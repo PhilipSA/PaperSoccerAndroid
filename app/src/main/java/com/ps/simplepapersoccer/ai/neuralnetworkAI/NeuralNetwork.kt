@@ -3,12 +3,12 @@ package com.ps.simplepapersoccer.ai.neuralnetworkAI
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import com.ps.simplepapersoccer.helpers.RandomHelper
 import java.io.*
 import java.util.*
 import kotlin.collections.HashMap
 import kotlin.collections.HashSet
 import kotlin.math.*
-import kotlin.random.Random
 
 class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkController<T>,
                        private val neuralNetworkCache: NeuralNetworkCache,
@@ -146,14 +146,14 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
         genome1.genes.forEach { gene1 ->
             val gene2 = innovations2[gene1.innovation]
 
-            if (gene2 != null && Random.nextBoolean() && gene2.enabled) {
+            if (gene2 != null && RandomHelper.nextBoolean() && gene2.enabled) {
                 child.genes.add(gene2.copy())
             } else {
                 child.genes.add(gene1.copy())
             }
         }
 
-        child.maxNeuron = if (genome1.maxNeuron?.index ?: 0 > genome2.maxNeuron?.index ?: 0) genome1.maxNeuron else genome2.maxNeuron
+        child.maxNeuron = if ((genome1.maxNeuron?.index ?: 0) > (genome2.maxNeuron?.index ?: 0)) genome1.maxNeuron else genome2.maxNeuron
 
         for ((mutation, rate) in genome1.mutationRates) {
             child.mutationRates[mutation] = rate
@@ -200,10 +200,10 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
         val step = genome.mutationRates.getValue("step")
 
         genome.genes.forEach { gene ->
-            if (Random.nextFloat() < neuralNetworkParameters.PERTURB_CHANCE) {
-                gene.weight = gene.weight + Random.nextFloat() * step * 2 - step
+            if (RandomHelper.nextFloat() < neuralNetworkParameters.PERTURB_CHANCE) {
+                gene.weight = gene.weight + RandomHelper.nextFloat() * step * 2 - step
             } else {
-                gene.weight = Random.nextFloat() * 4 - 2
+                gene.weight = RandomHelper.nextFloat() * 4 - 2
             }
         }
     }
@@ -237,7 +237,7 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
         if (containsLink(genome.genes, newLink)) return
 
         newLink.innovation = newInnovation()
-        newLink.weight = Random.nextFloat() * 4 - 2
+        newLink.weight = RandomHelper.nextFloat() * 4 - 2
 
         genome.genes.add(newLink)
     }
@@ -276,7 +276,7 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
     }
 
     private fun mutateHelper(rate: Float): Float {
-        return if (Random.nextBoolean()) {
+        return if (RandomHelper.nextBoolean()) {
             0.95f * rate
         } else {
             1.05263f * rate
@@ -289,13 +289,13 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
             genome.mutationRates[mutation] = value
         }
 
-        if (Random.nextFloat() < genome.mutationRates.getValue("connections")) {
+        if (RandomHelper.nextFloat() < genome.mutationRates.getValue("connections")) {
             pointMutate(genome)
         }
 
         var p = genome.mutationRates.getValue("link")
         while (p > 0) {
-            if (Random.nextFloat() < p) {
+            if (RandomHelper.nextFloat() < p) {
                 linkMutate(genome, false)
             }
             --p
@@ -303,7 +303,7 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
 
         p = genome.mutationRates.getValue("bias")
         while (p > 0) {
-            if (Random.nextFloat() < p) {
+            if (RandomHelper.nextFloat() < p) {
                 linkMutate(genome, true)
             }
             --p
@@ -311,7 +311,7 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
 
         p = genome.mutationRates.getValue("node")
         while (p > 0) {
-            if (Random.nextFloat() < p) {
+            if (RandomHelper.nextFloat() < p) {
                 nodeMutate(genome)
             }
             --p
@@ -319,7 +319,7 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
 
         p = genome.mutationRates.getValue("enable")
         while (p > 0) {
-            if (Random.nextFloat() < p) {
+            if (RandomHelper.nextFloat() < p) {
                 enableDisableMutate(genome, true)
             }
             --p
@@ -327,7 +327,7 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
 
         p = genome.mutationRates.getValue("disable")
         while (p > 0) {
-            if (Random.nextFloat() < p) {
+            if (RandomHelper.nextFloat() < p) {
                 enableDisableMutate(genome, false)
             }
             --p
@@ -434,7 +434,7 @@ class NeuralNetwork<T>(private val neuralNetworkController: INeuralNetworkContro
     }
 
     private fun breedChild(species: Species): Genome {
-        val child = if (Random.nextFloat() < neuralNetworkParameters.CROSSOVER_CHANCE) {
+        val child = if (RandomHelper.nextFloat() < neuralNetworkParameters.CROSSOVER_CHANCE) {
             val g1 = species.genomes.random()
             val g2 = species.genomes.random()
             crossover(g1, g2)

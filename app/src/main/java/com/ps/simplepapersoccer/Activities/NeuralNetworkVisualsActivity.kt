@@ -11,8 +11,7 @@ import com.ps.simplepapersoccer.R
 import com.ps.simplepapersoccer.ai.neuralnetworkAI.INeuralNetworkController
 import com.ps.simplepapersoccer.ai.neuralnetworkAI.NeuralNetwork
 import com.ps.simplepapersoccer.ai.neuralnetworkAI.NeuralNetworkCache
-import kotlin.random.Random
-
+import com.ps.simplepapersoccer.helpers.RandomHelper
 
 class NeuralNetworkVisualsActivity: Activity() {
 
@@ -54,7 +53,7 @@ class NeuralNetworkVisualsActivity: Activity() {
             }
 
             fun getRandomInputs(): List<Float> {
-                return listOf(Random.nextInt(0, 2), Random.nextInt(0, 2)).map { it.toFloat() }
+                return listOf(RandomHelper.nextInt(0, 2), RandomHelper.nextInt(0, 2)).map { it.toFloat() }
             }
         }
 
